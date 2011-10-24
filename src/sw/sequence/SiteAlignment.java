@@ -192,6 +192,7 @@ public class SiteAlignment {
 		}
 		return pattern;
 	}
+	
 
 	private void calAllFreq() {
 		for (int i = 0; i < noTime; i++) {

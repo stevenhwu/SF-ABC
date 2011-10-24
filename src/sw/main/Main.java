@@ -23,6 +23,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.stat.StatUtils;
 import org.apache.commons.math.util.MathUtils;
 
+import com.google.common.primitives.Doubles;
+
 import sw.abc.parameter.AbstractParameter;
 
 import sw.abc.parameter.ArrayLogFormatterD;
@@ -80,7 +82,7 @@ public class Main {
 		
 		
 		setting = ABCSetup(dataDir, null, "simData.paup", 40, 2);
-//		generateStatFile(500, setting);
+		generateStatFile(100, setting);
 
 //		SummaryStat sumStat = new SStatSitePattern();
 		SummaryStat sumStat = new SStatTopFreqSingleProduct();
@@ -235,8 +237,11 @@ public class Main {
 
 				sa = updateAlignment(sa, proc, setting);
 				newStat.updateSiteAlignment(sa);
-				// saveGap[p] = newStat.calDelta(obsStat);
+				
+				saveGap[p] = newStat.calDelta(obsStat);
 				saveGap[p] = newStat.calIndStat(obsStat);
+				
+				
 				// System.out.print(saveGap[p]+"\t");
 				// for (int dup = 0; dup < deltaDup.length; dup++) {
 				// newStat.addParIndex(cFile.getAllPar());
@@ -331,7 +336,7 @@ public class Main {
 		ArrayList<Trace> tChisq = TraceUtil.creatTrace(noTime, "chisq");
 		ArrayList<Trace> tVar = TraceUtil.creatTrace(noTime, "var");
 
-		ArrayList<Trace> tPattern = TraceUtil.creatTrace(Site.PATTERN, "sitePattern");
+		ArrayList<Trace> tPattern = TraceUtil.creatTrace(Site.PATTERN_COUNT, "sitePattern");
 		ArrayList<Trace> tFreq1 = TraceUtil.creatTrace(9, "ferqT1");
 		ArrayList<Trace> tFreq2 = TraceUtil.creatTrace(9, "ferqT2");
 
@@ -395,17 +400,33 @@ public class Main {
 		}
 		System.out.println((System.nanoTime() - startTime) / 1000 / 1000);
 		//
+		
+		System.out.println(traceLogStats.getLabels());
+		
+		SStatFlexable sStat = new SStatFlexable();
+		
 		Regression lm = new Regression(traceLogStats.to2DArray(), traceLogParam.toArray(0) );
-		 // lm.setAllX(allDist);
+		 
+		// lm.setAllX(allDist);
 //		 lm.addX() ;
 //		 lm.setY(allTheta);
 		 lm.linear();//runNoIntercept();
-//		
-		 System.out.println(ArrayUtils.toString( lm.getBestEstimates() ));
-		 System.out.println(ArrayUtils.toString( lm.getCoeff() ));
-		 System.out.println(ArrayUtils.toString( lm.getPvalues() ));
+		 double[] coef =  lm.getBestEstimates();
+		 System.out.println(ArrayUtils.toString( coef ));
 
-		 //		
+		 System.out.println(traceLogStats.getNoParamCategory());
+
+		 sStat.addCoefMu(coef);
+		 String s = traceLogStats.getLine(10);
+		 System.out.println(s);
+		 String[] sArr = s.split("\\t");
+		 double[] test = new double[sArr.length];
+		 for (int j = 0; j < test.length; j++) {
+			test[j] = Double.parseDouble(sArr[j]);
+		}
+		 System.out.println(Arrays.toString(test));
+		 System.out.println(sStat.calStat(test) );
+		 
 //		 lm.setY(allMu);
 //		 lm.runNoIntercept();
 //		

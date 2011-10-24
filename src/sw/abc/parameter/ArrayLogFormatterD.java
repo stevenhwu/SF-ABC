@@ -24,7 +24,10 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 	String heading;
 	String[] labels = new String[]{};
 	ArrayList<Trace<T>> traces = new ArrayList<Trace<T>>();
+	int noParamCat = 0;
 	
+
+
 	List<String> lines = new ArrayList<String>();
 //	ArrayList<double[]> traceDouble = new ArrayList<double[]>();
 	
@@ -43,10 +46,6 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 	public ArrayLogFormatterD(boolean echo) {
 		this.echo = echo;
 	}
-
-//	public void addPar(Parameters p){
-//		params.add(p);
-//	}
 	
 	public void addTrace(Trace<T> trace){
 		traces.add(trace);
@@ -60,6 +59,7 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 	}
 	
 	public void addTrace(ArrayList<Trace<T>>... allT ){
+		noParamCat += allT.length;
 		for (ArrayList<Trace<T>> arrayList : allT) {
 			for (Trace<T> trace : arrayList) {
 				addTrace(trace);
@@ -204,8 +204,8 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 	}
 
 	public double[][] to2DArray() {
-		// TODO Auto-generated method stub
-		int noPar = traces.size();
+
+		int noPar = getSize();
 		int size = traces.get(0).getValuesSize();
 		double[][] summary = new double[noPar][size];
 		for (int i = 0; i < noPar; i++) {
@@ -228,4 +228,7 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		return d;
 	}
 
+	public int getNoParamCategory() {
+		return noParamCat;
+	}
 }

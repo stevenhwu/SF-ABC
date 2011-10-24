@@ -3,7 +3,7 @@ package sw.abc.stat.summary;
 import java.util.Arrays;
 
 public class SStatSitePattern extends AbstractSummaryStat {
-
+// 5 pattern cats
 	public SStatSitePattern() {
 
 	}

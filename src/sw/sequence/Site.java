@@ -8,7 +8,7 @@ import org.apache.commons.math.stat.StatUtils;
 
 public class Site {
 
-	public static final int PATTERN = 4; //TEMP
+	public static final int PATTERN_COUNT = 4; //TEMP
 	private int index;
 	private double[] freqs;
 	private double maxFreq;
