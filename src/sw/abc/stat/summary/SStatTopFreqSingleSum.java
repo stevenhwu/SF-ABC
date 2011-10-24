@@ -2,26 +2,13 @@ package sw.abc.stat.summary;
 
 import java.util.Arrays;
 
-public class SStatTopFreqSingleSum implements SummaryStat {
+public class SStatTopFreqSingleSum extends AbstractSummaryStat  {
 
 	public SStatTopFreqSingleSum() {
 
 	}
 
-	@Override
-	public double calStat1P1R(int p, double[] par) {
-		double stat = 0;
-		switch (p) {
-		case 0:
-			stat = calStatMu(par);
-			break;
 
-		case 1:
-			stat = calStatTheta(par);
-			break;
-		}
-		return stat;
-	}
 
 	@Override
 	public double[] calStat(double[] par) {
@@ -45,18 +32,5 @@ public class SStatTopFreqSingleSum implements SummaryStat {
 	}
 
 
-
-	@Override
-	public double calStatMu(double[] par) {
-
-		return Double.MAX_VALUE;
-
-	}
-
-	@Override
-	public double calStatTheta(double[] par) {
-
-		return Double.MAX_VALUE;
-	}
 
 }

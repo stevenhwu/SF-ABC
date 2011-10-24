@@ -42,6 +42,7 @@ import sw.math.UniformDistribution;
 import sw.math.ZTestDistribution;
 import sw.process.RunExt;
 import sw.sequence.Importer;
+import sw.sequence.Site;
 
 import sw.sequence.SiteAlignment;
 import sw.util.TraceUtil;
@@ -76,13 +77,17 @@ public class Main {
 
 		String dataDir = "/dev/shm/testLargeSample/";
 		// String dataDir = userDir;
-		SummaryStat sumStat = new SStatSitePattern();
-		setting = ABCSetup(dataDir, sumStat, "simData.paup", 40, 2);
-
-		generateStatFile(1000, setting);
 		
-		AlignmentStat obsDataStat = calObsStat(setting);
+		
+		setting = ABCSetup(dataDir, null, "simData.paup", 40, 2);
+//		generateStatFile(500, setting);
 
+//		SummaryStat sumStat = new SStatSitePattern();
+		SummaryStat sumStat = new SStatTopFreqSingleProduct();
+		setting = ABCSetup(dataDir, sumStat, "simData.paup", 40, 2);
+		
+//		SummaryStat sumStat = new 
+		AlignmentStat obsDataStat = calObsStat(setting);
 		
 
 		setting = ABCSetup(dataDir, sumStat, "simData.paup", NOSEQPERTIME, 2);
@@ -289,7 +294,7 @@ public class Main {
 	@SuppressWarnings("rawtypes")
 	public static void generateStatFile(int nRun, Setup setting) {
 
-		System.out.println(setting.getWorkingDir());
+		System.out.println("Generate stats\t"+ setting.getWorkingDir());
 		int seqLength = 750;
 		int noTime = setting.getNoTime();
 
@@ -326,7 +331,7 @@ public class Main {
 		ArrayList<Trace> tChisq = TraceUtil.creatTrace(noTime, "chisq");
 		ArrayList<Trace> tVar = TraceUtil.creatTrace(noTime, "var");
 
-		ArrayList<Trace> tPattern = TraceUtil.creatTrace(5, "sitePattern");
+		ArrayList<Trace> tPattern = TraceUtil.creatTrace(Site.PATTERN, "sitePattern");
 		ArrayList<Trace> tFreq1 = TraceUtil.creatTrace(9, "ferqT1");
 		ArrayList<Trace> tFreq2 = TraceUtil.creatTrace(9, "ferqT2");
 
@@ -373,7 +378,7 @@ public class Main {
 				// oResult2.println(tempOut.substring(1, tempOut.length()-1));
 				// oResult2.flush();
 
-				if ((i % 1000) == 0) {
+				if ((i % 100) == 0) {
 					oResult.flush();
 					System.out.println(i+"\t"+ ((System.currentTimeMillis() - startTime) / 1000));
 				}

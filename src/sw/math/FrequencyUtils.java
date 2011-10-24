@@ -16,7 +16,6 @@ public class FrequencyUtils {
 //		int[] unique = removeDuplicates(count);
 		double[] table = new double[noElement];
 		for (int i : count) {
-			
 			table[i]++;
 		}
 		table = normalise(table, count.length);

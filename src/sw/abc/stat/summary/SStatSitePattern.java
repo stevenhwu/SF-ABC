@@ -2,37 +2,10 @@ package sw.abc.stat.summary;
 
 import java.util.Arrays;
 
-public class SStatSitePattern implements SummaryStat {
+public class SStatSitePattern extends AbstractSummaryStat {
 
 	public SStatSitePattern() {
 
-	}
-
-	@Override
-	public double calStat1P1R(int p, double[] par) {
-		double stat = 0;
-		switch (p) {
-		case 0:
-			stat = calStatMu(par);
-			break;
-
-		case 1:
-			stat = calStatTheta(par);
-			break;
-		}
-		return stat;
-	}
-
-	@Override
-	public double[] calStat(double[] par) {
-		double[] stat = new double[] { calStatMu(par), calStatTheta(par) };
-		return stat;
-	}
-
-	@Override
-	public double[] calStat(double[]... par) {
-		double[] stat = new double[] { calStatMu(par), calStatTheta(par) };
-		return stat;
 	}
 
 	public double calStatMu(double[]... par) {
@@ -49,19 +22,6 @@ public class SStatSitePattern implements SummaryStat {
 		double stat = 7106187.14676177*1 -28824.2486488602*par[0][0] +26778.6600860624*par[0][1] +28274.1484266296*par[0][2] -296.946100009669*par[1][0] -155.67140433418*par[1][1] -31487.5810867864*par[2][0] -28454.1288854737*par[2][1] -7093681.91783574*par[3][0] -7107911.47652539*par[3][1] -7108312.67079564*par[3][2] -7106552.83788278*par[3][3] -7110942.86354525*par[3][4] +5.39655978062944*par[4][0] +10.0694553936354*par[4][1] +5.96204034481586*par[4][2] +3.78716602774189*par[4][3] +0*par[4][4] +2.59816240979537*par[4][5] +1.29529551520393*par[4][6] +0.570615070971672*par[4][7] +0*par[4][8] -7.8357221093757*par[5][0] +8.84976242783021*par[5][1] +5.50561942195379*par[5][2] +3.59101130449997*par[5][3] +0*par[5][4] +2.3258092064723*par[5][5] +1.3092586864502*par[5][6] +0.652619713586941*par[5][7] +0*par[5][8];
 
 		return stat;
-	}
-
-	@Override
-	public double calStatMu(double[] par) {
-
-		return Double.MAX_VALUE;
-
-	}
-
-	@Override
-	public double calStatTheta(double[] par) {
-
-		return Double.MAX_VALUE;
 	}
 
 }

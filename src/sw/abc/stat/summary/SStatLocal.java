@@ -2,38 +2,12 @@ package sw.abc.stat.summary;
 
 import java.util.Arrays;
 
-public class SStatLocal implements SummaryStat {
+public class SStatLocal extends AbstractSummaryStat  {
 
 	public SStatLocal() {
 
 	}
 
-	@Override
-	public double calStat1P1R(int p, double[] par) {
-		double stat = 0;
-		switch (p) {
-		case 0:
-			stat = calStatMu(par);
-			break;
-
-		case 1:
-			stat = calStatTheta(par);
-			break;
-		}
-		return stat;
-	}
-
-	@Override
-	public double[] calStat(double[] par) {
-		double[] stat = new double[] { calStatMu(par), calStatTheta(par) };
-		return stat;
-	}
-
-	@Override
-	public double[] calStat(double[]... par) {
-		double[] stat = new double[] { calStatMu(par), calStatTheta(par) };
-		return stat;
-	}
 
 	public double calStatMu(double[]... par) {
 //		0.00375 0.00515 0.00655 0.00795 0.00935
@@ -111,17 +85,5 @@ public class SStatLocal implements SummaryStat {
 			return stat;
 	}
 
-	@Override
-	public double calStatMu(double[] par) {
-
-		return Double.MAX_VALUE;
-
-	}
-
-	@Override
-	public double calStatTheta(double[] par) {
-
-		return Double.MAX_VALUE;
-	}
 
 }

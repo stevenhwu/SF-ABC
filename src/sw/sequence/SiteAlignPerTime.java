@@ -19,7 +19,7 @@ import dr.util.Citation.Status;
 
 public class SiteAlignPerTime {
 
-	private static final int SITE_PATTERN_COUNT = Site.PATTERN;
+//	private static final int SITE_PATTERN_COUNT = Site.PATTERN;
 	final static double SITE_SPEC_BIN_SIZE = 0.05;
 	final static int SITE_SPEC_NO_BIN = (int) (1/SITE_SPEC_BIN_SIZE);
 	
@@ -220,8 +220,7 @@ public class SiteAlignPerTime {
 		for (int i = 0; i < allSites.size(); i++) {
 			pattern[i] = allSites.get(i).calPattern(st2.getSite(i));
 		}		
-		System.out.println(Arrays.toString(pattern));
-		double[] table = FrequencyUtils.summaryTable(pattern, SITE_PATTERN_COUNT);
+		double[] table = FrequencyUtils.summaryTable(pattern, Site.PATTERN);
 
 		return table;
 	}
