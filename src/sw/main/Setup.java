@@ -35,8 +35,12 @@ public class Setup {
 	private int noTotalSeq;
 	private SummaryStat stat;
 
+	private String[] paramList;
+	private String[] statList;
+	
 	private ArrayList<Parameters> allPar;
-	private ArrayList<Trace<Double>> allTrace;
+	private ArrayList<Parameters> allParUniformPrior;
+
 
 	public Setup(String wDir) {
 		if (wDir.charAt(wDir.length() - 1) == sysSep) {
@@ -173,14 +177,11 @@ public class Setup {
 	}
 	public void setNoSeqPerTime(int noSeq) {
 		noSeqPerTime = noSeq;
+		noTotalSeq = this.noSeqPerTime * this.noTime;
 	}
 	
 	public SummaryStat getStat() {
 		return stat;
-	}
-
-	public ArrayList<Trace<Double>> getAllTrace() {
-		return allTrace;
 	}
 
 	public ArrayList<Parameters> getAllPar() {
@@ -190,9 +191,30 @@ public class Setup {
 	public void setAllPar(ArrayList<Parameters> allPar) {
 		this.allPar = allPar;
 	}
+	
+	public ArrayList<Parameters> getallParUniformPrior() {
+		return allParUniformPrior;
+	}
 
-	public void setAllTrace(ArrayList<Trace<Double>> allTrace) {
-		this.allTrace = allTrace;
+	public void setallParUniformPrior(ArrayList<Parameters> allParUniformPrior) {
+		this.allParUniformPrior = allParUniformPrior;
+	}
+
+
+	public String[] getParamList() {
+		return paramList;
+	}
+
+	public void setParamList(String[] paramList) {
+		this.paramList = paramList;
+	}
+
+	public String[] getStatList() {
+		return statList;
+	}
+
+	public void setStatList(String[] statList) {
+		this.statList = statList;
 	}
 
 }

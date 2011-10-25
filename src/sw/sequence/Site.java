@@ -8,7 +8,7 @@ import org.apache.commons.math.stat.StatUtils;
 
 public class Site {
 
-	public static final int PATTERN_COUNT = 4; //TEMP
+	public static final int PATTERN_COUNT = 4-1; //4 different patterns, but sum up to one, so take out the last position
 	private int index;
 	private double[] freqs;
 	private double maxFreq;

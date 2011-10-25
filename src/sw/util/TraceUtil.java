@@ -2,11 +2,16 @@ package sw.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import com.google.common.base.Strings;
+
+import sw.abc.parameter.ArrayLogFormatterD;
 import sw.math.Combination;
+import sw.sequence.Site;
 
 import dr.inference.trace.Trace;
 import dr.inference.trace.TraceFactory;
@@ -17,7 +22,62 @@ import dr.inference.loggers.NumberColumn;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TraceUtil {
 
-//	TraceFactory.TraceType
+	
+	private  HashMap<String, Integer> summaryStatCollection = new HashMap<String, Integer>();
+
+	private int noTime;
+	private int noParam;
+	
+	public TraceUtil(int noTime, int noParam){
+
+		this.noTime = noTime;
+		this.noParam = noParam;
+		int noComb = Combination.calNoComb(noTime);
+		summaryStatCollection.put("Mu", 1);
+		summaryStatCollection.put("Theta", 1);
+		summaryStatCollection.put("Gap", noParam);
+		
+		summaryStatCollection.put("dist", -1);
+		summaryStatCollection.put("chisq", noTime);
+		summaryStatCollection.put("var", noTime);
+		summaryStatCollection.put("sitePattern", Site.PATTERN_COUNT*noComb);
+		summaryStatCollection.put("freq", 9);
+	}
+	
+	public TraceUtil(int noTime){
+		this(noTime, 0);
+
+	}
+	
+	public ArrayList<Trace> createTraceAL(String[] paramList){
+		
+		ArrayList<Trace> allAL = new ArrayList<Trace>();
+		for (String key : paramList) {
+			int noTrace = summaryStatCollection.get(key);	
+			if(noTrace == 0){
+	            System.err.println("Check noParam OR parameter name: "+ key);
+	            System.exit(-1);
+			}
+			else if(noTrace== -1){
+				allAL.addAll( TraceUtil.creatTraceDist(noTime) );	
+			}
+			else if(noTrace==1){
+				allAL.add( TraceUtil.creatTraceOne( key) );	
+			}
+			else{
+				allAL.addAll( TraceUtil.creatTrace(noTrace, key) );
+			}
+		}
+		return allAL; 
+	}
+
+
+	public ArrayList<Trace> createTraceAL(String key){
+		int noTrace = summaryStatCollection.get(key);
+		return TraceUtil.creatTrace(noTrace, key);
+	}
+	
+
 	static NumberColumn nc = new NumberColumn("") {
 		
 		@Override
@@ -58,6 +118,7 @@ public class TraceUtil {
 		return newT;
 		
 	}
+
 	
 	public static ArrayList<Trace> creatTrace(int noTrace, String prefix){
 		return creatTrace(noTrace, prefix, TraceType.DOUBLE);
@@ -72,8 +133,8 @@ public class TraceUtil {
 		return newT;
 		
 	}
-
-	public static Trace creatTrace(String prefix){
+	
+	public static Trace creatTraceOne(String prefix){
 		return creatTrace(prefix, TraceType.DOUBLE);
 	}
 	public static Trace creatTrace(String prefix, TraceType tf) {

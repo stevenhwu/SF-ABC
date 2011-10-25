@@ -12,14 +12,16 @@ import dr.app.tools.NormaliseMeanTreeRate;
 public class FrequencyUtils {
 
 	public static double[] summaryTable(int[] count, int noElement){
-		
-//		int[] unique = removeDuplicates(count);
-		double[] table = new double[noElement];
+		// noElement == Total number of patterns - 1
+		//Sum up to one, so take out the last position
+		double[] table = new double[noElement+1];
 		for (int i : count) {
 			table[i]++;
 		}
 		table = normalise(table, count.length);
-		return table;
+		double[] result = new double[noElement];
+		System.arraycopy(table, 0, result, 0, result.length);
+		return result;
 	}
 	
 	public static double[] summaryTable(int[] count, int[] elementList){

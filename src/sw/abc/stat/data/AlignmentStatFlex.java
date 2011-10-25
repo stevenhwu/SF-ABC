@@ -3,6 +3,7 @@ package sw.abc.stat.data;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.stat.StatUtils;
@@ -41,49 +42,36 @@ public class AlignmentStatFlex {
 //	private double[][] siteFreqSpec;
 	private double[][] siteFreqSpecEach;
 	
-	private StatArray siteDists;
-	private StatArray siteVarinace;
-	private StatArray siteChiDist;
+	private StatArray siteDists = new StatArray("dist");
+	private StatArray siteVarinace = new StatArray("var");
+	private StatArray siteChiDist = new StatArray("chisq");
+	private StatArray sitePattern = new StatArray("sitePattern");
 
+	private String[] statsList;
+	private double[] summaryStatAll;
+	
+	private HashMap<String, StatArray> siteStats = new HashMap<String, StatArray>(); 
 
-	private double[] statAll;
-
-	private StatArray sitePattern;
-
-
-	public double[] getStatAll() {
-		return statAll;
-	}
-
-
-	public AlignmentStatFlex(SummaryStat sumStat) {
-		this.sumStat = sumStat;
-	}
 
 
 	public AlignmentStatFlex(Setup setting) {
-		this(setting.getStat());
+		this.sumStat = setting.getStat();
+		this.statsList = setting.getStatList();
+		siteStats.put("dist", siteDists);
+		siteStats.put("chisq", siteChiDist);
+		siteStats.put("var", siteVarinace);
+		siteStats.put("sitePattern", sitePattern);
 	}
 
-	public double[] getSiteChiDist() {
-		return siteChiDist.getStats();
+	
+	public double[] getSummaryStatAll() {
+		return summaryStatAll;
+	}
+
+	public StatArray getStat(String key){
+		return siteStats.get(key);
 	}
 	
-	public double[] getSiteVarinace() {
-		return siteVarinace.getStats();
-	}
-
-	public double[] getSiteDists() {
-		return siteDists.getStats();
-	}
-
-	public double[][] getSiteFreqSpecEach() {
-		return siteFreqSpecEach;
-	}
-	public double[] getSitePattern() {
-		return sitePattern.getStats();
-	}
-
 
 	
 	// TODO fix adding/cal/updating
@@ -100,13 +88,13 @@ public class AlignmentStatFlex {
 
 
 	private void addSiteDists(SiteAlignment sa) {
-		this.siteDists.setName("chisq");
+
 		this.siteDists.setStats(sa.calDists() );
 
 	}
 
 	private void addSiteVar(SiteAlignment sa) {
-		this.siteVarinace.setName("var");
+
 		this.siteVarinace.setStats( sa.getVar() );
 	}
 
@@ -120,16 +108,17 @@ public class AlignmentStatFlex {
 	private void addSitePattern(SiteAlignment sa) {
 		double[][] stat2d = sa.calSitePattern();
 		this.sitePattern.setStats( Doubles.concat(stat2d) );
+		
 	}
 
 	public double calDelta(AlignmentStatFlex obsStat) {
 		calSumStat();
-		double[] obsStatAll = obsStat.getStatAll();
+		double[] obsStatAll = obsStat.getSummaryStatAll();
 		double delta = 0;
-		for (int i = 0; i < statAll.length; i++) {
+		for (int i = 0; i < summaryStatAll.length; i++) {
 			//
 			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
-			double dif = statAll[i] - obsStatAll[i];
+			double dif = summaryStatAll[i] - obsStatAll[i];
 			double s = Math.abs(dif) / obsStatAll[i];
 			delta += s;
 			// System.out.print(statAll[i] +"\t");
@@ -138,42 +127,30 @@ public class AlignmentStatFlex {
 			// System.out.print( (dif*dif)/obsStatAll[i] + "\t");
 		}
 		// System.out.println();
-		delta /= statAll.length;
+		delta /= summaryStatAll.length;
 		return delta;
 
 	}
 
 	public void calSumStat() {
-		// TODO fix confusing names
-//		if (sumStat instanceof SStatFreq) {
-//			statAll = sumStat.calStat(siteDists, siteChiDist);
-//		} else if (sumStat instanceof SStatTopFreq) {
-//			statAll = sumStat.calStat(siteDists, siteChiDist, siteVarinace,
-//					siteFreqSpecEach[0], siteFreqSpecEach[1] );
-//		}else if (sumStat instanceof SStatTopFreqSingleSum) {
-//			statAll = sumStat.calStat(siteDists, siteChiDist, siteVarinace,
-//					siteFreqSpecEach[0], siteFreqSpecEach[1] );
-//		}else if (sumStat instanceof SStatTopFreqSingleProduct) {
-//			statAll = sumStat.calStat(siteDists, siteChiDist, siteVarinace,
-//					siteFreqSpecEach[0], siteFreqSpecEach[1] );
-//		}else if (sumStat instanceof SStatTopFreqSingleProductNoS) {
-//			statAll = sumStat.calStat(siteDists, siteChiDist, siteVarinace,
-//					siteFreqSpecEach[0], siteFreqSpecEach[1] );
-//		}else if (sumStat instanceof SStatSitePattern) {
-//			statAll = sumStat.calStat(siteDists, siteChiDist, siteVarinace,
-//					sitePattern[0], siteFreqSpecEach[0], siteFreqSpecEach[1] );
-//		}
+		summaryStatAll = sumStat.calStat(getCurStat(statsList));
 	}
 
 	@Override
 	public String toString() {
-		return "AlignmentStat [statAll=" + Arrays.toString(statAll) + "]";
+		return "ObsStat= " + Arrays.toString(summaryStatAll) ;
 	}
 
 
-
-
-
+	public double[] getCurStat(String[] statsList) {
+		
+		double[] stat = new double[0];
+		for (String key : statsList) {
+			stat = Doubles.concat(stat, siteStats.get(key).getStats());
+		}
+		return stat;
+		
+	}
 
 
 

@@ -220,8 +220,8 @@ public class SiteAlignPerTime {
 		for (int i = 0; i < allSites.size(); i++) {
 			pattern[i] = allSites.get(i).calPattern(st2.getSite(i));
 		}		
+		//Sum up to one, so take out the last position
 		double[] table = FrequencyUtils.summaryTable(pattern, Site.PATTERN_COUNT);
-
 		return table;
 	}
 

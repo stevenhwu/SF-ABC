@@ -6,8 +6,12 @@ public class StatArray {
 	String name;
 	
 	public StatArray(){
-		
+		this(null);
 	}
+	public StatArray(String string) {
+		this.name = string;
+	}
+	
 	public double[] getStats() {
 		return stats;
 	}

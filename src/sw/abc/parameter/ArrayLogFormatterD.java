@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import com.google.common.base.Strings;
 import com.google.common.primitives.Doubles;
 
 import dr.evolution.io.NewickImporter;
@@ -23,10 +24,7 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 	int dp = -1;
 	String heading;
 	String[] labels = new String[]{};
-	ArrayList<Trace<T>> traces = new ArrayList<Trace<T>>();
-	int noParamCat = 0;
-	
-
+	ArrayList<Trace> traces = new ArrayList<Trace>();
 
 	List<String> lines = new ArrayList<String>();
 //	ArrayList<double[]> traceDouble = new ArrayList<double[]>();
@@ -47,6 +45,11 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		this.echo = echo;
 	}
 	
+	public ArrayLogFormatterD(int i, ArrayList<Trace> traceAL) {
+		setDp(dp);
+		addTrace(traceAL);
+	}
+
 	public void addTrace(Trace<T> trace){
 		traces.add(trace);
 		labels = (String[]) ArrayUtils.add(labels,  trace.getName() );	
@@ -58,10 +61,10 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		}
 	}
 	
-	public void addTrace(ArrayList<Trace<T>>... allT ){
-		noParamCat += allT.length;
-		for (ArrayList<Trace<T>> arrayList : allT) {
-			for (Trace<T> trace : arrayList) {
+	public void addTrace(ArrayList<Trace>... allT ){
+
+		for (ArrayList<Trace> arrayList : allT) {
+			for (Trace trace : arrayList) {
 				addTrace(trace);
 			}
 		}
@@ -120,7 +123,6 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 	public String getLine(int n) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < traces.size(); i++) {
-			
 			double d = (Double) (traces.get(i).getValue(n));
 			
 			if(d == Math.rint(d) ){
@@ -149,7 +151,7 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		return traces.size();
 	}
 
-	public List<Trace<T>> getTraces() {
+	public List<Trace> getTraces() {
 		return traces;
 	}
 
@@ -173,6 +175,12 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 					"logLabels() method should only be called once!");
 	}
 
+	public void logValues(double[] ds) {
+		for (int i = 0; i < traces.size(); i++) {
+			traces.get(i).add(ds[i]);
+		}
+	}
+	
 	@Override
 	public void logLine(String line) {
 		lines.add(line);
@@ -209,26 +217,19 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		int size = traces.get(0).getValuesSize();
 		double[][] summary = new double[noPar][size];
 		for (int i = 0; i < noPar; i++) {
-			
 			double[] d = Doubles.toArray((Collection<Double>) traces.get(i).getValues(0, size, null) );
 			for (int j = 0; j < d.length; j++) {
 				summary[i][j] = d[j];
 			}
 		}
-			
-				
 		return summary;
 	}
 
 	public double[] toArray(int i) {
 		
-		Trace<T> t = traces.get(i);
+		Trace t = traces.get(i);
 		int size = t.getValuesSize();
 		double[] d = Doubles.toArray((Collection<Double>) t.getValues(0, size, null) );
 		return d;
-	}
-
-	public int getNoParamCategory() {
-		return noParamCat;
 	}
 }

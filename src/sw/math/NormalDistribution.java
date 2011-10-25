@@ -63,14 +63,13 @@ public class NormalDistribution extends RandomGenerator implements DistributionP
 		return logq;
 	}
 	
-	 double pdf2(double x){
-		 
-		return 0;
+	public double logPdf(double x){
+		return Math.log(pdf(x));
 	}
 
 	@Override
 	public double getLogPrior(double x) {
-		return pdf(x);
+		return logPdf(x);
 	}
 
 }

@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaTheta;
@@ -13,11 +14,20 @@ import sw.abc.parameter.Parameters;
 
 public class CreateControlFile {
 
+	final static String MU = "Mu";
+	final static String THETA = "Theta";
+	
 	String controlFile;
 	
-
-	double mu; //rate
-	double theta;  //pop
+	String[] parList = new String[]{MU, THETA};
+	double[] allpar = new double[parList.length];
+//	double mu; //rate
+//	double theta;  //pop
+	HashMap<String, Double> params = new HashMap<String, Double>(){{
+		for (String s : parList) {
+			put(s, 0.0);
+		}
+	}};
 	StringBuilder sb;
 
 	public CreateControlFile(String cFileName) {
@@ -28,13 +38,19 @@ public class CreateControlFile {
 	public String getControlFile() {
 		return controlFile;
 	}
-	public double getMu() {
-		return mu;
-	}
 	
-	public double getTheta() {
-		return theta;
+	@Deprecated
+	public double getMu() {
+		return params.get(MU);
 	}
+	@Deprecated
+	public double getTheta() {
+		return params.get(THETA);
+	}
+	public double getPar(String s) {
+		return params.get(s);
+	}
+
 
 	public void setControlFile(String controlFile) {
 		this.controlFile = controlFile;
@@ -47,10 +63,10 @@ public class CreateControlFile {
 	}
 	public void setInitPar(Parameters p) {
 		if (p instanceof ParaMu) {
-			updateMu(p.getValue());
+			setParam(MU, p.getValue());
 		}
 		else if (p instanceof ParaTheta) {
-			updateTheta(p.getValue());
+			setParam(THETA, p.getValue());
 		}
 	}
 
@@ -63,22 +79,22 @@ public class CreateControlFile {
 		//		System.out.println( p.getClass().toString());
 		//		System.out.println( p.getClass().getName());
 		if (p instanceof ParaMu) {
-			updateMu(p.nextPrior());
+			setParam(MU, p.nextPrior());
 		}
 		else if (p instanceof ParaTheta) {
-			updateTheta(p.nextPrior());
+			setParam(THETA, p.nextPrior());
 		}
 	}
 	public void setParProposal(ArrayList<Parameters> par, int ind){
 
 		Parameters p = par.get(ind);
 		if (p instanceof ParaMu) {
-			updateMu(p.nextProposal());
-			updateTheta(par.get(ind+1).getValue());
+			setParam(MU, p.nextProposal());
+			setParam(THETA, par.get(ind+1).getValue());
 		}
 		else if (p instanceof ParaTheta) {
-			updateTheta(p.nextProposal());
-			updateMu(par.get(ind-1).getValue());
+			setParam(THETA, p.nextProposal());
+			setParam(MU, par.get(ind-1).getValue());
 		}
 	}
 
@@ -103,13 +119,15 @@ public class CreateControlFile {
 	
 	}
 	
-	private void updateMu(double mu){
-		this.mu = mu;
-	}
-
-	private void updateTheta(double theta){
-		this.theta = theta;
-	}
+//	@Deprecated
+//	private void setMu(double mu){
+//		params.put("Mu", mu);
+//	}
+//	
+//	@Deprecated
+//	private void setTheta(double theta){
+//		params.put("Theta", theta);
+//	}
 
 	public StringBuilder updateTemplate2T(){
 	
@@ -118,7 +136,7 @@ public class CreateControlFile {
 		sb.append("An test ABC run\n")
 		.append("1 population with ancient data\n")
 		.append("Deme size\n")
-		.append((int) theta).append("\n")
+		.append((int) ((double) params.get(THETA))).append("\n")
 		.append("Sample sizes\n")
 		.append(2).append(" sample groups\n")
 		.append("100 0 0 0\n")
@@ -128,7 +146,7 @@ public class CreateControlFile {
 		.append("Number of migration matrices\n0\n")
 		.append("Historical event\n0\n")
 		.append("Mutations per generation for the whole sequence\n")
-		.append(mu).append("\n")
+		.append(params.get(MU)).append("\n")
 		.append("Number of loci\n")
 		.append("750\n")
 		.append("Data type\n")
@@ -147,7 +165,7 @@ public class CreateControlFile {
 		sb.append("An test ABC run\n")
 		.append("1 population with ancient data\n")
 		.append("Deme size\n")
-		.append((int) theta).append("\n")
+		.append((int) ((double) params.get(THETA))).append("\n")
 		.append("Sample sizes\n")
 		.append(3).append(" sample groups\n")
 		.append("40 0 0 0\n")
@@ -158,7 +176,7 @@ public class CreateControlFile {
 		.append("Number of migration matrices\n0\n")
 		.append("Historical event\n0\n")
 		.append("Mutations per generation for the whole sequence\n")
-		.append(mu).append("\n")
+		.append(params.get(MU)).append("\n")
 		.append("Number of loci\n")
 		.append("750\n")
 		.append("Data type\n")
@@ -168,16 +186,24 @@ public class CreateControlFile {
 	
 	}
 	
+	@Deprecated
 	public void setMu(double mu) {
-		updateMu(mu);
+		setMu(mu);
 	}
-
+	@Deprecated
 	public void setTheta(double theta) {
-		updateTheta(theta);
+		setTheta(theta);
+	}
+	public void setParam(String s, double value) {
+		params.put(s, value);
 	}
 
 	public double[] getAllPar() {
-		
-		return new double[]{mu, theta};
+
+		for (int i = 0; i < parList.length; i++) {
+			allpar[i] = params.get(parList[i]);
+		}
+
+		return allpar;
 	}
 }
