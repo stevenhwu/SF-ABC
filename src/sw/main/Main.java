@@ -49,7 +49,7 @@ public class Main {
 		String obsDataName = args[1];
 		String dataDir = "/dev/shm/"+obsDataName.split("\\.")[0]+"_"+args[2]+SYSSEP;
 		if(args[0].equalsIgnoreCase("1")){
-			dataDir = "/scratch"+obsDataName.split("\\.")[0]+"_"+args[2]+SYSSEP;
+			dataDir = "/scratch/sw167/"+obsDataName.split("\\.")[0]+"_"+args[2]+SYSSEP;
 		}
 		System.out.println(dataDir);
 		File f = new File(dataDir);

@@ -2,6 +2,7 @@ package sw.process;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class RunExt {
@@ -104,7 +105,19 @@ public class RunExt {
 			Process p =pb.start();
 			p.waitFor();
 		       
-           
+			
+			BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		    String line;
+//		    System.out.println("&&&&& start &&&&&");
+//		    while ((line = br.readLine()) != null) {
+//		    	System.out.println(line);
+//		    }
+//		     
+//		    br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+//		    while ((line = br.readLine()) != null) {
+//		    	System.out.println(line);
+//		    }
+//		       System.out.println("&&&&& end &&&&&");
         	  p.getOutputStream().close();
         	  p.getErrorStream().close();
         	  p.getInputStream().close();

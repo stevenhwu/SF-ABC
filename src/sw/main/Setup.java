@@ -42,14 +42,19 @@ public class Setup {
 		}
 		fwDir = new File(wDir);
 		try {
-			if (!fwDir.exists()) {
-				fwDir.mkdirs();
+			if (fwDir.exists()) {
+				File[] toDel = fwDir.listFiles();
+				for (File file : toDel) {
+					file.delete();
+				}
+				fwDir.delete();
 			}
 			String templateDir = System.getProperty("user.dir") + sysSep
 					 + "TemplateFiles" + sysSep;
 			File tDir = new File(templateDir);
 			
 			FileUtils.copyDirectory(tDir, fwDir);
+
 			new File(workingDir + "BCC").setExecutable(true);
 
 		} catch (Exception e) {
