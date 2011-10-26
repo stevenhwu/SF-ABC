@@ -6,6 +6,7 @@ public class SStatFreq extends AbstractSummaryStat  {
 
 	}
 
+	@Override
 	public double calStatMu(double[]... par) {
 
 		// mu<- lm(Mu~.-Theta,data=dataAll[,1:7])
@@ -23,6 +24,7 @@ public class SStatFreq extends AbstractSummaryStat  {
 
 	}
 
+	@Override
 	public double calStatTheta(double[]... par) {
 
 		// th<- lm(Theta~.-Mu,data=dataAll[,1:7])

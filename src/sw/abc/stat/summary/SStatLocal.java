@@ -1,7 +1,5 @@
 package sw.abc.stat.summary;
 
-import java.util.Arrays;
-
 public class SStatLocal extends AbstractSummaryStat  {
 
 	public SStatLocal() {
@@ -9,6 +7,7 @@ public class SStatLocal extends AbstractSummaryStat  {
 	}
 
 
+	@Override
 	public double calStatMu(double[]... par) {
 //		0.00375 0.00515 0.00655 0.00795 0.00935
 //		0.01075 0.01215 0.01355 0.01495
@@ -44,6 +43,7 @@ public class SStatLocal extends AbstractSummaryStat  {
 
 	}
 
+	@Override
 	public double calStatTheta(double[]... par) {
 
 		double stat = 0;

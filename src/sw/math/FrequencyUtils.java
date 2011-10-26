@@ -5,9 +5,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.math.util.MathUtils;
-
-import dr.app.tools.NormaliseMeanTreeRate;
 
 public class FrequencyUtils {
 

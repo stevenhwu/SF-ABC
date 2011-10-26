@@ -8,6 +8,7 @@ public class SStatBrLn extends AbstractSummaryStat  {
 
 
 
+	@Override
 	public double calStatMu(double[]... par) {
 
 		double stat = 
@@ -103,6 +104,7 @@ public class SStatBrLn extends AbstractSummaryStat  {
 
 	}
 
+	@Override
 	public double calStatTheta(double[]... par) {
 
 		double stat = 

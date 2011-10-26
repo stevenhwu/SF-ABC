@@ -1,24 +1,19 @@
 package sw.sequence;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.math.stat.StatUtils;
-
 import sw.main.Setup;
 import sw.math.Combination;
 
 import dr.evolution.alignment.Alignment;
 import dr.evolution.alignment.SimpleAlignment;
-import dr.evolution.datatype.Nucleotides;
+
 
 public class SiteAlignment {
 
 	private final static int DNASTATCOUNT = 4; 
 
-	private int noSeq;
-	private int noState;
+//	private int noSeq;
+//	private int noState;
 	
 	private Alignment ali;
 	private int noSite; 
@@ -31,8 +26,8 @@ public class SiteAlignment {
 		
 		this.ali = ali;
 		noSite = ali.getSiteCount(); // 750 length
-		noSeq = ali.getSequenceCount(); // 80 = 40*2  
-		noState = ali.getStateCount(); // 4
+//		noSeq = ali.getSequenceCount(); // 80 = 40*2  
+//		noState = ali.getStateCount(); // 4
 		timeGroup = new ArrayList<int[]>();
 
 	}
@@ -48,8 +43,8 @@ public class SiteAlignment {
 	public SiteAlignment(int noSite, int noSeq, int noState) {
 
 		this.noSite = noSite; // 750 length
-		this.noSeq = noSeq; // 80 = 40*2  
-		this.noState = noState; // 4
+//		this.noSeq = noSeq; // 80 = 40*2  
+//		this.noState = noState; // 4
 		timeGroup = new ArrayList<int[]>();
 
 	}
@@ -111,7 +106,7 @@ public class SiteAlignment {
 		
 		int[] t = timeGroup.get(index);
 		SimpleAlignment simpA = new SimpleAlignment();
-		simpA.setDataType(Nucleotides.INSTANCE);
+
 		for (int i : t) {
 			simpA.addSequence(ali.getSequence(i));	
 		}

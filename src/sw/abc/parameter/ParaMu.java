@@ -1,6 +1,5 @@
 package sw.abc.parameter;
 
-import dr.inference.loggers.LogColumn;
 import sw.math.DistributionPrior;
 
 public class ParaMu extends AbstractParameter   {

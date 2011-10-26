@@ -41,8 +41,8 @@ public class CreateControlFileTest {
 				"DNA 0.5\n" +
 				"Mutation rates\n" +
 				"0 0 0\n";
-		cFile.setMu(0.0075);
-		cFile.setTheta(3000);
+		cFile.setParam("Mu", 0.0075);
+		cFile.setParam("Theta", 3000);
 		StringBuilder sb = cFile.updateTemplate2T();
 		assertEquals(exp, sb.toString());
 	}

@@ -1,7 +1,5 @@
 package sw.abc.stat.summary;
 
-import java.util.Arrays;
-
 public class SStat3TMoreStatNoInt extends AbstractSummaryStat  {
 
 	public SStat3TMoreStatNoInt() {
@@ -10,6 +8,7 @@ public class SStat3TMoreStatNoInt extends AbstractSummaryStat  {
 
 
 
+	@Override
 	public double calStatMu(double[]... par) {
 
 		double statMu = 
@@ -39,6 +38,7 @@ public class SStat3TMoreStatNoInt extends AbstractSummaryStat  {
 
 	}
 
+	@Override
 	public double calStatTheta(double[]... par) {
 
 		double statTheta = 

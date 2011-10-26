@@ -1,11 +1,11 @@
 package sw.abc.parameter;
 
-import dr.inference.loggers.Loggable;
+
 import sw.math.DistributionPrior;
 import sw.math.DistributionProposal;
 
 
-public interface Parameters extends Loggable{
+public interface Parameters {
 
 	
 	public void init();

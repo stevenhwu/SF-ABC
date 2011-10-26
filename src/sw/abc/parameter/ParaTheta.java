@@ -1,6 +1,5 @@
 package sw.abc.parameter;
 
-import dr.inference.loggers.LogColumn;
 import sw.math.DistributionPrior;
 
 public class ParaTheta extends AbstractParameter  {
@@ -27,11 +26,7 @@ public class ParaTheta extends AbstractParameter  {
 		
 	}
 
-	@Override
-	public LogColumn[] getColumns() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 	
 //	@Override
 //	public double nextPrior() {

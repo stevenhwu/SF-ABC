@@ -1,34 +1,13 @@
 package sw.abc.stat.data;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.math.stat.StatUtils;
-import org.apache.commons.math.util.MathUtils;
-import org.hamcrest.internal.ArrayIterator;
-
 import com.google.common.primitives.Doubles;
 
-import dr.inference.trace.Trace;
-
-import sw.abc.stat.summary.SStat3TMoreStat;
-import sw.abc.stat.summary.SStat3TMoreStatNoInt;
-import sw.abc.stat.summary.SStatBrLn;
-import sw.abc.stat.summary.SStatFreq;
-import sw.abc.stat.summary.SStatLocal;
-import sw.abc.stat.summary.SStatSitePattern;
-import sw.abc.stat.summary.SStatTopFreq;
-import sw.abc.stat.summary.SStatTopFreqSingleProduct;
-import sw.abc.stat.summary.SStatTopFreqSingleProductNoS;
-import sw.abc.stat.summary.SStatTopFreqSingleSum;
 import sw.abc.stat.summary.SummaryStat;
 import sw.main.Setup;
-import sw.sequence.Site;
 import sw.sequence.SiteAlignment;
-import sw.util.TraceUtil;
 
 public class AlignmentStatFlex {
 

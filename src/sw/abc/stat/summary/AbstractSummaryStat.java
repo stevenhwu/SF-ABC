@@ -3,6 +3,7 @@ package sw.abc.stat.summary;
 public abstract class AbstractSummaryStat implements SummaryStat{
 
 	
+	@Override
 	public double calStat1P1R(int p, double[] par){
 		double stat = 0 ;
 		switch (p) {

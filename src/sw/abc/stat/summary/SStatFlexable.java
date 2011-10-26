@@ -1,9 +1,5 @@
 package sw.abc.stat.summary;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -20,12 +16,14 @@ public class SStatFlexable extends AbstractSummaryStat {
 	}
 	
 	
+	@Override
 	public double calStatMu(double[] par) {
 
 		double stat = calStatParam(par, coef.get("Mu"));
 		return stat;
 	}
 	
+	@Override
 	public double calStatTheta(double[] par) {
 		double stat = calStatParam(par, coef.get("Theta"));
 		return stat;
@@ -44,6 +42,7 @@ public class SStatFlexable extends AbstractSummaryStat {
 	}
 
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Regression Coefficient\n");

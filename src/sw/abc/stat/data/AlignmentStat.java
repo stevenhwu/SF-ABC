@@ -1,14 +1,9 @@
 package sw.abc.stat.data;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.stat.StatUtils;
-import org.apache.commons.math.util.MathUtils;
-import org.hamcrest.internal.ArrayIterator;
-
 import sw.abc.stat.summary.SStat3TMoreStat;
 import sw.abc.stat.summary.SStat3TMoreStatNoInt;
 import sw.abc.stat.summary.SStatBrLn;

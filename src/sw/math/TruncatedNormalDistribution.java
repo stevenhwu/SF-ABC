@@ -122,14 +122,17 @@ public class TruncatedNormalDistribution implements DistributionPrior {
 	}
 
 	private UnivariateFunction pdfFunction = new UnivariateFunction() {
+		@Override
 		public final double evaluate(double x) {
 			return pdf(x);
 		}
 
+		@Override
 		public final double getLowerBound() {
 			return lower;
 		}
 
+		@Override
 		public final double getUpperBound() {
 			return upper;
 		}

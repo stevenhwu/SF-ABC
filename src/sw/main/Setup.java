@@ -1,24 +1,16 @@
 package sw.main;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.apache.commons.io.FileUtils;
 
 
 import sw.abc.parameter.Parameters;
 import sw.abc.stat.summary.SummaryStat;
-import dr.inference.trace.Trace;
 
 public class Setup {
 
 	final private char sysSep = System.getProperty("file.separator").charAt(0);
-	final private String templateDir = System.getProperty("user.dir") + sysSep
-			+ "data" + sysSep + "TemplateFiles" + sysSep;
 
 	private String workingDir;
 	private String obsName;
@@ -53,7 +45,10 @@ public class Setup {
 			if (!fwDir.exists()) {
 				fwDir.mkdirs();
 			}
+			String templateDir = System.getProperty("user.dir") + sysSep
+					 + "TemplateFiles" + sysSep;
 			File tDir = new File(templateDir);
+			
 			FileUtils.copyDirectory(tDir, fwDir);
 			new File(workingDir + "BCC").setExecutable(true);
 

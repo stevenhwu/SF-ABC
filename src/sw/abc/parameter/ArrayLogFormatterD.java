@@ -1,23 +1,19 @@
 package sw.abc.parameter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 
-import com.google.common.base.Strings;
+import sw.util.Trace;
+import sw.util.TraceFactory;
+
 import com.google.common.primitives.Doubles;
 
-import dr.evolution.io.NewickImporter;
-import dr.inference.trace.Trace;
-import dr.inference.trace.TraceFactory;
-
-import dr.inference.loggers.LogFormatter;
 
 
-public class ArrayLogFormatterD<T> implements LogFormatter {
+
+public class ArrayLogFormatterD<T> {
 
 	private static LogColumn lc = new LogColumn("");
 
@@ -155,13 +151,13 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		return traces;
 	}
 
-	@Override
+	
 	public void logHeading(String heading) {
 		this.heading = heading;
 		echo(heading);
 	}
 
-	@Override
+	
 	public void logLabels(String[] labels) {
 		if (this.labels == null) {
 			this.labels = labels;
@@ -181,35 +177,14 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		}
 	}
 	
-	@Override
+	
 	public void logLine(String line) {
 		lines.add(line);
 		echo(line);
 	}
 
-//	public void logValues(double[] values) {
-//		for (int i = 0; i < values.length; i++) {
-//			// Double v = Double.parseDouble(values[i]);
-//			getTraces().get(i).add(values[i]);
-//		}
-//	}
 
-	@Override
-	public void logValues(String[] values) {
-//		for (int i = 0; i < values.length; i++) {
-//			// Double v = Double.parseDouble(values[i]);
-//			traces.get(i).add(Double.parseDouble(values[i]));
-//		}
-//		echo(values);
-	}
 
-	@Override
-	public void startLogging(String title) {
-	}
-
-	@Override
-	public void stopLogging() {
-	}
 
 	public double[][] to2DArray() {
 
@@ -217,7 +192,7 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		int size = traces.get(0).getValuesSize();
 		double[][] summary = new double[noPar][size];
 		for (int i = 0; i < noPar; i++) {
-			double[] d = Doubles.toArray((Collection<Double>) traces.get(i).getValues(0, size, null) );
+			double[] d = Doubles.toArray(traces.get(i).getValues(0, size, null) );
 			for (int j = 0; j < d.length; j++) {
 				summary[i][j] = d[j];
 			}
@@ -229,7 +204,7 @@ public class ArrayLogFormatterD<T> implements LogFormatter {
 		
 		Trace t = traces.get(i);
 		int size = t.getValuesSize();
-		double[] d = Doubles.toArray((Collection<Double>) t.getValues(0, size, null) );
+		double[] d = Doubles.toArray(t.getValues(0, size, null) );
 		return d;
 	}
 }

@@ -1,21 +1,15 @@
 package sw.sequence;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.math.stat.Frequency;
 import org.apache.commons.math.stat.StatUtils;
 import org.apache.commons.math.stat.descriptive.moment.Kurtosis;
 import org.apache.commons.math.stat.descriptive.moment.SecondMoment;
 import org.apache.commons.math.stat.descriptive.moment.Skewness;
-import org.apache.commons.math.util.MathUtils;
-
 import sw.math.FrequencyUtils;
 
 import dr.evolution.alignment.SimpleAlignment;
-import dr.util.Citation.Status;
 
 public class SiteAlignPerTime {
 

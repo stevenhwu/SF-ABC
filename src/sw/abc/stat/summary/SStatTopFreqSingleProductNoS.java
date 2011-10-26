@@ -1,7 +1,5 @@
 package sw.abc.stat.summary;
 
-import java.util.Arrays;
-
 public class SStatTopFreqSingleProductNoS extends AbstractSummaryStat  {
 
 	public SStatTopFreqSingleProductNoS() {

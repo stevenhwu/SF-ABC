@@ -1,6 +1,6 @@
 package sw.abc.parameter;
 
-import dr.inference.loggers.LogColumn;
+//import dr.inference.loggers.LogColumn;
 import sw.math.DistributionPrior;
 import sw.math.DistributionProposal;
 
@@ -95,12 +95,6 @@ public abstract class AbstractParameter implements Parameters {
 		
 	}
 
-
-	@Override
-	public LogColumn[] getColumns() {
-		
-		return null;
-	}
 	
 	public void setInitValue(double v) {
 		value = v;

@@ -1,21 +1,18 @@
 package sw.util;
 
 import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
 
-import com.google.common.base.Strings;
-
-import sw.abc.parameter.ArrayLogFormatterD;
 import sw.math.Combination;
 import sw.sequence.Site;
+import sw.util.TraceFactory.TraceType;
 
-import dr.inference.trace.Trace;
-import dr.inference.trace.TraceFactory;
-import dr.inference.trace.TraceFactory.TraceType;
+
 
 import dr.inference.loggers.NumberColumn;
 
@@ -35,7 +32,7 @@ public class TraceUtil {
 		int noComb = Combination.calNoComb(noTime);
 		summaryStatCollection.put("Mu", 1);
 		summaryStatCollection.put("Theta", 1);
-		summaryStatCollection.put("Gap", noParam);
+		summaryStatCollection.put("Gap", this.noParam);
 		
 		summaryStatCollection.put("dist", -1);
 		summaryStatCollection.put("chisq", noTime);

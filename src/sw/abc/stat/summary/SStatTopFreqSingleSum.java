@@ -1,7 +1,5 @@
 package sw.abc.stat.summary;
 
-import java.util.Arrays;
-
 public class SStatTopFreqSingleSum extends AbstractSummaryStat  {
 
 	public SStatTopFreqSingleSum() {

@@ -1,13 +1,12 @@
 package sw.abc.stat.summary;
 
-import java.util.Arrays;
-
 public class SStat3TMoreStat extends AbstractSummaryStat  {
 
 	public SStat3TMoreStat() {
 
 	}
 
+	@Override
 	public double calStatMu(double[]... par) {
 
 		double stat = 
@@ -37,6 +36,7 @@ public class SStat3TMoreStat extends AbstractSummaryStat  {
 
 	}
 
+	@Override
 	public double calStatTheta(double[]... par) {
 
 		double stat = 

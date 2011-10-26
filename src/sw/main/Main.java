@@ -1,61 +1,28 @@
 package sw.main;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.StringTokenizer;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFileFilter;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.math.stat.StatUtils;
-import org.apache.commons.math.util.MathUtils;
-
-import com.google.common.base.Splitter;
 import com.google.common.primitives.Doubles;
-import com.google.common.primitives.Primitives;
-
-import sw.abc.parameter.AbstractParameter;
-
 import sw.abc.parameter.ArrayLogFormatterD;
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.Parameters;
 import sw.abc.stat.data.AlignmentStat;
 import sw.abc.stat.data.AlignmentStatFlex;
-import sw.abc.stat.data.FrequencyStat;
 import sw.abc.stat.summary.*;
 
-import sw.math.NormalDistribution;
-
-import sw.math.Combination;
-import sw.math.OneOverDistribution;
 import sw.math.Scale;
 import sw.math.TruncatedNormalDistribution;
 import sw.math.UniformDistribution;
-import sw.math.ZTestDistribution;
 import sw.process.RunExt;
 import sw.sequence.Importer;
-import sw.sequence.Site;
-
 import sw.sequence.SiteAlignment;
 import sw.util.TraceUtil;
 import dr.evolution.alignment.Alignment;
-import dr.inference.trace.*;
-import dr.inference.trace.TraceFactory.TraceType;
 import flanagan.analysis.Regression;
 
 public class Main {
@@ -78,12 +45,22 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
-		String obsDataName = args[0];
+		// args[0]==0 local   ==1  /scratch
+		String obsDataName = args[1];
+		String dataDir = "/dev/shm/"+obsDataName.split("\\.")[0]+"_"+args[2]+SYSSEP;
+		if(args[0].equalsIgnoreCase("1")){
+			dataDir = "/scratch"+obsDataName.split("\\.")[0]+"_"+args[2]+SYSSEP;
+		}
+		System.out.println(dataDir);
+		File f = new File(dataDir);
+		System.out.println(f.getAbsolutePath());
+		System.out.println(f.mkdir());
 		
-		String dataDir = "/dev/shm/"+obsDataName.split("\\.")[0]+"_"+args[1]+SYSSEP;
 		
 //		Setup setting = ABCSetup(dataDir, null, "simData.paup", NO_SEQ_PER_TIME, 2);
 		Setup setting = ABCSetup(dataDir, null, obsDataName, NO_SEQ_PER_TIME, 2);
+		
+		System.out.println(Arrays.toString( f.list() ));//TEMP
 		
 		SummaryStat sumStat = generateStatFile(100, setting);
 //		SummaryStat sumStat = new SStatSmall();
@@ -92,9 +69,9 @@ public class Main {
 		AlignmentStatFlex obsDataStat = calObsStat(setting);
 		
 		setting.setNoSeqPerTime(NO_SEQ_PER_TIME);
-		ABCUpdateMCMC(setting, 1000, 10, 0.01, obsDataStat);
+		ABCUpdateMCMC(setting, 100, 10, 0.01, obsDataStat);
 
-		// testRead();
+
 
 	}
 
@@ -218,7 +195,7 @@ public class Main {
 		oResult.println("Ite\t" + traceLog.getLabels());
 		oResult.flush();
 
-		double[] deltaDup = new double[10];
+//		double[] deltaDup = new double[10];
 		for (int i = 0; i < nRun; i++) {
 			// System.out.println();
 			for (int p = 0; p < allPar.size(); p++) {
@@ -280,7 +257,7 @@ public class Main {
 		}
 		oResult.close();
 
-		System.out.println((System.nanoTime() - startTime) / 1000 / 1000);
+		System.out.println("Time: "+(System.nanoTime() - startTime) / 60e6);
 		// System.out
 		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(0))));
 		// System.out
@@ -288,11 +265,10 @@ public class Main {
 
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static SummaryStat generateStatFile(int nRun, Setup setting) {
 
 		System.out.println("Generate stats\t"+ setting.getWorkingDir());
-		int seqLength = 750;
 		int noTime = setting.getNoTime();
 		String[] paramList = setting.getParamList();
 		String[] statsList = setting.getStatList();
@@ -303,6 +279,7 @@ public class Main {
 		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
 		
 		TraceUtil tu = new TraceUtil(noTime);
+	
 		ArrayLogFormatterD traceLogParam = new ArrayLogFormatterD(6, tu.createTraceAL(paramList));
 		ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAL(statsList));
 
@@ -356,6 +333,7 @@ public class Main {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	private static SStatFlexable semiAutoRegression(ArrayLogFormatterD traceLogStats, ArrayLogFormatterD traceLogParam) {
 		double[][] xxData = traceLogStats.to2DArray();
 		SStatFlexable sStat = new SStatFlexable();
