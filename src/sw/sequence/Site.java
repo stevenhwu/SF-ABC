@@ -182,7 +182,7 @@ public class Site {
 			// 4 false [0.625, 0.0, 0.0, 0.375] [0.0, 0.0, 0.55, 0.45]
 			// 4 false [0.4, 0.575, 0.0, 0.025] [0.4, 0.0, 0.6, 0.0]
 			// 4 false [0.5, 0.5, 0.0, 0.0] [0.0, 0.4, 0.0, 0.6]	
-			System.out.println(pattern + "\t"			+ (maxIndex == site.getMaxFreqIndex()) + "\t"			+ Arrays.toString(freqs) + "\t"			+ Arrays.toString(site.getFreqs()));
+//			System.out.println(pattern + "\t"			+ (maxIndex == site.getMaxFreqIndex()) + "\t"			+ Arrays.toString(freqs) + "\t"			+ Arrays.toString(site.getFreqs()));
 			
 		}
 

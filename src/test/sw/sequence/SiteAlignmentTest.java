@@ -64,7 +64,7 @@ public class SiteAlignmentTest {
 		String dataName = "junit.paup";
 //		String dataDir = userDir+sysSep+"data"+sysSep;
 		String dataDir = "/dev/shm/JUnit/";
-		Setup setting = new Setup(dataDir);
+		Setup setting = new Setup(dataDir, dataName);
 		setting.setObsFile(dataName);
 		int noSeqPerTime = 40;
 		int noTime = 2;

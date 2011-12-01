@@ -42,34 +42,58 @@ public class Main {
 	private static String[] switchPar = new String[] { "-t", "-f" };
 	private static String noSimPerPar = "1";
 	private static int NO_SEQ_PER_TIME = 100;
-
+	private static String softwareName = "BCC_fixParams";
+	/*
+		param:
+		args[0]: ==0 local   ==1  /scratch on DSCR
+		args[1]: data file 
+		args[2]: 
+		e.g. 0 simData.paup 1
+	*/
 	public static void main(String[] args) throws Exception {
 
+		
+		int noItePreprocess = 500_000;
+		int noIteMCMC = 1_000_000;
+		int thinning = 1000;
+		double error = 0.01;
+				
 		// args[0]==0 local   ==1  /scratch
 		String obsDataName = args[1];
-		String dataDir = "/dev/shm/"+obsDataName.split("\\.")[0]+"_"+args[2]+SYSSEP;
+		String obsDataNamePrefix = obsDataName.split("\\.")[0];
+		String dataDir = "/dev/shm/"+obsDataNamePrefix+SYSSEP;
 		if(args[0].equalsIgnoreCase("1")){
-			dataDir = "/scratch/sw167/"+obsDataName.split("\\.")[0]+"_"+args[2]+SYSSEP;
+			dataDir = "/scratch/sw167/"+obsDataNamePrefix+SYSSEP;
 		}
-		System.out.println(dataDir);
 		File f = new File(dataDir);
-		System.out.println(f.getAbsolutePath());
-		System.out.println(f.mkdir());
+		if(!f.exists()){
+			System.out.println("mkdir "+f.toString()+"\t"+f.mkdir());
+		}
 		
+		int fileIndex = obsDataNamePrefix.indexOf("_");
+		double[] initValue = new double[2];
+		if(fileIndex== -1){
+			initValue = new double[]{0.00001, 3000};
+		}
+		else {
+			int i = Integer.parseInt(obsDataNamePrefix.substring(fileIndex+1));
+			initValue = RegressionResult.result[i];
+		}
+		System.out.println("Init values:\t"+Arrays.toString(initValue));
 		
 //		Setup setting = ABCSetup(dataDir, null, "simData.paup", NO_SEQ_PER_TIME, 2);
-		Setup setting = ABCSetup(dataDir, null, obsDataName, NO_SEQ_PER_TIME, 2);
+		Setup setting = ABCSetup(dataDir, null, obsDataName, NO_SEQ_PER_TIME, 2, initValue);
 		
-		System.out.println(Arrays.toString( f.list() ));//TEMP
-		
-		SummaryStat sumStat = generateStatFile(100, setting);
+		SummaryStat sumStat = generateStatFile(noItePreprocess, thinning, setting);
 //		SummaryStat sumStat = new SStatSmall();
+
 		setting.setStat(sumStat);
 		setting.setNoSeqPerTime(40);
 		AlignmentStatFlex obsDataStat = calObsStat(setting);
 		
 		setting.setNoSeqPerTime(NO_SEQ_PER_TIME);
-		ABCUpdateMCMC(setting, 100, 10, 0.01, obsDataStat);
+		
+		ABCUpdateMCMC(setting, noIteMCMC, thinning, error, obsDataStat);
 
 
 
@@ -77,7 +101,7 @@ public class Main {
 
 
 	public static Setup ABCSetup(String dataDir, SummaryStat stat,
-			String obsFileName, int noSeqPerTime, int noTime) {
+			String obsFileName, int noSeqPerTime, int noTime, double[] initValue) {
 
 		
 		int seqLength = 750;
@@ -85,7 +109,7 @@ public class Main {
 		String[] statList = new String[]{"dist", "chisq", "var", "sitePattern"};
 //		String[] statList = new String[]{ "sitePattern"};
 				
-		Setup setting = new Setup(dataDir);
+		Setup setting = new Setup(dataDir, obsFileName);
 		setting.setStat(stat);
 		setting.setObsFile(obsFileName);
 		setting.setAlignmentFile(alignmentName);
@@ -95,27 +119,37 @@ public class Main {
 		setting.setStatList(statList);
 		setting.setSeqInfo(seqLength, noSeqPerTime, noTime);
 
-		ArrayList<Parameters> allParUniformPrior  = new ArrayList<Parameters>();
-		ParaMu pMu = new ParaMu(new UniformDistribution(1E-5 / 3 * seqLength, 1E-5 * 3 * seqLength));
-		ParaTheta pTheta = new ParaTheta(new UniformDistribution(1000, 5000));
-		allParUniformPrior.add(pMu);
-		allParUniformPrior.add(pTheta);
-		setting.setallParUniformPrior(allParUniformPrior);
+		double muMean = initValue[0] * seqLength;
+		double muLower = muMean / 10;
+		double muUpper = muMean * 10;
+		
+		double thetaMean = initValue[1];
+		double thetaLower = 100;
+		double thetaUpper = thetaMean * 5;
+		
+//		ArrayList<Parameters> allParUniformPrior  = new ArrayList<Parameters>();
+		ParaMu priorMu = new ParaMu(new UniformDistribution(muLower, muUpper));
+		ParaTheta priorTheta = new ParaTheta(new UniformDistribution(thetaLower, thetaUpper));
+//		allParUniformPrior.add(pMu);
+//		allParUniformPrior.add(pTheta);
+//		setting.setallParUniformPrior(allParUniformPrior);
+		setting.setallParPrior(priorMu, priorTheta);
 
 		
-		ArrayList<Parameters> allPar = new ArrayList<Parameters>();
+//		ArrayList<Parameters> allPar = new ArrayList<Parameters>();
 //		pMu = new ParaMu(new UniformDistribution(1E-5 * seqLength / 3, 1E-5 * seqLength * 3));
-		pMu = new ParaMu(new TruncatedNormalDistribution(1E-5 * seqLength, 1E-5 * seqLength/3, 1E-7, 1E-4 * seqLength));
+		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
 		pMu.setProposal(new Scale(0.75));
-		pMu.setInitValue(1E-5 * seqLength);
-		pTheta = new ParaTheta(new TruncatedNormalDistribution(3000, 500, 100, 10000));
+		pMu.setInitValue(muMean);
+		
+		ParaTheta pTheta = new ParaTheta(new TruncatedNormalDistribution(thetaMean, thetaMean/2, thetaLower, thetaUpper));
 		pTheta.setProposal(new Scale(0.75));
-		pTheta.setInitValue(3000);
+		pTheta.setInitValue(thetaMean);
 		// ParaTheta pTheta = new ParaTheta(new OneOverDistribution(3000));
 		// pTheta.setProposal(new NormalDistribution(3000, 100));
-		allPar.add(pMu);
-		allPar.add(pTheta);
-		setting.setAllPar(allPar);
+//		allPar.add(pMu);
+//		allPar.add(pTheta);
+		setting.setAllPar(pMu, pTheta);
 		
 			// ParaMu pMu = new ParaMu(new UniformDistribution(1E-5*seqLength/3,
 		// 1E-5*seqLength*3));
@@ -138,25 +172,6 @@ public class Main {
 	}
 	
 
-	public static AlignmentStatFlex calObsStat(Setup setting) {
-
-		System.out.println("Calculate obs stat");
-		SiteAlignment sa = new SiteAlignment(setting);
-		Importer imp = new Importer(setting.getDataFile(), setting);
-		AlignmentStatFlex aliStat = new AlignmentStatFlex(setting);
-
-		sa.updateAlignment(imp);
-		aliStat.updateSiteAlignment(sa);
-
-		aliStat.calSumStat();
-
-		System.out.println(aliStat.toString());
-
-		return aliStat;
-
-	}
-
-	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void ABCUpdateMCMC(Setup setting, int nRun, int logInt,
 			double error, AlignmentStatFlex obsStat) throws Exception {
@@ -183,7 +198,7 @@ public class Main {
 
 		CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile());
 		RunExt proc = new RunExt(setting.getfWorkingDir());
-		proc.setPar("./BCC", cFile.getControlFile(), noSimPerPar, switchPar);
+		proc.setPar(softwareName, cFile.getControlFile(), noSimPerPar, switchPar);
 
 		cFile.setInitPar(allPar);
 		cFile.updateFile(noTime);
@@ -266,14 +281,14 @@ public class Main {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static SummaryStat generateStatFile(int nRun, Setup setting) {
+	public static SummaryStat generateStatFile(int nRun, int thinning, Setup setting) {
 
-		System.out.println("Generate stats\t"+ setting.getWorkingDir());
+		System.out.println("Generate stats at:\t"+ setting.getWorkingDir());
 		int noTime = setting.getNoTime();
 		String[] paramList = setting.getParamList();
 		String[] statsList = setting.getStatList();
 
-		ArrayList<Parameters> allParUniformPrior = setting.getallParUniformPrior();//new ArrayList<Parameters>();
+		ArrayList<Parameters> allParUniformPrior = setting.getallParPrior();//new ArrayList<Parameters>();
 		CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile());
 		SiteAlignment sa = new SiteAlignment(setting);
 		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
@@ -284,7 +299,7 @@ public class Main {
 		ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAL(statsList));
 
 		RunExt proc = new RunExt(setting.getfWorkingDir());
-		proc.setPar("./BCC", cFile.getControlFile(), "1", switchPar);
+		proc.setPar(softwareName, cFile.getControlFile(), "1", switchPar);
 
 		long startTime = System.currentTimeMillis();
 		try {
@@ -303,9 +318,9 @@ public class Main {
 				traceLogStats.logValues( newStat.getCurStat(statsList));
 				oResult.println(i + "\t" + traceLogParam.getLine(i) + "\t"	+ traceLogStats.getLine(i));
 
-				if ((i % 100) == 0) {
+				if ((i % thinning) == 0) {
 					oResult.flush();
-					System.out.println("Ite:\t"+i+"\t"+ ((System.currentTimeMillis() - startTime)/60000));
+					System.out.println("Ite:\t"+i+"\t"+ ((System.currentTimeMillis() - startTime)/60000)+" mins");
 				}
 			}
 			oResult.close();
@@ -316,7 +331,7 @@ public class Main {
 		
 		System.out.println("Time:\t" + ( (System.currentTimeMillis()-startTime)/60000) );
 		SStatFlexable sStat = semiAutoRegression(traceLogStats, traceLogParam);
-		
+		System.out.println(sStat.toString());
 		try {
 			String outFile = setting.getWorkingDir()+"regressinoCoefSummary";
 			PrintWriter oResult = new PrintWriter(new BufferedWriter(new FileWriter(outFile )));
@@ -330,6 +345,25 @@ public class Main {
 		
 		 
 		return sStat;
+	}
+
+
+	public static AlignmentStatFlex calObsStat(Setup setting) {
+	
+		System.out.println("Calculate observed stat");
+		SiteAlignment sa = new SiteAlignment(setting);
+		Importer imp = new Importer(setting.getDataFile(), setting);
+		AlignmentStatFlex aliStat = new AlignmentStatFlex(setting);
+	
+		sa.updateAlignment(imp);
+		aliStat.updateSiteAlignment(sa);
+	
+		aliStat.calSumStat();
+	
+		System.out.println("Observed stat:\t"+aliStat.toString());
+	
+		return aliStat;
+	
 	}
 
 
@@ -397,33 +431,3 @@ public class Main {
 	}
 
 }
-
-/*
- * 
- * Actually, you do not need to "unpack" the JAR, you can just get a hold on the
- * exec's stream using classloader (just as you would access any other kind of
- * file contained in a JAR) and then copy that stream content to a temporary
- * folder on the disk.
- * 
- * Something similar to (from memory): ClassLoader loader =
- * this.getClass().getClassLoader(); URL url =
- * loader.getResource("my/package/mybatchscript.bat"); if (url == null) { throw
- * new IllegalStateException("Could not find script file"); } InputStream in =
- * url.openStream(); try { OutputStream out = new FileOutputStream(...); try {
- * ... } finally { out.close(); } } finally { in.close(); }
- * 
- * 
- * I happen to have a program that does just that (but with an exec instead of a
- * batch file) which has a Java/JavaFX front-end to a C++ fish population model.
- * When a scenario runs, we extract the exec in a temp folder, run it and delete
- * the tmp folder content after. Though now we've moved to a different setup
- * (cause we have to take care of distributing and updating different versions
- * of the exec), in my initial tests, I was simply extracting the demo exec out
- * of the JAR in a similar fashion and it worked just fine.
- * 
- * Note: - the app needs to be signed to be able to write on the local disk (of
- * course). - on Windows, especially on more recent version like Vista and 7,
- * you have to be careful were you try to do your extraction. - on Linux, I had
- * to change the file's permission to make it executable afterward of course by
- * doing a chmod command just before trying to execute the file.
- */

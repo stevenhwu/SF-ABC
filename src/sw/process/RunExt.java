@@ -15,6 +15,7 @@ public class RunExt {
 
 	File dataDir;
 	String[] command;
+	private String progName;
 
 	public RunExt(File dataDir) {
 		setDir(dataDir);
@@ -37,20 +38,25 @@ public class RunExt {
 	public RunExt() {
 		setDir(workDir);
 	}
-
+	@Deprecated
 	public void setPar(String parFile) {
 		setPar("./BCC", parFile, "1");
 	}
+	@Deprecated
 	public void setPar(String parFile, String noRep) {
 		setPar("./BCC", parFile, noRep);
 	}
 	public void setPar(String progName, String parFile, String noRep) {
 		setPar(progName, parFile, noRep, "-p", "-f");
 	}
+	
 	public void setPar(String progName, String parFile, String noRep, String...  switchPar ) {
 
+		this.progName = progName;
+		File fProg = new File(dataDir.getAbsoluteFile()+fileSep+progName);
+		System.out.println("Is program \""+ progName +"\" executable? "+fProg.setExecutable(true));
 		command = new String[switchPar.length+3];
-		command[0] = progName;
+		command[0] = "./"+progName;
 		for (int i = 0; i < switchPar.length; i++) {
 			command[i+1] = switchPar[i];
 		}
@@ -102,6 +108,7 @@ public class RunExt {
 //			File temp = pb.directory();  
 //			String currentWorkingDirectory = "Current working directory: " + temp.toString();
 //			System.out.println(currentWorkingDirectory);
+//			
 			Process p =pb.start();
 			p.waitFor();
 		       

@@ -2,7 +2,11 @@ package sw.main;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
+
+import com.sun.media.sound.FFT;
 
 
 import sw.abc.parameter.Parameters;
@@ -12,6 +16,7 @@ public class Setup {
 
 	final private char sysSep = System.getProperty("file.separator").charAt(0);
 
+	private String softwareName = "BCC_fixParams";
 	private String workingDir;
 	private String obsName;
 	private String resultName;
@@ -30,11 +35,13 @@ public class Setup {
 	private String[] paramList;
 	private String[] statList;
 	
-	private ArrayList<Parameters> allPar;
-	private ArrayList<Parameters> allParUniformPrior;
+	private ArrayList<Parameters> allPar = new ArrayList<>();
+	private ArrayList<Parameters> allParPrior = new ArrayList<>();
 
 
-	public Setup(String wDir) {
+
+
+	public Setup(String wDir, String obsFileName) {
 		if (wDir.charAt(wDir.length() - 1) == sysSep) {
 			this.workingDir = wDir;
 		} else {
@@ -51,15 +58,21 @@ public class Setup {
 			}
 			String templateDir = System.getProperty("user.dir") + sysSep
 					 + "TemplateFiles" + sysSep;
-			File tDir = new File(templateDir);
-			
-			FileUtils.copyDirectory(tDir, fwDir);
+//			File tDir = new File(templateDir);
+//			FileUtils.copyDirectory(tDir, fwDir);
+//			new File(workingDir + softwareName).setExecutable(true);
 
-			new File(workingDir + "BCC").setExecutable(true);
+			File tFile = new File(templateDir+softwareName);
+			FileUtils.copyFileToDirectory(tFile, fwDir);
+			
+			tFile = new File(templateDir+obsFileName);
+			FileUtils.copyFileToDirectory(tFile, fwDir);
+
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("List of files:\t"+Arrays.toString( fwDir.list() ));//TEMP
 
 	}
 
@@ -188,16 +201,22 @@ public class Setup {
 		return allPar;
 	}
 
-	public void setAllPar(ArrayList<Parameters> allPar) {
-		this.allPar = allPar;
+	public void setAllPar(Parameters... allPar) {
+		for (Parameters p : allPar) {
+			this.allPar.add(p);
+		}
 	}
 	
-	public ArrayList<Parameters> getallParUniformPrior() {
-		return allParUniformPrior;
+	public ArrayList<Parameters> getallParPrior() {
+		return allParPrior;
 	}
 
-	public void setallParUniformPrior(ArrayList<Parameters> allParUniformPrior) {
-		this.allParUniformPrior = allParUniformPrior;
+	public void setallParPrior(Parameters... allParUPrior) {
+		for (Parameters p : allParUPrior) {
+			this.allParPrior.add(p);
+		}
+
+		
 	}
 
 

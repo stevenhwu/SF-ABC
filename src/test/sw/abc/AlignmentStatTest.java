@@ -24,7 +24,7 @@ public class AlignmentStatTest {
 
 		String dataDir = userDir + sysSep + "data" + sysSep;
 
-		Setup setting = new Setup(dataDir);
+		Setup setting = new Setup(dataDir, fileName);
 		// setting.setStat(null);
 		// setting.setStat(new SStatBig());
 
