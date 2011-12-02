@@ -29,14 +29,14 @@ public class TraceUtil {
 
 		this.noTime = noTime;
 		this.noParam = noParam;
-		int noComb = Combination.calNoComb(noTime);
+		int noComb = Combination.calNoComb(this.noTime);
 		summaryStatCollection.put("Mu", 1);
 		summaryStatCollection.put("Theta", 1);
 		summaryStatCollection.put("Gap", this.noParam);
 		
 		summaryStatCollection.put("dist", -1);
-		summaryStatCollection.put("chisq", noTime);
-		summaryStatCollection.put("var", noTime);
+		summaryStatCollection.put("chisq", this.noTime);
+		summaryStatCollection.put("var", this.noTime);
 		summaryStatCollection.put("sitePattern", Site.PATTERN_COUNT*noComb);
 		summaryStatCollection.put("freq", 9);
 	}

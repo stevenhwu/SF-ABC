@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 
-import com.sun.media.sound.FFT;
+
 
 
 import sw.abc.parameter.Parameters;
@@ -19,7 +19,11 @@ public class Setup {
 	private String softwareName = "BCC_fixParams";
 	private String workingDir;
 	private String obsName;
-	private String resultName;
+	
+	private String regressionOutFile;
+	private String resultOutFile;
+
+	
 	private String controlName;
 	private String alignmentName;
 
@@ -35,9 +39,12 @@ public class Setup {
 	private String[] paramList;
 	private String[] statList;
 	
-	private ArrayList<Parameters> allPar = new ArrayList<>();
-	private ArrayList<Parameters> allParPrior = new ArrayList<>();
+	private ArrayList<Parameters> allPar = new ArrayList<Parameters>();
+	private ArrayList<Parameters> allParPrior = new ArrayList<Parameters>();
 
+	private String summarySetting;
+
+	
 
 
 
@@ -91,10 +98,6 @@ public class Setup {
 
 	}
 
-	public void setResultFile(String resultName) {
-		this.resultName = workingDir + resultName;
-
-	}
 
 	public void setSeqInfo(int seqLength, int noSeqPerTime, int noTime) {
 		this.seqLength = seqLength;
@@ -113,6 +116,12 @@ public class Setup {
 		return timeInfo;
 	}
 
+	public void setOutputFiles(String outputDir, String obsFileName) {
+		String outFilePrefix = outputDir + obsFileName;
+		this.resultOutFile =  outFilePrefix + "_summary.log";
+		this.regressionOutFile = outFilePrefix + "_regressionCoef.coef";;
+	}
+
 	public String getWorkingDir() {
 		return workingDir;
 	}
@@ -125,8 +134,12 @@ public class Setup {
 		return obsName;
 	}
 
-	public String getResultFile() {
-		return resultName;
+	public String getResultOutFile() {
+		return resultOutFile;
+	}
+
+	public String getRegressionOutFile() {
+		return regressionOutFile;
 	}
 
 	public String getBCCControlFile() {
@@ -234,6 +247,15 @@ public class Setup {
 
 	public void setStatList(String[] statList) {
 		this.statList = statList;
+	}
+
+	public void setSummarySetting(String summarySetting) {
+		this.summarySetting = summarySetting;
+		
+	}
+	public String getSummarySetting() {
+		return summarySetting;
+		
 	}
 
 }

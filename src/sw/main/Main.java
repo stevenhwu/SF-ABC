@@ -6,6 +6,9 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import javax.sound.midi.SysexMessage;
+
 import com.google.common.primitives.Doubles;
 import sw.abc.parameter.ArrayLogFormatterD;
 import sw.abc.parameter.ParaMu;
@@ -33,11 +36,10 @@ public class Main {
 	 */
 	public static final String SYSSEP = System.getProperty("file.separator");
 	
-	public static String userDir = System.getProperty("user.dir");
+	public static String userDir = System.getProperty("user.dir")+SYSSEP;
 	// public static String fileName = "Shankarappa.Patient9.nex";
 	private static String alignmentName = "jt.paup";
 	private static String controlName = "jt.par";
-	private static String resultName = "summary.log";
 
 	private static String[] switchPar = new String[] { "-t", "-f" };
 	private static String noSimPerPar = "1";
@@ -47,17 +49,21 @@ public class Main {
 		param:
 		args[0]: ==0 local   ==1  /scratch on DSCR
 		args[1]: data file 
-		args[2]: 
-		e.g. 0 simData.paup 1
+		args[2]: noItePreprocess
+		args[3]: noIteMCMC
+		args[4]: thinning
+		args[5]: error
+		e.g.	0 simData.paup 50 100 10 0.1 
+		e.g.	0 simData.paup 500000 1000000 1000 0.01
 	*/
 	public static void main(String[] args) throws Exception {
 
 		
-		int noItePreprocess = 500_000;
-		int noIteMCMC = 1_000_000;
-		int thinning = 1000;
-		double error = 0.01;
-				
+		int noItePreprocess = Integer.parseInt(args[2]);
+		int noIteMCMC = Integer.parseInt(args[3]);
+		int thinning = Integer.parseInt(args[4]);
+		double error = Double.parseDouble(args[5]);
+		String summarySetting = noItePreprocess +"\t" + noIteMCMC +"\t" + thinning +"\t" + error;
 		// args[0]==0 local   ==1  /scratch
 		String obsDataName = args[1];
 		String obsDataNamePrefix = obsDataName.split("\\.")[0];
@@ -68,6 +74,7 @@ public class Main {
 		File f = new File(dataDir);
 		if(!f.exists()){
 			System.out.println("mkdir "+f.toString()+"\t"+f.mkdir());
+			System.out.println(f.exists());
 		}
 		
 		int fileIndex = obsDataNamePrefix.indexOf("_");
@@ -82,13 +89,14 @@ public class Main {
 		System.out.println("Init values:\t"+Arrays.toString(initValue));
 		
 //		Setup setting = ABCSetup(dataDir, null, "simData.paup", NO_SEQ_PER_TIME, 2);
-		Setup setting = ABCSetup(dataDir, null, obsDataName, NO_SEQ_PER_TIME, 2, initValue);
+		Setup setting = ABCSetup(dataDir, null, obsDataName, NO_SEQ_PER_TIME, 2, initValue, summarySetting);
 		
 		SummaryStat sumStat = generateStatFile(noItePreprocess, thinning, setting);
 //		SummaryStat sumStat = new SStatSmall();
 
 		setting.setStat(sumStat);
 		setting.setNoSeqPerTime(40);
+		
 		AlignmentStatFlex obsDataStat = calObsStat(setting);
 		
 		setting.setNoSeqPerTime(NO_SEQ_PER_TIME);
@@ -101,7 +109,7 @@ public class Main {
 
 
 	public static Setup ABCSetup(String dataDir, SummaryStat stat,
-			String obsFileName, int noSeqPerTime, int noTime, double[] initValue) {
+			String obsFileName, int noSeqPerTime, int noTime, double[] initValue, String summarySetting) {
 
 		
 		int seqLength = 750;
@@ -110,11 +118,13 @@ public class Main {
 //		String[] statList = new String[]{ "sitePattern"};
 				
 		Setup setting = new Setup(dataDir, obsFileName);
+		setting.setOutputFiles(userDir, obsFileName);
+		
+		setting.setSummarySetting(summarySetting);
 		setting.setStat(stat);
 		setting.setObsFile(obsFileName);
 		setting.setAlignmentFile(alignmentName);
 		setting.setBCCControlFile(controlName);
-		setting.setResultFile(resultName);
 		setting.setParamList(paramList);
 		setting.setStatList(statList);
 		setting.setSeqInfo(seqLength, noSeqPerTime, noTime);
@@ -188,12 +198,13 @@ public class Main {
 		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
 
 
-		String[] paramList = new String[setting.getParamList().length+1];
-		System.arraycopy(setting.getParamList(), 0, paramList, 0, setting.getParamList().length);
-		paramList[setting.getParamList().length] = "Gap";
-
+//		String[] paramList = new String[setting.getParamList().length+1];
+//		System.arraycopy(setting.getParamList(), 0, paramList, 0, setting.getParamList().length);
+//		paramList[setting.getParamList().length] = "Gap";
+//		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAL(paramList));
+		
 		TraceUtil ut = new TraceUtil(noTime, noPar);
-		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAL(paramList));
+		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAL(setting.getParamList()));
 		
 
 		CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile());
@@ -203,10 +214,12 @@ public class Main {
 		cFile.setInitPar(allPar);
 		cFile.updateFile(noTime);
 
-		double[] logValues = Doubles.concat(cFile.getAllPar(), saveGap);
+//		double[] logValues = Doubles.concat(cFile.getAllPar(), saveGap);
+		double[] logValues = Doubles.concat(cFile.getAllPar());
 		traceLog.logValues( logValues );
 
-		PrintWriter oResult = new PrintWriter(new BufferedWriter(new FileWriter(setting.getResultFile())));
+		PrintWriter oResult = new PrintWriter(new BufferedWriter(new FileWriter(setting.getResultOutFile())));
+		oResult.println("# "+setting.getDataFile()+"\t"+setting.getSummarySetting());
 		oResult.println("Ite\t" + traceLog.getLabels());
 		oResult.flush();
 
@@ -254,7 +267,8 @@ public class Main {
 						+allPar.get(0).getValue() + "\t" + allPar.get(1).getValue() + "\t"
 						+ setting.getWorkingDir());
 
-				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()}, saveGap);
+//				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()}, saveGap);
+				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()});
 				traceLog.logValues(logValues);
 //				TraceUtil.logValue(tMu, allPar.get(0).getValue());
 //				TraceUtil.logValue(tTheta, allPar.get(1).getValue());
@@ -304,7 +318,7 @@ public class Main {
 		long startTime = System.currentTimeMillis();
 		try {
 			PrintWriter oResult = new PrintWriter(new BufferedWriter(
-					new FileWriter(setting.getResultFile())));
+					new FileWriter(setting.getResultOutFile())));
 			oResult.println("Ite\t" + traceLogParam.getLabels() +"\t"+ traceLogStats.getLabels());
 			
 			for (int i = 0; i < nRun; i++) {
@@ -331,11 +345,13 @@ public class Main {
 		
 		System.out.println("Time:\t" + ( (System.currentTimeMillis()-startTime)/60000) );
 		SStatFlexable sStat = semiAutoRegression(traceLogStats, traceLogParam);
-		System.out.println(sStat.toString());
+		String regressionSummary = sStat.toString();
+		System.out.println(regressionSummary);
 		try {
-			String outFile = setting.getWorkingDir()+"regressinoCoefSummary";
+			String outFile = setting.getRegressionOutFile();
 			PrintWriter oResult = new PrintWriter(new BufferedWriter(new FileWriter(outFile )));
-			oResult.println(sStat.toString());
+			oResult.println("# "+setting.getDataFile()+"\t"+setting.getSummarySetting());
+			oResult.println(regressionSummary);
 			oResult.close();
 		} catch (Exception e) {
 			e.printStackTrace();
