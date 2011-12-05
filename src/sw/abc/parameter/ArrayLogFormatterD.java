@@ -207,4 +207,11 @@ public class ArrayLogFormatterD<T> {
 		double[] d = Doubles.toArray(t.getValues(0, size, null) );
 		return d;
 	}
+
+	public int getLength() {
+		// TODO Auto-generated method stub
+		Trace t = traces.get(0);
+		int length = t.getValuesSize();
+		return length;
+	}
 }

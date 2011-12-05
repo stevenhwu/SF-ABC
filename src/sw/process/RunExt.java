@@ -54,7 +54,10 @@ public class RunExt {
 
 		this.progName = progName;
 		File fProg = new File(dataDir.getAbsoluteFile()+fileSep+progName);
-		System.out.println("Is program \""+ progName +"\" executable? "+fProg.setExecutable(true));
+		if(!fProg.canExecute()){
+			System.out.println("Set program \""+ progName +"\" executable: "+fProg.setExecutable(true));			
+		}
+
 		command = new String[switchPar.length+3];
 		command[0] = "./"+progName;
 		for (int i = 0; i < switchPar.length; i++) {
