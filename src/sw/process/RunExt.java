@@ -16,40 +16,11 @@ public class RunExt {
 	File dataDir;
 	String[] command;
 	private String progName;
-
+	private ProcessBuilder pb;
+	
 	public RunExt(File dataDir) {
 		setDir(dataDir);
 	}
-
-	public RunExt(File dataDir, String progName, String parFile, String noRep) {
-		setDir(dataDir);
-		setPar(progName, parFile, noRep);
-	}
-
-	public RunExt(String dataDirName) {
-		setDir(dataDirName);
-	}
-
-	public RunExt(String dataDirName, String progName, String parFile, String noRep) {
-		setDir(dataDirName);
-		setPar(progName, parFile, noRep);
-	}
-
-	public RunExt() {
-		setDir(workDir);
-	}
-	@Deprecated
-	public void setPar(String parFile) {
-		setPar("./BCC", parFile, "1");
-	}
-	@Deprecated
-	public void setPar(String parFile, String noRep) {
-		setPar("./BCC", parFile, noRep);
-	}
-	public void setPar(String progName, String parFile, String noRep) {
-		setPar(progName, parFile, noRep, "-p", "-f");
-	}
-	
 	public void setPar(String progName, String parFile, String noRep, String...  switchPar ) {
 
 		this.progName = progName;
@@ -66,6 +37,8 @@ public class RunExt {
 		command[switchPar.length+1] = parFile;
 		command[switchPar.length+2] = noRep;
 
+		pb = new ProcessBuilder(command);  
+		pb = pb.directory(dataDir);  
 	}
 
 
@@ -96,18 +69,11 @@ public class RunExt {
 		}
 	}
 
-	private void setDir(String dataDirName) {
-		dataDir = new File(workDir+ fileSep+dataDirName+fileSep);
-		setDir(dataDir);
-	}
-
 	public void run() {
 
 		try {
 			
-			ProcessBuilder pb = new ProcessBuilder(command);  
 
-			pb = pb.directory(dataDir);  
 //			File temp = pb.directory();  
 //			String currentWorkingDirectory = "Current working directory: " + temp.toString();
 //			System.out.println(currentWorkingDirectory);
@@ -127,12 +93,12 @@ public class RunExt {
 //		    while ((line = br.readLine()) != null) {
 //		    	System.out.println(line);
 //		    }
-//		       System.out.println("&&&&& end &&&&&");
-        	  p.getOutputStream().close();
-        	  p.getErrorStream().close();
-        	  p.getInputStream().close();
-        	  
-//			p.destroy();
+			// System.out.println("&&&&& end &&&&&");
+			p.getOutputStream().close();
+			p.getErrorStream().close();
+			p.getInputStream().close();
+			p.destroy();
+
 //			System.out.println(System.currentTimeMillis());
 //			p.waitFor();
 
@@ -146,15 +112,42 @@ public class RunExt {
 		}  
 	}
 
-//	public void runCheck(){
-//		try {
-////			p.waitFor();
-////			p.destroy();
-//		} catch (InterruptedException e) {
 
-//			e.printStackTrace();
-//		}
-//	}
+	@Deprecated
+	public RunExt(File dataDir, String progName, String parFile, String noRep) {
+		setDir(dataDir);
+		setPar(progName, parFile, noRep);
+	}
+	@Deprecated
+	public RunExt(String dataDirName) {
+		setDir(dataDirName);
+	}
+	@Deprecated
+	public RunExt(String dataDirName, String progName, String parFile, String noRep) {
+		setDir(dataDirName);
+		setPar(progName, parFile, noRep);
+	}
+	@Deprecated
+	public RunExt() {
+		setDir(workDir);
+	}
+	@Deprecated
+	public void setPar(String parFile) {
+		setPar("./BCC", parFile, "1");
+	}
+	@Deprecated
+	public void setPar(String parFile, String noRep) {
+		setPar("./BCC", parFile, noRep);
+	}
+	@Deprecated
+	public void setPar(String progName, String parFile, String noRep) {
+		setPar(progName, parFile, noRep, "-p", "-f");
+	}
+	@Deprecated
+	private void setDir(String dataDirName) {
+		dataDir = new File(workDir+ fileSep+dataDirName+fileSep);
+		setDir(dataDir);
+	}
 	public void testLock(String testFile) {
 
 		try {

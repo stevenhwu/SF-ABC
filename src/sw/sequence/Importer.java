@@ -9,10 +9,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileSystem;
+import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
+import sw.main.Main;
 import sw.main.Setup;
 
 import dr.evolution.alignment.Alignment;
@@ -70,43 +72,76 @@ public class Importer {
 		
 		SimpleAlignment sa = new SimpleAlignment();
 		String line = null;
-		
-		while ((line = br.readLine().trim()) != null) {
-			if (line.equals("matrix")) {
-				break;
+		boolean isStartSeq = false;
+		boolean isEndSeq = false;
+		try {
+			while ((line = br.readLine().trim()) != null) {
+				if (line.equals("matrix")) {
+					isStartSeq = true;
+					br.readLine();
+				}
+				
+				if (isStartSeq && !isEndSeq){
+					if (line.contains(";")) {
+						break;
+					}
+					
+					String t = br.readLine();
+					if (!StringUtils.isAsciiPrintable(t)) {
+						// br.close();
+						return null;
+					}
+					// Sequence s = ;// br.readLine());
+					sa.addSequence(new Sequence(t));
+					if (sa.getSequenceCount() == noSeq) {
+						break;
+					}
+				}
+				
 			}
-		}
+//
+//			while ((line = br.readLine()) != null) {
+//				if (line.contains(";")) {
+//					break;
+//				}
+//
+//				String t = br.readLine();
+//				if (!StringUtils.isAsciiPrintable(t)) {
+//					// br.close();
+//					return null;
+//				}
+//				// Sequence s = ;// br.readLine());
+//				sa.addSequence(new Sequence(t));
+//
+//				if (sa.getSequenceCount() == noSeq) {
+//					break;
+//				}
+//
+//			}
+			// br.close();
 
-
-		while ((line = br.readLine()) != null) {
-			if (line.contains(";")) {
-				break;
-			}
-
-			String t = br.readLine();
-			if (!StringUtils.isAsciiPrintable(t)) {
-//				br.close();
+			if (sa.getSequenceCount() != noSeq) {
+				System.out.println(sa.getSequenceCount() + "\t" + noSeq
+						+ " return null");
 				return null;
 			}
-			//Sequence s = ;// br.readLine());
-			sa.addSequence(new Sequence(t));
 
-			if (sa.getSequenceCount() == noSeq) {
-				break;
-			}
-
-		}
-//		br.close();
-
-		if (sa.getSequenceCount() != noSeq) {
-			System.out.println(sa.getSequenceCount() + "\t" + noSeq
-					+ " return null");
-			return null;
-		}
-		try {
+	
 			return sa;
 		} catch (Exception e) {
+	
 			e.printStackTrace();
+			System.out.println(aliFile.toString());
+			String s = aliFile.getParent();
+			s = s.substring(s.lastIndexOf(File.separatorChar)+1);
+			File f = new File(Main.USERDIR+File.separatorChar+System.currentTimeMillis()+"_"+s);
+			System.out.println(f.toString());
+			FileUtils.copyFile(aliFile, f);
+			System.out.println("br:\t"+br.hashCode());
+			System.out.println(br.ready());	
+			System.out.println(br.readLine());	
+			System.out.println("SA:\t"+sa.getSiteCount());
+			
 		}
 		return null;		
 
@@ -114,11 +149,76 @@ public class Importer {
 
 	}
 
-	public void testingOutPut() throws IOException {
+
+	private SimpleAlignment readSeqBackup(BufferedReader br) throws IOException {
+		
+		SimpleAlignment sa = new SimpleAlignment();
+		String line = null;
+		try {
+			while ((line = br.readLine().trim()) != null) {
+				if (line.equals("matrix")) {
+					break;
+				}
+			}
+
+			while ((line = br.readLine()) != null) {
+				if (line.contains(";")) {
+					break;
+				}
+
+				String t = br.readLine();
+				if (!StringUtils.isAsciiPrintable(t)) {
+					// br.close();
+					return null;
+				}
+				// Sequence s = ;// br.readLine());
+				sa.addSequence(new Sequence(t));
+
+				if (sa.getSequenceCount() == noSeq) {
+					break;
+				}
+
+			}
+			// br.close();
+
+			if (sa.getSequenceCount() != noSeq) {
+				System.out.println(sa.getSequenceCount() + "\t" + noSeq
+						+ " return null");
+				return null;
+			}
+
+	
+			return sa;
+		} catch (Exception e) {
+	
+			e.printStackTrace();
+			System.out.println(aliFile.toString());
+			String s = aliFile.getParent();
+			s = s.substring(s.lastIndexOf(File.separatorChar)+1);
+			File f = new File(Main.USERDIR+File.separatorChar+System.currentTimeMillis()+"_"+s);
+			System.out.println(f.toString());
+			FileUtils.copyFile(aliFile, f);
+			System.out.println("br:\t"+br.hashCode());
+			System.out.println(br.ready());	
+			System.out.println(br.readLine());	
+			System.out.println("SA:\t"+sa.getSiteCount());
+			
+		}
+		return null;		
+
+
+
+	}
+
+	
+	public void testingOutPut(String userDir) throws IOException {
 
 		System.out.println(aliFile.toString());
 		System.out.println(aliFile.getParent());
-		File f = new File(aliFile.getParent()+File.separatorChar+"Error_Input_"+System.currentTimeMillis());
+		String p = aliFile.getParent();
+		p = p.substring(p.indexOf('_'),p.length());
+		System.out.println(p);
+		File f = new File(userDir+File.separatorChar+"Error_Input_"+p+"_"+System.currentTimeMillis());
 		FileUtils.copyFile(aliFile, f);
 		
 		

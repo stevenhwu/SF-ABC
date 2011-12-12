@@ -1,7 +1,9 @@
 package sw.main;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -38,7 +40,7 @@ public class Main {
 	public static final char SYSSEP = File.separatorChar; //System.getProperty("file.separator");
 	
 	
-	public static String userDir = System.getProperty("user.dir")+SYSSEP;
+	public static final String USERDIR = System.getProperty("user.dir")+File.separatorChar;
 	// public static String fileName = "Shankarappa.Patient9.nex";
 	private static String alignmentName = "jt.paup";
 	private static String controlName = "jt.par";
@@ -126,7 +128,7 @@ public class Main {
 //		String[] statList = new String[]{ "sitePattern"};
 				
 		Setup setting = new Setup(dataDir, obsFileName);
-		setting.setOutputFiles(userDir, obsFileName);
+		setting.setOutputFiles(USERDIR, obsFileName);
 		
 		setting.setSummarySetting(summarySetting);
 		setting.setStat(stat);
@@ -242,7 +244,7 @@ public class Main {
 				newStat.updateSiteAlignment(sa);
 				
 				saveGap[p] = newStat.calDelta(obsStat);
-//				saveGap[p] = newStat.calIndStat(obsStat);
+//				saveGap[p] = newStat.calDeltaSep(obsStat, p);
 				
 				
 				// System.out.print(saveGap[p]+"\t");
@@ -270,7 +272,7 @@ public class Main {
 			}
 
 			if ((i % logInt) == 0) {
-				System.out.println(i + "\t" + allPar.get(0).getAcceptCount()
+				System.out.println(i + "\t"+ allPar.get(0).getAcceptCount()
 						+ "\t" + allPar.get(1).getAcceptCount() + "\t"
 						+allPar.get(0).getValue() + "\t" + allPar.get(1).getValue() + "\t"
 						+ setting.getWorkingDir());
@@ -305,78 +307,127 @@ public class Main {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static SummaryStat generateStatFile(int nRun, int thinning, Setup setting) {
 
-		System.out.println("Generate stats at:\t"+ setting.getWorkingDir());
-		int noTime = setting.getNoTime();
-		String[] paramList = setting.getParamList();
-		String[] statsList = setting.getStatList();
-
-		ArrayList<Parameters> allParUniformPrior = setting.getallParPrior();//new ArrayList<Parameters>();
-		CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile());
-		SiteAlignment sa = new SiteAlignment(setting);
-		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
+		String outFile =  setting.getRegressionCoefFile();
 		
-		TraceUtil tu = new TraceUtil(noTime);
-	
-		ArrayLogFormatterD traceLogParam = new ArrayLogFormatterD(6, tu.createTraceAL(paramList));
-		ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAL(statsList));
-
-		RunExt proc = new RunExt(setting.getfWorkingDir());
-		proc.setPar(softwareName, cFile.getControlFile(), "1", switchPar);
-
-		long startTime = System.currentTimeMillis();
-		try{	
-			PrintWriter oResult = new PrintWriter(new BufferedWriter(
-					new FileWriter(setting.getResultOutFile())));
-			oResult.println("Ite\t" + traceLogParam.getLabels() +"\t"+ traceLogStats.getLabels());
+		SStatFlexable sStat = null;
+		if(outFile != null){
+			sStat = readRegressionFile(outFile);
+			System.out.println("Skip preprocessing");
+		}
+		else{
 			
-			for (int i = 0; i < nRun; i++) {
-				cFile.setParPrior(allParUniformPrior);
-				cFile.updateFile(noTime);
+			
+			System.out.println("Generate stats at:\t"+ setting.getWorkingDir());
+			int noTime = setting.getNoTime();
+			String[] paramList = setting.getParamList();
+			String[] statsList = setting.getStatList();
 	
-				sa = updateAlignment(sa, proc, setting);
-				newStat.updateSiteAlignment(sa);
+			ArrayList<Parameters> allParUniformPrior = setting.getallParPrior();//new ArrayList<Parameters>();
+			CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile());
+			SiteAlignment sa = new SiteAlignment(setting);
+			AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
+			
+			TraceUtil tu = new TraceUtil(noTime);
+		
+			ArrayLogFormatterD traceLogParam = new ArrayLogFormatterD(6, tu.createTraceAL(paramList));
+			ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAL(statsList));
+	
+			RunExt proc = new RunExt(setting.getfWorkingDir());
+			proc.setPar(softwareName, cFile.getControlFile(), noSimPerPar, switchPar);
+	
+			long startTime = System.currentTimeMillis();
+			try{	
+				PrintWriter oResult = new PrintWriter(new BufferedWriter(
+						new FileWriter(setting.getResultOutFile())));
+				oResult.println("Ite\t" + traceLogParam.getLabels() +"\t"+ traceLogStats.getLabels());
 				
-				traceLogParam.logValues( cFile.getAllPar());
-				traceLogStats.logValues( newStat.getCurStat(statsList));
-				oResult.println(i + "\t" + traceLogParam.getLine(i) + "\t"	+ traceLogStats.getLine(i));
-	
-				if ((i % thinning) == 0) {
-					oResult.flush();
-					System.out.println("Ite:\t"+i+"\t"+ ((System.currentTimeMillis() - startTime)/60000)+" mins");
+				for (int i = 0; i < nRun; i++) {
+					cFile.setParPrior(allParUniformPrior);
+					cFile.updateFile(noTime);
+		
+					sa = updateAlignment(sa, proc, setting);
+					newStat.updateSiteAlignment(sa);
+					
+					traceLogParam.logValues( cFile.getAllPar());
+					traceLogStats.logValues( newStat.getCurStat(statsList));
+					oResult.println(i + "\t" + traceLogParam.getLine(i) + "\t"	+ traceLogStats.getLine(i));
+		
+					if ((i % thinning) == 0) {
+						oResult.flush();
+						System.out.println("Ite:\t"+i+"\t"+ ((System.currentTimeMillis() - startTime)/60000)+" mins");
+					}
 				}
+				oResult.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			oResult.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		System.out.println("Time:\t" + ( (System.currentTimeMillis()-startTime)/60000) );	
-		SStatFlexable sStat = semiAutoRegression(nRun, traceLogStats, traceLogParam);
-		String regressionSummary = sStat.toString();
-		System.out.println(regressionSummary);
-
-		String outFile = setting.getRegressionOutFile();
-		try {	
-			PrintWriter oResult1 = new PrintWriter(new BufferedWriter(
-					new FileWriter(outFile)));
-			oResult1.println("# " + setting.getDataFile() + "\t"
-					+ setting.getSummarySetting());
-			oResult1.println(regressionSummary);
-			oResult1.close();
-		
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 			
+			System.out.println("Time:\t" + ( (System.currentTimeMillis()-startTime)/60000) );	
+			sStat = semiAutoRegression(nRun, traceLogStats, traceLogParam);
+			String regressionSummary = sStat.toString();
+			System.out.println(regressionSummary);
+	
+			
+			try {	
+				PrintWriter oResult1 = new PrintWriter(new BufferedWriter(
+						new FileWriter(outFile)));
+				oResult1.println("# " + setting.getDataFile() + "\t"
+						+ setting.getSummarySetting());
+				oResult1.println(regressionSummary);
+				oResult1.close();
+			
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
 		return sStat;
+		
+		
 		 
 	
 	}
 
 
+	private static SStatFlexable readRegressionFile(String outFile) {
+		
+		System.out.println("Parse existing coef file: "+outFile.toString());
+		SStatFlexable sStat = new SStatFlexable();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(outFile));
+			String line;
+			while((line = br.readLine())!= null ){
+				if(line.startsWith("Mu")) {
+					sStat.addCoef("Mu", parseCoef(line));
+				} else if(line.startsWith("Theta")){
+					sStat.addCoef("Theta", parseCoef(line));
+				}
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+
+	
+		return sStat;
+	}
+
+
+	private static double[] parseCoef(String line) {
+		
+		String[] tokens = line.split("\\[|,|\\]");
+		double[] coef = new double[tokens.length-1];
+		for (int i = 0; i < coef.length; i++) {
+			coef[i] = Double.parseDouble(tokens[i+1].trim());
+		}
+		return coef;
+	}
+
+
 	public static AlignmentStatFlex calObsStat(Setup setting) {
 	
-		System.out.println("Calculate observed stat");
+		System.out.print("Calculate observed stat:\t");
 		SiteAlignment sa = new SiteAlignment(setting);
 		Importer imp = new Importer(setting.getDataFile(), setting);
 		AlignmentStatFlex aliStat = new AlignmentStatFlex(setting);
@@ -439,8 +490,9 @@ public class Main {
 			}
 			if(isReRun){
 				System.out.println("rerun Seq: "+ali);
-				imp.testingOutPut();
-				System.exit(-999);
+				
+//				imp.testingOutPut(USERDIR);
+//				System.exit(-999);
 			}
 		}
 

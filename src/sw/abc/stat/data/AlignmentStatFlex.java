@@ -90,15 +90,32 @@ public class AlignmentStatFlex {
 		
 	}
 
+	public double calDeltaSep(AlignmentStatFlex obsStat, int p) {
+		calSumStat();
+		double obsStatP = obsStat.getSummaryStatAll()[p];
+
+		double dif = summaryStatAll[p] - obsStatP;
+		double delta = Math.abs(dif / obsStatP);
+			
+			// System.out.print(statAll[i] +"\t");
+			// System.out.print(
+			// Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i] + "\t");
+			// System.out.print( (dif*dif)/obsStatAll[i] + "\t");
+
+		return delta;
+
+	}
+	
 	public double calDelta(AlignmentStatFlex obsStat) {
 		calSumStat();
 		double[] obsStatAll = obsStat.getSummaryStatAll();
+//		System.out.println(Arrays.toString(summaryStatAll));
 		double delta = 0;
 		for (int i = 0; i < summaryStatAll.length; i++) {
 			//
 			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
 			double dif = summaryStatAll[i] - obsStatAll[i];
-			double s = Math.abs(dif) / obsStatAll[i];
+			double s = Math.abs(dif / obsStatAll[i]);
 			delta += s;
 			// System.out.print(statAll[i] +"\t");
 			// System.out.print(

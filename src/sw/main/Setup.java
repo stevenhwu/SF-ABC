@@ -22,7 +22,7 @@ public class Setup {
 	
 	private String regressionOutFile;
 	private String resultOutFile;
-
+	private String regressionCoefFile;
 	
 	private String controlName;
 	private String alignmentName;
@@ -74,6 +74,13 @@ public class Setup {
 			
 			tFile = new File(templateDir+obsFileName);
 			FileUtils.copyFileToDirectory(tFile, fwDir);
+			
+			tFile = new File(templateDir+obsFileName+"_regressionCoef.coef");
+			if(tFile.exists()){
+				System.out.println("Regression file exist\t"+tFile.toString());
+				FileUtils.copyFileToDirectory(tFile, fwDir);	
+				regressionCoefFile = fwDir.toString()+File.separatorChar+obsFileName+"_regressionCoef.coef";
+			}
 
 
 		} catch (Exception e) {
@@ -141,7 +148,9 @@ public class Setup {
 	public String getRegressionOutFile() {
 		return regressionOutFile;
 	}
-
+	public String getRegressionCoefFile() {
+		return regressionCoefFile;
+	}
 	public String getBCCControlFile() {
 		return controlName;
 	}
