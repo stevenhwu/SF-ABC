@@ -2,15 +2,8 @@ package sw.abc.parameter;
 
 import sw.math.DistributionPrior;
 
-public class ParaTheta extends AbstractParameter  {
 
-	
-//	Distribution prior;
-//	Distribution proposal;
-//	double value;
-//	
-//	public ParaTheta() {
-//	}
+public class ParaTheta extends AbstractParameter  {
 
 	public ParaTheta(DistributionPrior d) {
 		setPrior(d);
@@ -18,38 +11,6 @@ public class ParaTheta extends AbstractParameter  {
 		
 	}
 	
-
-	
-	@Override
-	public void init() {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	
-//	@Override
-//	public double nextPrior() {
-//
-//	}
-//
-//	@Override
-//	public double nextProposal() {
-//		value = proposal.next(value);
-//		return value;
-//	}
-
-//	@Override
-//	public void setPrior(Distribution d) {
-//		prior = d;
-//		
-//	}
-//	@Override
-//	public void setProposal(Distribution d) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-
 
 
 }

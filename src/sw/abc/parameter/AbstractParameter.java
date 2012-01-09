@@ -54,11 +54,7 @@ public abstract class AbstractParameter implements Parameters {
 		return value;
 	}
 	
-	@Override
-	public void init() {
-		// TODO Auto-generated method stub
-		
-	}
+
 	
 	@Override
 	public double nextPrior(){
@@ -95,6 +91,11 @@ public abstract class AbstractParameter implements Parameters {
 		
 	}
 
+	@Override
+	public void updateProposal(double var) {
+		proposal.updateVar(var);
+		
+	}
 	
 	public void setInitValue(double v) {
 		value = v;

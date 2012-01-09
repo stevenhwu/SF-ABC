@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 
 
 import sw.abc.parameter.Parameters;
+import sw.abc.parameter.TunePar;
 import sw.abc.stat.summary.SummaryStat;
 
 public class Setup {
@@ -43,6 +44,8 @@ public class Setup {
 	private ArrayList<Parameters> allParPrior = new ArrayList<Parameters>();
 
 	private String summarySetting;
+
+	private TunePar tPar;
 
 	
 
@@ -265,6 +268,15 @@ public class Setup {
 	public String getSummarySetting() {
 		return summarySetting;
 		
+	}
+
+	public void setTunePar(TunePar tPar) {
+		this.tPar = tPar;
+		
+	}
+
+	public TunePar getTunePar() {
+		return tPar;
 	}
 
 }

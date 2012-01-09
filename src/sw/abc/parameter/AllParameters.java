@@ -10,11 +10,10 @@ public class AllParameters {
 //	NormalDistributionImpl norm = new NormalDistributionImpl();
 //	UniformDistribution unif = new UniformDistribution(2500, 3500);
 	static RandomDataImpl r = new RandomDataImpl();
-	double muLower = (1E-5)/3*750;
-	double muUpper = (1E-5)*3*750;
-	
-	int thetaLower = 2500;
-	int thetaUpper = 3500;
+	double muLower;
+	double muUpper;
+	int thetaLower;
+	int thetaUpper;
 	
 	public AllParameters() {
 		update();

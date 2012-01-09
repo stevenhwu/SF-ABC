@@ -46,4 +46,10 @@ public class UniformDistribution extends RandomGenerator implements Distribution
 		}
 	}
 
+
+	@Override
+	public void updateVar(double var) {
+		// do nothing
+	}
+
 }

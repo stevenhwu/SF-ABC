@@ -1,9 +1,12 @@
 package sw.math;
 
+import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 
 public class NormalDistribution extends RandomGenerator implements DistributionPrior, DistributionProposal {
 
+	static NormalDistributionImpl stdNorm = new NormalDistributionImpl(0,1);
+	
 	NormalDistributionImpl d = new NormalDistributionImpl();
 	double logq  = 1;
 	double mu;
@@ -13,6 +16,7 @@ public class NormalDistribution extends RandomGenerator implements DistributionP
 		this.mu = mu;
 		this.sigma = sigma;
 		d = new NormalDistributionImpl(mu, sigma);
+		
 	}
 
 	@Override
@@ -70,6 +74,25 @@ public class NormalDistribution extends RandomGenerator implements DistributionP
 	@Override
 	public double getLogPrior(double x) {
 		return logPdf(x);
+	}
+
+	public static double quantile(double p) {
+
+		double q = 0;
+		try {
+			q = stdNorm.inverseCumulativeProbability(p);
+		} catch (MathException e) {
+			e.printStackTrace();
+		}
+		return q;
+	}
+
+	@Override
+	public void updateVar(double var) {
+		this.sigma = Math.sqrt(var);
+		System.out.println("new var: "+var);
+		d = new NormalDistributionImpl(mu, sigma);
+		
 	}
 
 }

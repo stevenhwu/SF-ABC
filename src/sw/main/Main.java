@@ -17,10 +17,13 @@ import sw.abc.parameter.ArrayLogFormatterD;
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.Parameters;
+import sw.abc.parameter.SavePar;
+import sw.abc.parameter.TunePar;
 import sw.abc.stat.data.AlignmentStat;
 import sw.abc.stat.data.AlignmentStatFlex;
 import sw.abc.stat.summary.*;
 
+import sw.math.NormalDistribution;
 import sw.math.Scale;
 import sw.math.TruncatedNormalDistribution;
 import sw.math.UniformDistribution;
@@ -38,9 +41,10 @@ public class Main {
 	 * @version $Id$
 	 */
 	public static final char SYSSEP = File.separatorChar; //System.getProperty("file.separator");
-	
-	
 	public static final String USERDIR = System.getProperty("user.dir")+File.separatorChar;
+	public static final int TUNESIZE = 100 ;
+	public static final int TUNEGROUP = 6;
+	
 	// public static String fileName = "Shankarappa.Patient9.nex";
 	private static String alignmentName = "jt.paup";
 	private static String controlName = "jt.par";
@@ -49,6 +53,8 @@ public class Main {
 	private static String noSimPerPar = "1";
 	private static int NO_SEQ_PER_TIME = 100;
 	private static String softwareName = "BCC_fixParams";
+	
+	
 	/*
 		param:
 		args[0]: ==0 local   ==1  /scratch on DSCR
@@ -140,53 +146,40 @@ public class Main {
 		setting.setSeqInfo(seqLength, noSeqPerTime, noTime);
 
 		double muMean = initValue[0] * seqLength;
+		double muTune = muMean/10;
 		double muLower = muMean / 10;
 		double muUpper = muMean * 10;
 		
 		double thetaMean = initValue[1];
+		double thetaTune = thetaMean/10;
 		double thetaLower = 100;
 		double thetaUpper = thetaMean * 5;
 		
-//		ArrayList<Parameters> allParUniformPrior  = new ArrayList<Parameters>();
 		ParaMu priorMu = new ParaMu(new UniformDistribution(muLower, muUpper));
 		ParaTheta priorTheta = new ParaTheta(new UniformDistribution(thetaLower, thetaUpper));
-//		allParUniformPrior.add(pMu);
-//		allParUniformPrior.add(pTheta);
-//		setting.setallParUniformPrior(allParUniformPrior);
-		setting.setallParPrior(priorMu, priorTheta);
 
-		
-//		ArrayList<Parameters> allPar = new ArrayList<Parameters>();
-//		pMu = new ParaMu(new UniformDistribution(1E-5 * seqLength / 3, 1E-5 * seqLength * 3));
 		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
-		pMu.setProposal(new Scale(0.75));
 		pMu.setInitValue(muMean);
 		
 		ParaTheta pTheta = new ParaTheta(new TruncatedNormalDistribution(thetaMean, thetaMean/2, thetaLower, thetaUpper));
-		pTheta.setProposal(new Scale(0.75));
 		pTheta.setInitValue(thetaMean);
-		// ParaTheta pTheta = new ParaTheta(new OneOverDistribution(3000));
-		// pTheta.setProposal(new NormalDistribution(3000, 100));
-//		allPar.add(pMu);
-//		allPar.add(pTheta);
+		
+		
+//		double initScale = 0.05;
+//		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
+//		pMu.setProposal(new Scale(initScale ));
+//		pTheta.setProposal(new Scale(initScale ));
+		
+		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{muTune, thetaTune}, new String[] { "Normal", "Normal" });
+		pMu.setProposal(new NormalDistribution(muMean, muTune));
+		pTheta.setProposal(new NormalDistribution(thetaMean, thetaTune));
+
+		
+		
+		setting.setTunePar(tPar);
 		setting.setAllPar(pMu, pTheta);
-		
-			// ParaMu pMu = new ParaMu(new UniformDistribution(1E-5*seqLength/3,
-		// 1E-5*seqLength*3));
-		// ParaTheta pTheta = new ParaTheta(new UniformDistribution(1, 5000));
-		// ParaMu pMu = new ParaMu(new NormalDistribution(1E-5 * 750, 1E-6 *
-		// 750));
+		setting.setallParPrior(priorMu, priorTheta);
 
-		// ParaMu pMu = new ParaMu(new UniformDistribution(0, 1));
-		// ParaMu pMu = new ParaMu(new UniformDistribution(1E-5*seqLength*0.95,
-		// 1E-5*seqLength*1.05));
-		// pMu.setProposal(new UniformDistribution(1E-5*seqLength,
-		// 1E-5*seqLength));
-		
-		// pMu.setProposal(new NormalDistribution(1E-5*750, 5E-7*750));
-
-		// ParaTheta pTheta = new ParaTheta(new UniformDistribution(2900,
-		// 3100));
 		
 		return setting;
 	}
@@ -200,10 +193,12 @@ public class Main {
 		long startTime = System.nanoTime();
 
 		ArrayList<Parameters> allPar = setting.getAllPar();
+		TunePar tPar = setting.getTunePar(); 
 		int noPar = allPar.size();
 		int noTime = setting.getNoTime();
 		double[] saveGap = new double[noPar];
-
+		SavePar sPar = new SavePar(TUNESIZE);
+		
 		SiteAlignment sa = new SiteAlignment(setting);
 		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
 
@@ -234,6 +229,7 @@ public class Main {
 		oResult.flush();
 
 //		double[] deltaDup = new double[10];
+		
 		for (int i = 0; i < nRun; i++) {
 			// System.out.println();
 			for (int p = 0; p < allPar.size(); p++) {
@@ -270,7 +266,15 @@ public class Main {
 
 				}
 			}
-
+			sPar.add(allPar);
+			
+			if (i % TUNESIZE == 0 & i!=0) {
+				tPar.update(sPar, i);
+				for (int j = 0; j < allPar.size(); j++) {
+					allPar.get(j).updateProposal(tPar.getTunePar(j));
+				}
+			}
+			
 			if ((i % logInt) == 0) {
 				System.out.println(i + "\t"+ allPar.get(0).getAcceptCount()
 						+ "\t" + allPar.get(1).getAcceptCount() + "\t"
@@ -294,6 +298,7 @@ public class Main {
 			}
 
 		}
+		System.out.println(Arrays.toString( tPar.getAveAccRate() ));
 		oResult.close();
 
 		System.out.println("Time: "+(System.nanoTime() - startTime) / 60e6);
@@ -369,6 +374,8 @@ public class Main {
 	
 			
 			try {	
+				
+				outFile =  setting.getRegressionOutFile();
 				PrintWriter oResult1 = new PrintWriter(new BufferedWriter(
 						new FileWriter(outFile)));
 				oResult1.println("# " + setting.getDataFile() + "\t"

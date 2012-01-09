@@ -32,4 +32,13 @@ public class Scale implements  DistributionProposal {
 	}
 
 
+
+	@Override
+	public void updateVar(double sFactor) {
+		
+		this.scaleFactor = sFactor;
+		System.out.println("newScaleFactor: "+scaleFactor);
+	}
+
+
 }

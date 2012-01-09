@@ -8,7 +8,6 @@ import sw.math.DistributionProposal;
 public interface Parameters {
 
 	
-	public void init();
 	
 	// add prior distribution
 	public void setPrior(DistributionPrior d);
@@ -35,5 +34,7 @@ public interface Parameters {
 	public abstract double getValue();
 
 	public abstract int getAcceptCount();
+
+	public void updateProposal(double var);
 
 }

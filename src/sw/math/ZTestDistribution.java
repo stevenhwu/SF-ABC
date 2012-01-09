@@ -33,4 +33,10 @@ public class ZTestDistribution extends RandomGenerator implements DistributionPr
 		return 1;
 	}
 
+
+	@Override
+	public void updateVar(double var) {
+		// do nothing		
+	}
+
 }
