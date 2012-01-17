@@ -20,13 +20,13 @@ import sw.math.NormalDistribution;
 public class TunePar {
 	
 
-	final public static double OPTIMRATE = 0.234;
+	final public static double OPTIMRATE = 0.1; // Use different value for ABC-MCMC 0.234;
 	final public static double ACCTOL=0.05;
 	final public static int TUNESIZE = 500 ;
 	final public static int TUNEGROUP = 6;
 	final public static int TUNEGROUP1 = TUNEGROUP - 1;
-	final public static double TUNESTEPSIZE = 0.01; //used for scale tuning
-	final public static double TUNEINITSIZE = 2.38;
+	final public static double TUNESTEPSIZE = 0.05; //used for scale tuning
+//	final public static double TUNEINITSIZE = 2.38;
 	
 	
 	private double[] tunePar;
@@ -53,7 +53,7 @@ public class TunePar {
 
 	public TunePar(int tuneSize, int tuneGroup, double[] initValue, String[] type) {
 
-		this.initValue = initValue;
+		this.initValue = initValue.clone();
 		this.tunePar = initValue;
 		this.noTunePar = initValue.length;
 		
@@ -107,7 +107,7 @@ public class TunePar {
 		int index = ite / tuneSize;
 
 		double[] newAcc = all.calAccRate(tuneSize);
-
+System.out.println("acc rate: "+Arrays.toString(newAcc)); //TODO remove
 		double[] accRate = new double[newAcc.length];
 		if (index >= tuneGroup) {
 
@@ -115,16 +115,21 @@ public class TunePar {
 				System.arraycopy(accept[i], 1, accept[i], 0, tuneGroup1);
 				accept[i][tuneGroup1] = newAcc[i];
 				accRate[i] = StatUtils.mean(accept[i]);
+				
 			}
+			for (int i = 0; i < tunePar.length; i++) {
+				tunePar[i] = checkRate(tunePar[i], accRate[i], tuneType[i], initValue[i]);
+			}	
 		} else {
 			for (int i = 0; i < accRate.length; i++) {
 				accept[i][index] = newAcc[i];
 				accRate[i] = StatUtils.mean(accept[i]);
 			}
+
 		}
-		for (int i = 0; i < tunePar.length; i++) {
-			tunePar[i] = checkRate(tunePar[i], accRate[i], tuneType[i], initValue[i]);
-		}
+//		for (int i = 0; i < tunePar.length; i++) {
+//			tunePar[i] = checkRate(tunePar[i], accRate[i], tuneType[i], initValue[i]);
+//		}
 	}
 
 	private double checkRate(double tp, double d, int type, double reset) {
@@ -150,7 +155,7 @@ public class TunePar {
 		}
 
 		if (tp <= 0 | tp >= 1) {
-			tp = rd.nextUniform(0.8, 0.9);
+			tp = rd.nextUniform(0.7, 0.8);
 		}
 
 		return tp;
@@ -162,6 +167,10 @@ public class TunePar {
 
 		double newTp = tp * INV_OPT_ACC
 				/ NormalDistribution.quantile(d / 2);
+		System.out.println(d+"\t"+ NormalDistribution.quantile(d / 2)+
+				"\t" + (tp * INV_OPT_ACC)+
+				"\t" + newTp+
+				"\t" + Double.isNaN(newTp) );
 		if (Double.isNaN(newTp)) {
 			if(tp == reset){
 				newTp = reset*0.99;
@@ -178,13 +187,18 @@ public class TunePar {
 //				newTp = reset;
 //			}
 //		}
+		if(newTp == 0){
+			newTp = reset*5;
+		}
 		if( newTp> (reset*10) | newTp < (reset/20) ){
 			newTp = reset;
 		}
+
 		return newTp;
 	}
 	
-
+	
+	@Deprecated
 	private double checkNormal(double tp, double d, double reset) {
 
 		double newTp = tp * INV_OPT_ACC
@@ -213,11 +227,11 @@ public class TunePar {
 	
 	@Override
 	public String toString() {
-		return "TunePar [getAveAccRate()=" + Arrays.toString(getAveAccRate())
+		return "TunePar [getAveAccRate()=" + Arrays.toString(getEachAccRate())
 				+ ", tunePar=" + Arrays.toString(tunePar) + "]";
 	}
 
-	public double[] getAveAccRate() {
+	public double[] getEachAccRate() {
 
 		double[] r = new double[noTunePar];
 		for (int i = 0; i < noTunePar; i++) {
@@ -227,6 +241,15 @@ public class TunePar {
 
 	}
 
+	public double getMeanAccRate() {
+
+		
+		double rMean = StatUtils.mean(getEachAccRate());
+		
+		return rMean;
+
+	}
+	
 	public double[] getTunePar() {
 
 		return tunePar;

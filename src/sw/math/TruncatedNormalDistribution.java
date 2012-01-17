@@ -57,7 +57,7 @@ public class TruncatedNormalDistribution implements DistributionPrior {
 	}
 
 	public double pdf(double x) {
-		if (x >= upper && x < lower)
+		if (x > upper || x < lower)
 			return 0.0;
 		else
 			return (standardNormalPdf((x - m) / sd) / sd) / T;

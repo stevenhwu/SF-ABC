@@ -1,7 +1,6 @@
 package sw.sequence;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math.stat.StatUtils;

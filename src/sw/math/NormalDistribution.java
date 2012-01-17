@@ -90,7 +90,6 @@ public class NormalDistribution extends RandomGenerator implements DistributionP
 	@Override
 	public void updateVar(double var) {
 		this.sigma = Math.sqrt(var);
-		System.out.println("new var: "+var);
 		d = new NormalDistributionImpl(mu, sigma);
 		
 	}

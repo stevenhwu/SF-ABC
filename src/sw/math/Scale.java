@@ -37,7 +37,6 @@ public class Scale implements  DistributionProposal {
 	public void updateVar(double sFactor) {
 		
 		this.scaleFactor = sFactor;
-		System.out.println("newScaleFactor: "+scaleFactor);
 	}
 
 

@@ -115,7 +115,8 @@ public class AlignmentStatFlex {
 			//
 			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
 			double dif = summaryStatAll[i] - obsStatAll[i];
-			double s = Math.abs(dif / obsStatAll[i]);
+			double s = Math.abs(dif / obsStatAll[i] );
+//			System.out.println(s+"\t"+summaryStatAll[i] +"\t"+ obsStatAll[i]+"\t"); //TODO remove
 			delta += s;
 			// System.out.print(statAll[i] +"\t");
 			// System.out.print(

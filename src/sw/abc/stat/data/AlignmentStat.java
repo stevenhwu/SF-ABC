@@ -170,6 +170,7 @@ public class AlignmentStat {
 		this.sitePattern = sa.calSitePattern();
 	}
 
+	@Deprecated
 	public double calDelta(AlignmentStat obsStat) {
 		calSumStat();
 		double[] obsStatAll = obsStat.getStatAll();
@@ -191,6 +192,7 @@ public class AlignmentStat {
 
 	}
 
+	@Deprecated
 	public void calSumStat() {
 		// TODO fix confusing names
 		if (sumStat instanceof SStatFreq) {

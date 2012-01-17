@@ -4,7 +4,6 @@
 package sw.abc.parameter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Formatter;
 
 /**
@@ -80,7 +79,7 @@ public class SavePar {
 	public double[] calAccRate(int size) {
 
 		double[] accRate = new double[NOTUNE];
-		System.out.println(Arrays.toString(accRate));
+		
 		size -= 1;
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < NOTUNE; j++) {
@@ -93,6 +92,7 @@ public class SavePar {
 			accRate[i] /= size;
 		}
 		resetCount();
+
 		return accRate;
 	}
 

@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import javax.sound.midi.SysexMessage;
 
 import com.google.common.primitives.Doubles;
 import sw.abc.parameter.ArrayLogFormatterD;
@@ -34,6 +33,7 @@ import sw.util.TraceUtil;
 import dr.evolution.alignment.Alignment;
 import flanagan.analysis.Regression;
 
+
 public class Main {
 	/**
 	 * 
@@ -51,7 +51,7 @@ public class Main {
 
 	private static String[] switchPar = new String[] { "-t", "-f" };
 	private static String noSimPerPar = "1";
-	private static int NO_SEQ_PER_TIME = 100;
+	private static int NO_SEQ_PER_TIME = 50;
 	private static String softwareName = "BCC_fixParams";
 	
 	
@@ -68,8 +68,10 @@ public class Main {
 	*/
 	public static void main(String[] args) {
 		
+		int noTimePoint = 3;
+		
 		int noItePreprocess = Integer.parseInt(args[2]);
-		int noIteMCMC = Integer.parseInt(args[3]);
+		int noIteMCMC = Integer.parseInt(args[3]); //TODO change back
 		int thinning = Integer.parseInt(args[4]);
 		double error = Double.parseDouble(args[5]);
 		String summarySetting = noItePreprocess +"\t" + noIteMCMC +"\t" + thinning +"\t" + error;
@@ -97,13 +99,13 @@ public class Main {
 		}
 		System.out.println("Init values:\t"+Arrays.toString(initValue));
 		
-//		Setup setting = ABCSetup(dataDir, null, "simData.paup", NO_SEQ_PER_TIME, 2);
-		Setup setting = ABCSetup(dataDir, null, obsDataName, NO_SEQ_PER_TIME, 2, initValue, summarySetting);
+
+		//		Setup setting = ABCSetup(dataDir, null, "simData.paup", NO_SEQ_PER_TIME, 2);
+		Setup setting = ABCSetup(dataDir, null, obsDataName, NO_SEQ_PER_TIME, noTimePoint , initValue, summarySetting);
 		
 		SummaryStat sumStat = null;
 		sumStat = generateStatFile(noItePreprocess, thinning, setting);
 
-//		SummaryStat sumStat = new SStatSmall();
 
 		setting.setStat(sumStat);
 		setting.setNoSeqPerTime(40);
@@ -115,7 +117,6 @@ public class Main {
 		try {
 			ABCUpdateMCMC(setting, noIteMCMC, thinning, error, obsDataStat);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -152,7 +153,7 @@ public class Main {
 		
 		double thetaMean = initValue[1];
 		double thetaTune = thetaMean/10;
-		double thetaLower = 100;
+		double thetaLower = thetaMean / 5;;
 		double thetaUpper = thetaMean * 5;
 		
 		ParaMu priorMu = new ParaMu(new UniformDistribution(muLower, muUpper));
@@ -165,14 +166,14 @@ public class Main {
 		pTheta.setInitValue(thetaMean);
 		
 		
-//		double initScale = 0.05;
-//		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
-//		pMu.setProposal(new Scale(initScale ));
-//		pTheta.setProposal(new Scale(initScale ));
+		double initScale = 0.95;
+		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
+		pMu.setProposal(new Scale(initScale ));
+		pTheta.setProposal(new Scale(initScale ));
 		
-		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{muTune, thetaTune}, new String[] { "Normal", "Normal" });
-		pMu.setProposal(new NormalDistribution(muMean, muTune));
-		pTheta.setProposal(new NormalDistribution(thetaMean, thetaTune));
+//		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{muTune, thetaTune}, new String[] { "Normal", "Normal" });
+//		pMu.setProposal(new NormalDistribution(muMean, muTune));
+//		pTheta.setProposal(new NormalDistribution(thetaMean, thetaTune));
 
 		
 		
@@ -185,133 +186,9 @@ public class Main {
 	}
 	
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void ABCUpdateMCMC(Setup setting, int nRun, int logInt,
-			double error, AlignmentStatFlex obsStat) throws Exception {
-
-		System.out.println("Start ABCMCMC");
-		long startTime = System.nanoTime();
-
-		ArrayList<Parameters> allPar = setting.getAllPar();
-		TunePar tPar = setting.getTunePar(); 
-		int noPar = allPar.size();
-		int noTime = setting.getNoTime();
-		double[] saveGap = new double[noPar];
-		SavePar sPar = new SavePar(TUNESIZE);
-		
-		SiteAlignment sa = new SiteAlignment(setting);
-		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
-
-
-//		String[] paramList = new String[setting.getParamList().length+1];
-//		System.arraycopy(setting.getParamList(), 0, paramList, 0, setting.getParamList().length);
-//		paramList[setting.getParamList().length] = "Gap";
-//		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAL(paramList));
-		
-		TraceUtil ut = new TraceUtil(noTime, noPar);
-		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAL(setting.getParamList()));
-		
-
-		CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile());
-		RunExt proc = new RunExt(setting.getfWorkingDir());
-		proc.setPar(softwareName, cFile.getControlFile(), noSimPerPar, switchPar);
-
-		cFile.setInitPar(allPar);
-		cFile.updateFile(noTime);
-
-//		double[] logValues = Doubles.concat(cFile.getAllPar(), saveGap);
-		double[] logValues = Doubles.concat(cFile.getAllPar());
-		traceLog.logValues( logValues );
-
-		PrintWriter oResult = new PrintWriter(new BufferedWriter(new FileWriter(setting.getResultOutFile())));
-		oResult.println("# "+setting.getDataFile()+"\t"+setting.getSummarySetting());
-		oResult.println("Ite\t" + traceLog.getLabels());
-		oResult.flush();
-
-//		double[] deltaDup = new double[10];
-		
-		for (int i = 0; i < nRun; i++) {
-			// System.out.println();
-			for (int p = 0; p < allPar.size(); p++) {
-				cFile.setParProposal(allPar, p);
-				cFile.updateFile(noTime);
-
-				sa = updateAlignment(sa, proc, setting);
-				newStat.updateSiteAlignment(sa);
-				
-				saveGap[p] = newStat.calDelta(obsStat);
-//				saveGap[p] = newStat.calDeltaSep(obsStat, p);
-				
-				
-				// System.out.print(saveGap[p]+"\t");
-				// for (int dup = 0; dup < deltaDup.length; dup++) {
-				// newStat.addParIndex(cFile.getAllPar());
-				// deltaDup[dup] = newStat.calDelta(obsStat);
-				// }
-				// double delta = newStat.calMultiDelta(obsStat);
-				// saveGap[p] = StatUtils.mean(deltaDup);
-				// System.out.println(saveGap[p]+"\t"+StatUtils.min(deltaDup)+"\t"+Arrays.toString(deltaDup));
-
-				if (saveGap[p] < error) {
-					// newStat.calIndStat2(obsStat);
-					// System.out.print("FreqGap: " + saveGap[p]+"\t");
-
-					if (MH.accept(allPar.get(p))) {
-						allPar.get(p).acceptNewValue();
-						// System.out.println( i + "\t" +
-						// allPar.get(p).getAcceptCount() + "\t" + cFile.getMu()
-						// + "\t" + cFile.getTheta() + "\t"+
-						// setting.getWorkingDir());
-					}
-
-				}
-			}
-			sPar.add(allPar);
-			
-			if (i % TUNESIZE == 0 & i!=0) {
-				tPar.update(sPar, i);
-				for (int j = 0; j < allPar.size(); j++) {
-					allPar.get(j).updateProposal(tPar.getTunePar(j));
-				}
-			}
-			
-			if ((i % logInt) == 0) {
-				System.out.println(i + "\t"+ allPar.get(0).getAcceptCount()
-						+ "\t" + allPar.get(1).getAcceptCount() + "\t"
-						+allPar.get(0).getValue() + "\t" + allPar.get(1).getValue() + "\t"
-						+ setting.getWorkingDir());
-
-//				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()}, saveGap);
-				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()});
-				traceLog.logValues(logValues);
-//				TraceUtil.logValue(tMu, allPar.get(0).getValue());
-//				TraceUtil.logValue(tTheta, allPar.get(1).getValue());
-//				TraceUtil.logValue(tGap, saveGap);
-
-				// TraceUtil.logValue(tDist, 0);
-
-				String s = i + "\t" + traceLog.getLine(i / logInt);
-
-				// System.out.println(s + "\t" + setting.getWorkingDir());
-				oResult.println(s);
-				oResult.flush();
-			}
-
-		}
-		System.out.println(Arrays.toString( tPar.getAveAccRate() ));
-		oResult.close();
-
-		System.out.println("Time: "+(System.nanoTime() - startTime) / 60e6);
-		// System.out
-		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(0))));
-		// System.out
-		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(1))));
-
-	}
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static SummaryStat generateStatFile(int nRun, int thinning, Setup setting) {
-
+	
 		String outFile =  setting.getRegressionCoefFile();
 		
 		SStatFlexable sStat = null;
@@ -328,7 +205,7 @@ public class Main {
 			String[] statsList = setting.getStatList();
 	
 			ArrayList<Parameters> allParUniformPrior = setting.getallParPrior();//new ArrayList<Parameters>();
-			CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile());
+			CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile(), noTime, setting.getNoSeqPerTime());
 			SiteAlignment sa = new SiteAlignment(setting);
 			AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
 			
@@ -348,8 +225,8 @@ public class Main {
 				
 				for (int i = 0; i < nRun; i++) {
 					cFile.setParPrior(allParUniformPrior);
-					cFile.updateFile(noTime);
-		
+					
+					cFile.updateFile();
 					sa = updateAlignment(sa, proc, setting);
 					newStat.updateSiteAlignment(sa);
 					
@@ -395,6 +272,171 @@ public class Main {
 	
 	}
 
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static void ABCUpdateMCMC(Setup setting, int nRun, int logInt,
+			double error, AlignmentStatFlex obsStat) throws Exception {
+
+		System.out.println("Start ABCMCMC");
+		long startTime = System.nanoTime();
+
+		ArrayList<Parameters> allPar = setting.getAllPar();
+		TunePar tPar = setting.getTunePar(); 
+		int noPar = allPar.size();
+		int noTime = setting.getNoTime();
+		double[] saveGap = new double[noPar];
+		SavePar sPar = new SavePar(TUNESIZE);
+		
+		SiteAlignment sa = new SiteAlignment(setting);
+		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
+
+
+//		String[] paramList = new String[setting.getParamList().length+1];
+//		System.arraycopy(setting.getParamList(), 0, paramList, 0, setting.getParamList().length);
+//		paramList[setting.getParamList().length] = "Gap";
+//		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAL(paramList));
+		
+		TraceUtil ut = new TraceUtil(noTime, noPar);
+		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAL(setting.getParamList()));
+		
+
+		CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile(), noTime, setting.getNoSeqPerTime());
+		RunExt proc = new RunExt(setting.getfWorkingDir());
+		proc.setPar(softwareName, cFile.getControlFile(), noSimPerPar, switchPar);
+
+		cFile.setInitPar(allPar);
+		cFile.updateFile();
+
+//		double[] logValues = Doubles.concat(cFile.getAllPar(), saveGap);
+		double[] logValues = Doubles.concat(cFile.getAllPar());
+		traceLog.logValues( logValues );
+
+		PrintWriter oResult = new PrintWriter(new BufferedWriter(new FileWriter(setting.getResultOutFile())));
+		oResult.println("# "+setting.getDataFile()+"\t"+setting.getSummarySetting());
+		oResult.println("Ite\t" + traceLog.getLabels());
+		oResult.flush();
+
+//		double[] deltaDup = new double[10];
+		
+		double errorInit = error;
+		for (int i = 0; i < nRun; i++) {
+			// System.out.println();
+			
+//			if(i == 0){
+//				error = errorInit*10;
+//			}
+//			else if (i== nRun/10) {
+//				error = errorInit*8;
+//			}
+//			else if (i== nRun/10*2) {
+//				error = errorInit*6;
+//			}
+//			else if (i== nRun/10*3) {
+//				error = errorInit*4;
+//			}
+//			else if (i== nRun/10*4) {
+//				error = errorInit;
+//			}
+//			else if (i== nRun/10*5) {
+//				error = errorInit;
+//			}
+//			
+			
+			
+			for (int p = 0; p < allPar.size(); p++) {
+				cFile.setParProposal(allPar, p);
+				
+				cFile.updateFile();
+				
+				sa = updateAlignment(sa, proc, setting);
+				newStat.updateSiteAlignment(sa);
+				
+				saveGap[p] = newStat.calDelta(obsStat);
+//				saveGap[p] = newStat.calDeltaSep(obsStat, p);
+				
+				
+				// System.out.print(saveGap[p]+"\t");
+				// for (int dup = 0; dup < deltaDup.length; dup++) {
+				// newStat.addParIndex(cFile.getAllPar());
+				// deltaDup[dup] = newStat.calDelta(obsStat);
+				// }
+				// double delta = newStat.calMultiDelta(obsStat);
+				// saveGap[p] = StatUtils.mean(deltaDup);
+				// System.out.println(saveGap[p]+"\t"+StatUtils.min(deltaDup)+"\t"+Arrays.toString(deltaDup));
+
+				if (saveGap[p] < error) {
+					// newStat.calIndStat2(obsStat);
+					// System.out.print("FreqGap: " + saveGap[p]+"\t");
+
+					if (MH.accept(allPar.get(p))) {
+						allPar.get(p).acceptNewValue();
+						// System.out.println( i + "\t" +
+						// allPar.get(p).getAcceptCount() + "\t" + cFile.getMu()
+						// + "\t" + cFile.getTheta() + "\t"+
+						// setting.getWorkingDir());
+					}
+
+				}
+			}
+			sPar.add(allPar);
+			
+			if (i % TUNESIZE == 0 & i!=0) {
+				
+				tPar.update(sPar, i);
+				System.out.println(Arrays.toString(tPar.getTunePar()));
+				
+				for (int j = 0; j < allPar.size(); j++) {
+					allPar.get(j).updateProposal(tPar.getTunePar(j));
+				}
+				double accRate = tPar.getMeanAccRate();
+				if(accRate < 0.2){
+					error += 0.01;
+				}
+				else {
+					error -= 0.01;
+				}
+				if(error<0.01){
+					error = 0.01;
+				}
+				if(error > 0.5){
+					error = 0.5;
+				}
+				System.out.println(Arrays.toString(saveGap)+"\t"+error);
+			}
+			
+			if ((i % logInt) == 0) {
+				System.out.println(i + "\t"+ allPar.get(0).getAcceptCount()
+						+ "\t" + allPar.get(1).getAcceptCount() + "\t"
+						+allPar.get(0).getValue() + "\t" + allPar.get(1).getValue() + "\t"
+						+ setting.getWorkingDir());
+
+//				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()}, saveGap);
+				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()});
+				traceLog.logValues(logValues);
+//				TraceUtil.logValue(tMu, allPar.get(0).getValue());
+//				TraceUtil.logValue(tTheta, allPar.get(1).getValue());
+//				TraceUtil.logValue(tGap, saveGap);
+
+				// TraceUtil.logValue(tDist, 0);
+
+				String s = i + "\t" + traceLog.getLine(i / logInt);
+
+				// System.out.println(s + "\t" + setting.getWorkingDir());
+				oResult.println(s);
+				oResult.flush();
+			}
+
+		}
+		System.out.println(Arrays.toString( tPar.getEachAccRate() ));
+		oResult.close();
+
+		System.out.println("Time: "+(System.nanoTime() - startTime) / 60e6);
+		// System.out
+		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(0))));
+		// System.out
+		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(1))));
+
+	}
 
 	private static SStatFlexable readRegressionFile(String outFile) {
 		
@@ -462,15 +504,25 @@ public class Main {
 		double[][] xxData = traceLogStats.to2DArray();
 		SStatFlexable sStat = new SStatFlexable();
 		
-		Regression lm = new Regression(xxData, traceLogParam.toArray(0) );
-		lm.linear();	
 
+		// lm(log(Mu*Theta)~ .)
+		double[] allMu = traceLogParam.toArray(0);
+		double[] allTheta = traceLogParam.toArray(1);
+		double[] logMuTheta = new double[allTheta.length];
+		for (int i = 0; i < allTheta.length; i++) {
+			logMuTheta[i] = Math.log(allMu[i]*allTheta[i]);
+		}
+		Regression lm = new Regression(xxData, logMuTheta );
+		
+//		Regression lm = new Regression(xxData, traceLogParam.toArray(0) );
+		lm.linear();	
+//
 		double[] coef = lm.getBestEstimates();
 		sStat.addCoef("Mu", coef);
-
-		lm.enterData(xxData, traceLogParam.toArray(1));
-		lm.linear();
-		coef = lm.getBestEstimates();
+//
+//		lm.enterData(xxData, traceLogParam.toArray(1));
+//		lm.linear();
+//		coef = lm.getBestEstimates();
 		sStat.addCoef("Theta", coef);
 
 		return sStat;
@@ -495,12 +547,11 @@ public class Main {
 			if (ali != null) {
 				isReRun = false;
 			}
-			if(isReRun){
-				System.out.println("rerun Seq: "+ali);
-				
+//			if(isReRun){
+//				System.out.println("rerun Seq: "+ali);
 //				imp.testingOutPut(USERDIR);
 //				System.exit(-999);
-			}
+//			}
 		}
 
 		sa.updateAlignment(ali);

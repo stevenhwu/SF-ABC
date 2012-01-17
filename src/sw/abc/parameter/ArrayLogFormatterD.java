@@ -11,8 +11,7 @@ import sw.util.TraceFactory;
 import com.google.common.primitives.Doubles;
 
 
-
-
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ArrayLogFormatterD<T> {
 
 	private static LogColumn lc = new LogColumn("");
@@ -20,6 +19,7 @@ public class ArrayLogFormatterD<T> {
 	int dp = -1;
 	String heading;
 	String[] labels = new String[]{};
+	
 	ArrayList<Trace> traces = new ArrayList<Trace>();
 
 	List<String> lines = new ArrayList<String>();
@@ -41,6 +41,7 @@ public class ArrayLogFormatterD<T> {
 		this.echo = echo;
 	}
 	
+
 	public ArrayLogFormatterD(int i, ArrayList<Trace> traceAL) {
 		setDp(dp);
 		addTrace(traceAL);

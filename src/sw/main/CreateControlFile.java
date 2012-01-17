@@ -17,7 +17,13 @@ public class CreateControlFile {
 	final static String MU = "Mu";
 	final static String THETA = "Theta";
 	
+	
+	
 	String controlFile;
+	
+	private int noSeqPerTime;
+	private int noTime;
+	private String[] allTemplate;
 	
 	String[] parList = new String[]{MU, THETA};
 	double[] allpar = new double[parList.length];
@@ -28,25 +34,29 @@ public class CreateControlFile {
 			put(s, 0.0);
 		}
 	}};
+	
+	
 	StringBuilder sb;
+	
 
+	@Deprecated
 	public CreateControlFile(String cFileName) {
 		setControlFile(cFileName);
 		sb = new StringBuilder();
 	}
 
+	public CreateControlFile(String cFileName, int noTime, int noSample) {
+		setControlFile(cFileName);
+		this.noTime = noTime;
+		this.noSeqPerTime = noSample;
+		this.allTemplate = createTemplate();
+	}
+
+	
 	public String getControlFile() {
 		return controlFile;
 	}
 	
-	@Deprecated
-	public double getMu() {
-		return params.get(MU);
-	}
-	@Deprecated
-	public double getTheta() {
-		return params.get(THETA);
-	}
 	public double getPar(String s) {
 		return params.get(s);
 	}
@@ -61,7 +71,7 @@ public class CreateControlFile {
 			setInitPar(parameters);
 		}
 	}
-	public void setInitPar(Parameters p) {
+	private void setInitPar(Parameters p) {
 		if (p instanceof ParaMu) {
 			setParam(MU, p.getValue());
 		}
@@ -75,7 +85,7 @@ public class CreateControlFile {
 			setParPrior(parameters);
 		}
 	}
-	public void setParPrior(Parameters p){
+	private void setParPrior(Parameters p){
 		//		System.out.println( p.getClass().toString());
 		//		System.out.println( p.getClass().getName());
 		if (p instanceof ParaMu) {
@@ -98,6 +108,76 @@ public class CreateControlFile {
 		}
 	}
 
+	public void updateFile(){
+		String template = updateTemplate();
+		try {
+			PrintWriter out
+				= new PrintWriter(new BufferedWriter(new FileWriter(controlFile)));
+			out.write(template);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	
+	}
+	
+	private String updateTemplate() {
+		
+		String template = allTemplate[0]+
+				((int) (double) params.get(THETA) )+
+				allTemplate[1]+
+				params.get(MU)+
+				allTemplate[2];
+		return template;
+		
+		
+	}
+
+	private String[] createTemplate(){
+		
+		String [] templateString = new String[3];
+		templateString[0] = "An test ABC run\n" +
+							"1 population with ancient data\n"+
+							"Deme size\n";
+		
+//		.append((int) ((double) params.get(THETA))).append("\n")
+		
+		templateString[1] = "\nSample sizes\n"+
+							noTime+ " sample groups\n";
+		for (int i = 0; i < noTime; i++) {
+			templateString[1] += noSeqPerTime+" "+(i*400)+" 0 0\n";
+		} 
+		templateString[1] += "Growth rates\n"+
+							"0\n"+
+							"Number of migration matrices\n0\n"+
+							"Historical event\n0\n"+
+							"Mutations per generation for the whole sequence\n";
+
+		
+//		.append(params.get(MU)).append("\n")
+		
+		templateString[2] = "\nNumber of loci\n"+
+							"750\n"+
+							"Data type\n"+
+							"DNA 0.5\n"+
+							"Mutation rates\n0 0 0\n";
+		return templateString;
+	}
+public void setParam(String s, double value) {
+		params.put(s, value);
+	}
+
+	public double[] getAllPar() {
+	
+		for (int i = 0; i < parList.length; i++) {
+			allpar[i] = params.get(parList[i]);
+		}
+	
+		return allpar;
+	}
+
+@Deprecated
 	public void updateFile(int noTime){
 		if(noTime==2){
 			sb = updateTemplate2T();
@@ -106,7 +186,7 @@ public class CreateControlFile {
 			sb = updateTemplate3T();
 		}
 		
-
+	
 		try {
 			PrintWriter out
 			= new PrintWriter(new BufferedWriter(new FileWriter(controlFile)));
@@ -118,46 +198,46 @@ public class CreateControlFile {
 		
 	
 	}
-	
-//	@Deprecated
-//	private void setMu(double mu){
-//		params.put("Mu", mu);
-//	}
-//	
-//	@Deprecated
-//	private void setTheta(double theta){
-//		params.put("Theta", theta);
-//	}
 
-	public StringBuilder updateTemplate2T(){
+	//	@Deprecated
+	//	private void setMu(double mu){
+	//		params.put("Mu", mu);
+	//	}
+	//	
+	//	@Deprecated
+	//	private void setTheta(double theta){
+	//		params.put("Theta", theta);
+	//	}
 	
+		@Deprecated
+		public StringBuilder updateTemplate2T(){
 		
-		sb.delete(0, sb.length());
-		sb.append("An test ABC run\n")
-		.append("1 population with ancient data\n")
-		.append("Deme size\n")
-		.append((int) ((double) params.get(THETA))).append("\n")
-		.append("Sample sizes\n")
-		.append(2).append(" sample groups\n")
-		.append("100 0 0 0\n")
-		.append("100 400 0 0\n")
-		.append("Growth rates\n")
-		.append("0\n")
-		.append("Number of migration matrices\n0\n")
-		.append("Historical event\n0\n")
-		.append("Mutations per generation for the whole sequence\n")
-		.append(params.get(MU)).append("\n")
-		.append("Number of loci\n")
-		.append("750\n")
-		.append("Data type\n")
-		.append("DNA 0.5\n")
-		.append("Mutation rates\n0 0 0\n");
-		return sb;
-	
-	}
+			
+			sb.delete(0, sb.length());
+			sb.append("An test ABC run\n")
+			.append("1 population with ancient data\n")
+			.append("Deme size\n")
+			.append((int) ((double) params.get(THETA))).append("\n")
+			.append("Sample sizes\n")
+			.append(2).append(" sample groups\n")
+			.append(noSeqPerTime).append(" 0 0 0\n")
+			.append(noSeqPerTime).append(" 400 0 0\n")
+			.append("Growth rates\n")
+			.append("0\n")
+			.append("Number of migration matrices\n0\n")
+			.append("Historical event\n0\n")
+			.append("Mutations per generation for the whole sequence\n")
+			.append(params.get(MU)).append("\n")
+			.append("Number of loci\n")
+			.append("750\n")
+			.append("Data type\n")
+			.append("DNA 0.5\n")
+			.append("Mutation rates\n0 0 0\n");
+			return sb;
+		
+		}
 
-	
-
+	@Deprecated
 	public StringBuilder updateTemplate3T(){
 	
 		
@@ -168,9 +248,9 @@ public class CreateControlFile {
 		.append((int) ((double) params.get(THETA))).append("\n")
 		.append("Sample sizes\n")
 		.append(3).append(" sample groups\n")
-		.append("40 0 0 0\n")
-		.append("40 400 0 0\n")
-		.append("40 800 0 0\n")
+		.append(noSeqPerTime).append(" 0 0 0\n")
+		.append(noSeqPerTime).append(" 400 0 0\n")
+		.append(noSeqPerTime).append(" 800 0 0\n")
 		.append("Growth rates\n")
 		.append("0\n")
 		.append("Number of migration matrices\n0\n")
@@ -185,7 +265,7 @@ public class CreateControlFile {
 		return sb;
 	
 	}
-	
+
 	@Deprecated
 	public void setMu(double mu) {
 		setMu(mu);
@@ -194,16 +274,13 @@ public class CreateControlFile {
 	public void setTheta(double theta) {
 		setTheta(theta);
 	}
-	public void setParam(String s, double value) {
-		params.put(s, value);
+	@Deprecated
+	public double getMu() {
+		return params.get(MU);
 	}
 
-	public double[] getAllPar() {
-
-		for (int i = 0; i < parList.length; i++) {
-			allpar[i] = params.get(parList[i]);
-		}
-
-		return allpar;
+	@Deprecated
+	public double getTheta() {
+		return params.get(THETA);
 	}
 }
