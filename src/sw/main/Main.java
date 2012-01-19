@@ -70,7 +70,7 @@ public class Main {
 		
 		int noTimePoint = 3;
 		
-		int noItePreprocess = Integer.parseInt(args[2]);
+		int noItePreprocess = Integer.parseInt(args[2]); //TODO change back
 		int noIteMCMC = Integer.parseInt(args[3]); //TODO change back
 		int thinning = Integer.parseInt(args[4]);
 		double error = Double.parseDouble(args[5]);
@@ -166,7 +166,7 @@ public class Main {
 		pTheta.setInitValue(thetaMean);
 		
 		
-		double initScale = 0.95;
+		double initScale = 0.75;
 		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
 		pMu.setProposal(new Scale(initScale ));
 		pTheta.setProposal(new Scale(initScale ));
@@ -320,28 +320,7 @@ public class Main {
 		
 		double errorInit = error;
 		for (int i = 0; i < nRun; i++) {
-			// System.out.println();
-			
-//			if(i == 0){
-//				error = errorInit*10;
-//			}
-//			else if (i== nRun/10) {
-//				error = errorInit*8;
-//			}
-//			else if (i== nRun/10*2) {
-//				error = errorInit*6;
-//			}
-//			else if (i== nRun/10*3) {
-//				error = errorInit*4;
-//			}
-//			else if (i== nRun/10*4) {
-//				error = errorInit;
-//			}
-//			else if (i== nRun/10*5) {
-//				error = errorInit;
-//			}
-//			
-			
+
 			
 			for (int p = 0; p < allPar.size(); p++) {
 				cFile.setParProposal(allPar, p);
@@ -389,19 +368,8 @@ public class Main {
 					allPar.get(j).updateProposal(tPar.getTunePar(j));
 				}
 				double accRate = tPar.getMeanAccRate();
-				if(accRate < 0.2){
-					error += 0.01;
-				}
-				else {
-					error -= 0.01;
-				}
-				if(error<0.01){
-					error = 0.01;
-				}
-				if(error > 0.5){
-					error = 0.5;
-				}
-				System.out.println(Arrays.toString(saveGap)+"\t"+error);
+				error = updateErrorRate(i, nRun, error, accRate );
+
 			}
 			
 			if ((i % logInt) == 0) {
@@ -437,6 +405,27 @@ public class Main {
 		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(1))));
 
 	}
+
+	private static double updateErrorRate(int i, int nRun, double error, double accRate ) {
+		
+//		if(i < (nRun/5)) {
+//			if(accRate < 0.1){
+//				error += 0.01;
+//			}
+//			else if (accRate > 0.4){
+//				error -= 0.01;
+//			}
+//			if(error<0.01){
+//				error = 0.01;
+//			}
+//			if(error > 0.5){
+//				error = 0.5;
+//			}
+//			System.out.println("accRate:\t"+accRate+"\t"+error);
+//		}
+		return error;
+	}
+
 
 	private static SStatFlexable readRegressionFile(String outFile) {
 		
