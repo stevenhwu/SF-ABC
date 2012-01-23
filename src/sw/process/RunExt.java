@@ -83,7 +83,8 @@ public class RunExt {
 		       
 			
 			BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		    String line;
+			br.close();
+//		    String line;
 //		    System.out.println("&&&&& start &&&&&");
 //		    while ((line = br.readLine()) != null) {
 //		    	System.out.println(line);

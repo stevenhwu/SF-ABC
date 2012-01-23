@@ -107,7 +107,7 @@ public class TunePar {
 		int index = ite / tuneSize;
 
 		double[] newAcc = all.calAccRate(tuneSize);
-System.out.println("acc rate: "+Arrays.toString(newAcc)); //TODO remove
+//		System.out.println("acc rate: "+Arrays.toString(newAcc)); //TODO remove
 		double[] accRate = new double[newAcc.length];
 		if (index >= tuneGroup) {
 

@@ -236,7 +236,7 @@ public class Main {
 		
 					if ((i % thinning) == 0) {
 						oResult.flush();
-						System.out.println("Ite:\t"+i+"\t"+ ((System.currentTimeMillis() - startTime)/60000)+" mins");
+						System.out.println("Ite:\t"+i+"\t"+ Math.round((System.currentTimeMillis() - startTime)/60e3)+" mins");
 					}
 				}
 				oResult.close();
@@ -244,7 +244,7 @@ public class Main {
 				e.printStackTrace();
 			}
 			
-			System.out.println("Time:\t" + ( (System.currentTimeMillis()-startTime)/60000) );	
+			System.out.println("Time:\t" + Math.round( (System.currentTimeMillis()-startTime)/60e3)+" mins" );	
 			sStat = semiAutoRegression(nRun, traceLogStats, traceLogParam);
 			String regressionSummary = sStat.toString();
 			System.out.println(regressionSummary);
@@ -278,7 +278,7 @@ public class Main {
 			double error, AlignmentStatFlex obsStat) throws Exception {
 
 		System.out.println("Start ABCMCMC");
-		long startTime = System.nanoTime();
+		long startTime = System.currentTimeMillis();
 
 		ArrayList<Parameters> allPar = setting.getAllPar();
 		TunePar tPar = setting.getTunePar(); 
@@ -362,21 +362,22 @@ public class Main {
 			if (i % TUNESIZE == 0 & i!=0) {
 				
 				tPar.update(sPar, i);
-				System.out.println(Arrays.toString(tPar.getTunePar()));
+//				System.out.println(Arrays.toString(tPar.getTunePar()));
 				
 				for (int j = 0; j < allPar.size(); j++) {
 					allPar.get(j).updateProposal(tPar.getTunePar(j));
 				}
-				double accRate = tPar.getMeanAccRate();
-				error = updateErrorRate(i, nRun, error, accRate );
+//				double accRate = tPar.getMeanAccRate();
+//				error = updateErrorRate(i, nRun, error, accRate );
 
 			}
 			
 			if ((i % logInt) == 0) {
-				System.out.println(i + "\t"+ allPar.get(0).getAcceptCount()
-						+ "\t" + allPar.get(1).getAcceptCount() + "\t"
-						+allPar.get(0).getValue() + "\t" + allPar.get(1).getValue() + "\t"
-						+ setting.getWorkingDir());
+				System.out.println("Ite:\t"+i + "\t"+ allPar.get(0).getAcceptCount() +
+						"\t" + allPar.get(1).getAcceptCount() + "\t" +
+						Arrays.toString(tPar.getEachAccRate()) + "\t" +
+//						+allPar.get(0).getValue() + "\t" + allPar.get(1).getValue() + "\t"
+						setting.getWorkingDir());
 
 //				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()}, saveGap);
 				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()});
@@ -398,7 +399,7 @@ public class Main {
 		System.out.println(Arrays.toString( tPar.getEachAccRate() ));
 		oResult.close();
 
-		System.out.println("Time: "+(System.nanoTime() - startTime) / 60e6);
+		System.out.println("Time:\t"+ Math.round((System.currentTimeMillis() - startTime) / 60e3) + " mins");
 		// System.out
 		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(0))));
 		// System.out
@@ -465,7 +466,7 @@ public class Main {
 
 	public static AlignmentStatFlex calObsStat(Setup setting) {
 	
-		System.out.print("Calculate observed stat:\t");
+		System.out.println("Calculate observed stat");
 		SiteAlignment sa = new SiteAlignment(setting);
 		Importer imp = new Importer(setting.getDataFile(), setting);
 		AlignmentStatFlex aliStat = new AlignmentStatFlex(setting);

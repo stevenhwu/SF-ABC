@@ -1,22 +1,15 @@
 package sw.sequence;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 import sw.main.Main;
 import sw.main.Setup;
-
 import dr.evolution.alignment.Alignment;
 import dr.evolution.alignment.SimpleAlignment;
 import dr.evolution.sequence.Sequence;
@@ -131,16 +124,16 @@ public class Importer {
 		} catch (Exception e) {
 	
 			e.printStackTrace();
-			System.out.println(aliFile.toString());
-			String s = aliFile.getParent();
-			s = s.substring(s.lastIndexOf(File.separatorChar)+1);
-			File f = new File(Main.USERDIR+File.separatorChar+System.currentTimeMillis()+"_"+s);
-			System.out.println(f.toString());
-			FileUtils.copyFile(aliFile, f);
-			System.out.println("br:\t"+br.hashCode());
-			System.out.println(br.ready());	
-			System.out.println(br.readLine());	
-			System.out.println("SA:\t"+sa.getSiteCount());
+//			System.out.println(aliFile.toString());
+//			String s = aliFile.getParent();
+//			s = s.substring(s.lastIndexOf(File.separatorChar)+1);
+//			File f = new File(Main.USERDIR+File.separatorChar+System.currentTimeMillis()+"_"+s);
+//			System.out.println(f.toString());
+//			FileUtils.copyFile(aliFile, f);
+//			System.out.println("br:\t"+br.hashCode());
+//			System.out.println(br.ready());	
+//			System.out.println(br.readLine());	
+//			System.out.println("SA:\t"+sa.getSiteCount());
 			
 		}
 		return null;		
@@ -149,7 +142,7 @@ public class Importer {
 
 	}
 
-
+	@Deprecated
 	private SimpleAlignment readSeqBackup(BufferedReader br) throws IOException {
 		
 		SimpleAlignment sa = new SimpleAlignment();
