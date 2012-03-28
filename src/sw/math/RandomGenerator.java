@@ -2,7 +2,10 @@ package sw.math;
 
 import org.apache.commons.math.random.RandomDataImpl;
 
+
 public class RandomGenerator {
+
+	private static final MersenneTwisterFast random = MersenneTwisterFast.DEFAULT_INSTANCE;
 
 	static RandomDataImpl r = new RandomDataImpl();
 
@@ -10,4 +13,11 @@ public class RandomGenerator {
 		return r.nextUniform(0, 1);
 		
 	}
+	
+	public static double nextDouble() {
+		synchronized (random) {
+			return random.nextDouble();
+		}
+	}
+	
 }

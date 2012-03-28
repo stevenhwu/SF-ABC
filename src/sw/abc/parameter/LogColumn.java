@@ -1,6 +1,7 @@
 package sw.abc.parameter;
 
-import dr.inference.loggers.NumberColumn;
+
+
 
 public class LogColumn extends NumberColumn {
 

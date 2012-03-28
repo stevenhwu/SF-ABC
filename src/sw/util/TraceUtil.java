@@ -14,7 +14,7 @@ import sw.util.TraceFactory.TraceType;
 
 
 
-import dr.inference.loggers.NumberColumn;
+import sw.abc.parameter.NumberColumn;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TraceUtil {

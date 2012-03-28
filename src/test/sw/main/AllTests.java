@@ -1,14 +1,15 @@
 package test.sw.main;
 
-public class AllTests {
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-//	public static Test suite() {
-//		TestSuite suite = new TestSuite(AllTests.class.getName());
-//		//$JUnit-BEGIN$
-//
-//		//$JUnit-END$
-//		return suite;
-//	}
+
+import test.sw.math.CombinationTest;
+import test.sw.math.RegressionTest;
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ CombinationTest.class, RegressionTest.class,  CreateControlFileTest.class} ) 
+public class AllTests {
 	
 
 }

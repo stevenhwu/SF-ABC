@@ -1,7 +1,5 @@
 package sw.math;
 
-import dr.math.MathUtils;
-
 
 
 // should be Operator class NOT Distribution
@@ -19,7 +17,7 @@ public class Scale implements  DistributionProposal {
 	@Override
 	public double next(double mean) {
 	    
-	    double scale = (scaleFactor + (MathUtils.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)));
+	    double scale = (scaleFactor + (RandomGenerator.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)));
 	    logq = -Math.log(scale);
 	    double newValue = scale * mean;
 

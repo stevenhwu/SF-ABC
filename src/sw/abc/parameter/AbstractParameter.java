@@ -1,6 +1,6 @@
 package sw.abc.parameter;
 
-//import dr.inference.loggers.LogColumn;
+
 import sw.math.DistributionPrior;
 import sw.math.DistributionProposal;
 
@@ -14,8 +14,8 @@ public abstract class AbstractParameter implements Parameters {
 	private double logP;	
 	private double newLogP;
 
-	DistributionPrior prior;
-	DistributionProposal proposal;
+	DistributionPrior priorDist;
+	DistributionProposal proposalDist;
 	private int acceptCount;
 	
 //	
@@ -58,34 +58,34 @@ public abstract class AbstractParameter implements Parameters {
 	
 	@Override
 	public double nextPrior(){
-		value =  prior.init();
-		logP = prior.getLogPrior(value);
+		value =  priorDist.init();
+		logP = priorDist.getLogPrior(value);
 		return value;
 	}
 	@Override
 	public double nextProposal(){
 
-		newValue = proposal.next(value);
-		newLogP = prior.getLogPrior(newValue);
+		newValue = proposalDist.next(value);
+		newLogP = priorDist.getLogPrior(newValue);
 		while(Double.isInfinite(newLogP) ) {
-			newValue = proposal.next(value);
-			newLogP = prior.getLogPrior(newValue);
+			newValue = proposalDist.next(value);
+			newLogP = priorDist.getLogPrior(newValue);
 		}	
-		logQ = proposal.getLogq();
+		logQ = proposalDist.getLogq();
 		return newValue;
 	}
 	
 
 	@Override
 	public void setPrior(DistributionPrior d) {
-		prior = d;
+		priorDist = d;
 		nextPrior();
 		
 	}
 
 	@Override
 	public void setProposal(DistributionProposal d) {
-		proposal = d;
+		proposalDist = d;
 //		value = proposal.next();
 
 		
@@ -93,14 +93,17 @@ public abstract class AbstractParameter implements Parameters {
 
 	@Override
 	public void updateProposal(double var) {
-		proposal.updateVar(var);
+		proposalDist.updateVar(var);
 		
 	}
 	
 	public void setInitValue(double v) {
 		value = v;
-		logP = prior.getLogPrior(v);
+		logP = priorDist.getLogPrior(v);
 	}
 
-
+	public void setInitValue() {
+		value = priorDist.init();
+		logP = priorDist.getLogPrior(value);
+	}
 }

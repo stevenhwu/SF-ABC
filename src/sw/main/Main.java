@@ -42,7 +42,7 @@ public class Main {
 	 */
 	public static final char SYSSEP = File.separatorChar; //System.getProperty("file.separator");
 	public static final String USERDIR = System.getProperty("user.dir")+File.separatorChar;
-	public static final int TUNESIZE = 100 ;
+	public static final int TUNESIZE = 10 ;
 	public static final int TUNEGROUP = 6;
 	
 	// public static String fileName = "Shankarappa.Patient9.nex";
@@ -161,9 +161,11 @@ public class Main {
 
 		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
 		pMu.setInitValue(muMean);
+//		pMu.setInitValue();
 		
 		ParaTheta pTheta = new ParaTheta(new TruncatedNormalDistribution(thetaMean, thetaMean/2, thetaLower, thetaUpper));
 		pTheta.setInitValue(thetaMean);
+//		pTheta.setInitValue();
 		
 		
 		double initScale = 0.75;
@@ -245,7 +247,7 @@ public class Main {
 			}
 			
 			System.out.println("Time:\t" + Math.round( (System.currentTimeMillis()-startTime)/60e3)+" mins" );	
-			sStat = semiAutoRegression(nRun, traceLogStats, traceLogParam);
+			sStat = semiAutoRegression(nRun, traceLogStats, traceLogParam, 2);
 			String regressionSummary = sStat.toString();
 			System.out.println(regressionSummary);
 	
@@ -369,7 +371,14 @@ public class Main {
 				}
 //				double accRate = tPar.getMeanAccRate();
 //				error = updateErrorRate(i, nRun, error, accRate );
-
+				
+				
+				if (allPar.get(0).getAcceptCount() == 0 & allPar.get(1).getAcceptCount() == 0 & i>(TUNESIZE*10)){
+					allPar.get(0).nextPrior();
+					allPar.get(1).nextPrior();
+					
+				}
+				
 			}
 			
 			if ((i % logInt) == 0) {
@@ -484,7 +493,7 @@ public class Main {
 
 
 	@SuppressWarnings("rawtypes")
-	private static SStatFlexable semiAutoRegression(int nRun, ArrayLogFormatterD traceLogStats, ArrayLogFormatterD traceLogParam) {
+	private static SStatFlexable semiAutoRegression(int nRun, ArrayLogFormatterD traceLogStats, ArrayLogFormatterD traceLogParam, int sParam) {
 		
 		if(nRun != traceLogParam.getLength()){
 			System.err.println("Error! incomplete preprocessing:\t"+nRun+"\t"+traceLogParam.getLength()+"\tEXIT");
@@ -494,27 +503,43 @@ public class Main {
 		double[][] xxData = traceLogStats.to2DArray();
 		SStatFlexable sStat = new SStatFlexable();
 		
+		if(sParam==1){
+			// lm(log(Mu*Theta)~ .)
+			double[] allMu = traceLogParam.toArray(0);
+			double[] allTheta = traceLogParam.toArray(1);
+			double[] logMuTheta = new double[allTheta.length];
+			for (int i = 0; i < allTheta.length; i++) {
+				logMuTheta[i] = Math.log(allMu[i]*allTheta[i]);
+			}
+			Regression lm = new Regression(xxData, logMuTheta );
+			
+			lm.linear();	
+			double[] coef = lm.getBestEstimates();
+			sStat.addCoef("Mu", coef);
+			sStat.addCoef("Theta", coef);
 
-		// lm(log(Mu*Theta)~ .)
-		double[] allMu = traceLogParam.toArray(0);
-		double[] allTheta = traceLogParam.toArray(1);
-		double[] logMuTheta = new double[allTheta.length];
-		for (int i = 0; i < allTheta.length; i++) {
-			logMuTheta[i] = Math.log(allMu[i]*allTheta[i]);
 		}
-		Regression lm = new Regression(xxData, logMuTheta );
-		
-//		Regression lm = new Regression(xxData, traceLogParam.toArray(0) );
-		lm.linear();	
-//
-		double[] coef = lm.getBestEstimates();
-		sStat.addCoef("Mu", coef);
-//
-//		lm.enterData(xxData, traceLogParam.toArray(1));
-//		lm.linear();
-//		coef = lm.getBestEstimates();
-		sStat.addCoef("Theta", coef);
+		else{
 
+//			double[] allMu = traceLogParam.toArray(0);
+//			double[] allTheta = traceLogParam.toArray(1);
+//			double[] logMuTheta = new double[allTheta.length];
+//			for (int i = 0; i < allTheta.length; i++) {
+//				logMuTheta[i] = Math.log(allMu[i]*allTheta[i]);
+//			}
+//			Regression lm = new Regression(xxData, logMuTheta );
+			
+			Regression lm = new Regression(xxData, traceLogParam.toArray(0) );
+			lm.linear();	
+	
+			double[] coef = lm.getBestEstimates();
+			sStat.addCoef("Mu", coef);
+	
+			lm.enterData(xxData, traceLogParam.toArray(1));
+			lm.linear();
+			coef = lm.getBestEstimates();
+			sStat.addCoef("Theta", coef);
+		}
 		return sStat;
 	}
 
