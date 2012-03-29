@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import sw.main.Main;
 import sw.main.Setup;

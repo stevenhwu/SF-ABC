@@ -2,7 +2,7 @@ package sw.abc.stat.data;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math.stat.StatUtils;
 import sw.abc.stat.summary.SStat3TMoreStat;
 import sw.abc.stat.summary.SStat3TMoreStatNoInt;
