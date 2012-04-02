@@ -6,15 +6,27 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import jebl.evolution.alignments.Alignment;
+import jebl.evolution.io.AlignmentImporter;
+import jebl.evolution.io.SequenceImporter;
+import jebl.evolution.sequences.Sequence;
+import jebl.evolution.taxa.Taxon;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.util.MathUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import sw.main.Setup;
 import sw.sequence.Importer;
 import sw.sequence.Site;
+import sw.sequence.SiteAlignPerTime;
 import sw.sequence.SiteAlignment;
+import sw.simulator.SSC;
 import dr.evolution.alignment.SimpleAlignment;
 import dr.evolution.io.NexusImporter;
 
@@ -168,5 +180,62 @@ public class SiteAlignmentTest {
 		}
 		assertArrayEquals(exp[0], sitePattern[0], 0.0 );
 
+	}
+	
+	@Test
+	public void testDifferentAlignmentClass() throws Exception {
+		
+		String infile = "simulated2.seq001.nex";
+		int noTime = 3;
+		int timeGap = 1000;
+		jebl.evolution.io.NexusImporter ni = new jebl.evolution.io.NexusImporter(new FileReader(infile));
+		
+		
+		
+		int noSeq = 5;
+		
+		SSC sim = new SSC(noTime, noSeq, timeGap);
+		Alignment ali = sim.simulateAlignment(3300, 1.75E-5);
+		List<Sequence> allSSSC = ali.getSequenceList();
+		
+		List<Sequence> allS = ni.importSequences();
+		SimpleAlignment[] allSiteAlignment = new SimpleAlignment[noTime];
+		SimpleAlignment temp = new SimpleAlignment();
+		
+		String[] timeLabel = {"_0.0","1000.0","2000.0"}; 
+		Arrays.fill(allSiteAlignment, temp);
+		for (Sequence s : allS) {
+			Taxon name = s.getTaxon();
+			int timeIndex = searchTimeIndex(name, timeLabel);
+			dr.evolution.sequence.Sequence drS = new dr.evolution.sequence.Sequence(s.getString());
+			allSiteAlignment[timeIndex].addSequence( drS);
+
+			System.out.println(drS.getSequenceString());
+			
+//			System.out.println(sequence.getTaxon() + "\t"
+//					+ sequence.getString());
+		}
+		for (int i = 0; i < allSiteAlignment.length; i++) {
+			SimpleAlignment s = allSiteAlignment[i];
+			System.out.println(s.getSequenceCount());
+			System.out.println(s.getSequence(1).getSequenceString());
+		}
+
+	}
+	
+	private void name() {
+		
+	}
+	
+	private int searchTimeIndex(Taxon name, String[] timeLabel) {
+		int index = -1;
+		String s = name.getName();
+		for (int i = 0; i < timeLabel.length; i++) {
+			if (s.contains(timeLabel[i])) {
+				index = i;
+				break;						
+			}
+		}
+		return index;
 	}
 }

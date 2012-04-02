@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import sw.abc.parameter.ParaMu;
-import sw.abc.parameter.ParaTheta;
+import sw.abc.parameter.ParaPopsize;
 import sw.abc.parameter.Parameters;
 import sw.math.UniformDistribution;
 import sw.math.ZTestDistribution;
@@ -43,7 +43,7 @@ public class ParaTest {
 		ParaMu pMu = new ParaMu(new ZTestDistribution(0));
 		pMu.setProposal(new ZTestDistribution(0));
 		
-		ParaTheta pTheta = new ParaTheta(new ZTestDistribution(1000));
+		ParaPopsize pTheta = new ParaPopsize(new ZTestDistribution(1000));
 		pTheta.setProposal(new ZTestDistribution(1000));
 		
 		allPar.add(pMu);
@@ -57,7 +57,7 @@ public class ParaTest {
 				if (allPar.get(j) instanceof ParaMu) {
 					isTrue = value == 1+i;
 				}
-				else if(allPar.get(j) instanceof ParaTheta){
+				else if(allPar.get(j) instanceof ParaPopsize){
 					isTrue = value == 1001+i;
 				}
 				System.out.println(i+"\t"+value+"\t"+isTrue);
@@ -76,7 +76,7 @@ public class ParaTest {
 		ParaMu pMu = new ParaMu(new ZTestDistribution(0));
 		pMu.setPrior(new ZTestDistribution(1));
 		
-		ParaTheta pTheta = new ParaTheta(new ZTestDistribution(0));
+		ParaPopsize pTheta = new ParaPopsize(new ZTestDistribution(0));
 		pTheta.setPrior(new ZTestDistribution(1000));
 		allPar.add(pMu);
 		allPar.add(pTheta);
@@ -89,7 +89,7 @@ public class ParaTest {
 				if (allPar.get(j) instanceof ParaMu) {
 					isTrue = value == 1;
 				}
-				else if(allPar.get(j) instanceof ParaTheta){
+				else if(allPar.get(j) instanceof ParaPopsize){
 					isTrue = value == 1000;
 				}
 //				System.out.println(i+"\t"+value+"\t"+isTrue);
@@ -107,7 +107,7 @@ public class ParaTest {
 		
 		ArrayList<Parameters> allPar = new ArrayList<Parameters>();
 		ParaMu pMu = new ParaMu(new UniformDistribution(0.01, 0.05));
-		ParaTheta pTheta = new ParaTheta(new UniformDistribution(1000, 5000));
+		ParaPopsize pTheta = new ParaPopsize(new UniformDistribution(1000, 5000));
 		allPar.add(pMu);
 		allPar.add(pTheta);
 
@@ -119,7 +119,7 @@ public class ParaTest {
 				if (allPar.get(j) instanceof ParaMu) {
 					isTrue = value>0.01 && value<0.05;
 				}
-				else if(allPar.get(j) instanceof ParaTheta){
+				else if(allPar.get(j) instanceof ParaPopsize){
 					isTrue = value>1000 && value<5000;
 				}
 //				System.out.println(i+"\t"+value+"\t"+isTrue);

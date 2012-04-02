@@ -30,9 +30,6 @@ public class Site {
 		this.freqs = freqs;
 	}
 
-	public Site() {
-		// TODO Auto-generated constructor stub
-	}
 
 	public Site(int i) {
 		this.index = i;

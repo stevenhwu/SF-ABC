@@ -4,6 +4,7 @@
 package sw.abc.parameter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
 
 /**
@@ -49,6 +50,13 @@ public class SavePar {
 
 	}
 
+	
+	public void add(ParametersCollection newPar) {
+
+		allPar[count] = newPar.getValues();
+		count++;
+
+	}
 	@Override
 	public String toString() {
 

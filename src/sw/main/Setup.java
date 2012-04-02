@@ -9,7 +9,9 @@ import org.apache.commons.io.FileUtils;
 
 
 
+import sw.abc.parameter.ParameterList;
 import sw.abc.parameter.Parameters;
+import sw.abc.parameter.ParametersCollection;
 import sw.abc.parameter.TunePar;
 import sw.abc.stat.summary.SummaryStat;
 
@@ -25,10 +27,13 @@ public class Setup {
 	private String resultOutFile;
 	private String regressionCoefFile;
 	
+	@Deprecated
 	private String controlName;
+	@Deprecated
 	private String alignmentName;
-
+	@Deprecated
 	private File fAliFile;
+	
 	private File fwDir;
 
 	private int seqLength;
@@ -40,9 +45,14 @@ public class Setup {
 	private String[] paramList;
 	private String[] statList;
 	
-	private ArrayList<Parameters> allPar = new ArrayList<Parameters>();
-	private ArrayList<Parameters> allParPrior = new ArrayList<Parameters>();
+	private ParametersCollection allPar = null;
+	private ParametersCollection allParPrior = null;//new ArrayList<Parameters>();
 
+	@Deprecated
+	private ArrayList<Parameters> allParArrayList = new ArrayList<Parameters>();
+	@Deprecated
+	private ArrayList<Parameters> allParPriorArrayList = new ArrayList<Parameters>();
+	
 	private String summarySetting;
 
 	private TunePar tPar;
@@ -97,12 +107,13 @@ public class Setup {
 		this.obsName = workingDir + dataName;
 
 	}
-
+	@Deprecated
 	public void setAlignmentFile(String alignmentName) {
 		this.alignmentName = workingDir + alignmentName;
 		fAliFile = new File(this.alignmentName);
 	}
 
+	@Deprecated
 	public void setBCCControlFile(String controlName) {
 		this.controlName = workingDir + controlName;
 
@@ -154,14 +165,17 @@ public class Setup {
 	public String getRegressionCoefFile() {
 		return regressionCoefFile;
 	}
+	
+	@Deprecated
 	public String getBCCControlFile() {
 		return controlName;
 	}
-
+	
+	@Deprecated
 	public String getAlignmentFile() {
 		return alignmentName;
 	}
-
+	@Deprecated
 	public File getfAliFile() {
 		return fAliFile;
 	}
@@ -222,27 +236,8 @@ public class Setup {
 		return stat;
 	}
 
-	public ArrayList<Parameters> getAllPar() {
-		return allPar;
-	}
 
-	public void setAllPar(Parameters... allPar) {
-		for (Parameters p : allPar) {
-			this.allPar.add(p);
-		}
-	}
 	
-	public ArrayList<Parameters> getallParPrior() {
-		return allParPrior;
-	}
-
-	public void setallParPrior(Parameters... allParUPrior) {
-		for (Parameters p : allParUPrior) {
-			this.allParPrior.add(p);
-		}
-
-		
-	}
 
 
 	public String[] getParamList() {
@@ -277,6 +272,73 @@ public class Setup {
 
 	public TunePar getTunePar() {
 		return tPar;
+	}
+
+	/**
+	 * @return the allPar
+	 */
+	public ParametersCollection getAllPar() {
+		return allPar;
+	}
+
+	/**
+	 * @param allPar the allPar to set
+	 */
+	public void setAllPar(ParametersCollection allPar) {
+		this.allPar = allPar;
+	}
+
+	/**
+	 * @return the allParPrior
+	 */
+	public ParametersCollection getAllParPrior() {
+		return allParPrior;
+	}
+
+	/**
+	 * @param allParPrior the allParPrior to set
+	 */
+	public void setAllParPrior(ParametersCollection allParPrior) {
+		this.allParPrior = allParPrior;
+	}
+
+	/**
+	 * @return the allParArrayList
+	 */
+	
+	@Deprecated
+	public ArrayList<Parameters> getAllParArrayList() {
+		return allParArrayList;
+	}
+
+	/**
+	 * @param allParArrayList the allParArrayList to set
+	 */
+	@Deprecated
+	public void setAllParArrayList(Parameters ... allP) {
+		for (Parameters p : allP) {
+			this.allParArrayList.add(p);
+		}
+	}
+
+	/**
+	 * @return the allParPriorArrayList
+	 */
+	@Deprecated
+	public ArrayList<Parameters> getAllParPriorArrayList() {
+		return allParPriorArrayList;
+	}
+
+	/**
+	 * @param allParPriorArrayList the allParPriorArrayList to set
+	 * @Deprecated
+	 */
+	@Deprecated
+	public void setAllParPriorArrayList(Parameters ... allP) {
+		for (Parameters p : allP) {
+			this.allParPriorArrayList.add(p);
+		}
+		
 	}
 
 }

@@ -10,107 +10,48 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-
-import com.google.common.primitives.Doubles;
 import sw.abc.parameter.ArrayLogFormatterD;
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaPopsize;
-import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.Parameters;
-import sw.abc.parameter.ParametersCollection;
 import sw.abc.parameter.SavePar;
 import sw.abc.parameter.TunePar;
 import sw.abc.stat.data.AlignmentStat;
 import sw.abc.stat.data.AlignmentStatFlex;
-import sw.abc.stat.summary.*;
-
-import sw.math.NormalDistribution;
+import sw.abc.stat.summary.SStatFlexable;
+import sw.abc.stat.summary.SummaryStat;
 import sw.math.Scale;
 import sw.math.TruncatedNormalDistribution;
 import sw.math.UniformDistribution;
-//import sw.process.RunExt;
+import sw.process.RunExt;
 import sw.sequence.Importer;
 import sw.sequence.SiteAlignment;
-import sw.simulator.SSC;
 import sw.util.TraceUtil;
+
+import com.google.common.primitives.Doubles;
+
 import dr.evolution.alignment.Alignment;
 import flanagan.analysis.Regression;
 
+@Deprecated
+public class OldSimulation {
 
-public class Main {
-	/**
-	 * 
-	 * @author Steven Wu
-	 * @version $Id$
-	 */
 	public static final char SYSSEP = File.separatorChar; //System.getProperty("file.separator");
 	public static final String USERDIR = System.getProperty("user.dir")+File.separatorChar;
 	public static final int TUNESIZE = 10 ;
 	public static final int TUNEGROUP = 6;
 	
 	// public static String fileName = "Shankarappa.Patient9.nex";
-//	private static String alignmentName = "jt.paup";
-//	private static String controlName = "jt.par";
+	private static String alignmentName = "jt.paup";
+	private static String controlName = "jt.par";
 
-//	private static String[] switchPar = new String[] { "-t", "-f" };
+	private static String[] switchPar = new String[] { "-t", "-f" };
 	private static String noSimPerPar = "1";
 	private static int NO_SEQ_PER_TIME = 50;
-//	private static String softwareName = "BCC_fixParams";
+	private static String softwareName = "BCC_fixParams";
 	
 	
-	/*
-		param:
-		args[0]: ==0 local   ==1  /scratch on DSCR
-		args[1]: data file 
-		args[2]: noItePreprocess
-		args[3]: noIteMCMC
-		args[4]: thinning
-		args[5]: error
-		e.g.	0 simData.paup 50 100 10 0.1 
-		e.g.	0 simData.paup 500000 1000000 1000 0.01
-	*/
-	public static void main(String[] args) {
-		
-//		startSimulation(args);
-		SSC ssc = new SSC(3,5,100);
-		
 
-		
-		int noTimePoint = 3;
-		
-		int noItePreprocess = Integer.parseInt(args[2]); //TODO change back
-		int noIteMCMC = Integer.parseInt(args[3]); //TODO change back
-		int thinning = Integer.parseInt(args[4]);
-		double error = Double.parseDouble(args[5]);
-		String summarySetting = noItePreprocess +"\t" + noIteMCMC +"\t" + thinning +"\t" + error;
-		// args[0]==0 local   ==1  /scratch
-		String obsDataName = args[1];
-		String obsDataNamePrefix = obsDataName.split("\\.")[0];
-		String dataDir = "/dev/shm/"+obsDataNamePrefix+SYSSEP;
-		if(args[0].equalsIgnoreCase("1")){
-			dataDir = "/scratch/sw167/"+obsDataNamePrefix+SYSSEP;
-		}
-		File f = new File(dataDir);
-		if(!f.exists()){
-			System.out.println("mkdir "+f.toString()+"\t"+f.mkdir());
-			System.out.println(f.exists());
-		}
-		
-		int fileIndex = obsDataNamePrefix.indexOf("_");
-		double[] initValue = new double[2];
-		if(fileIndex== -1){
-			initValue = new double[]{0.00001, 3000};
-		}
-		else {
-			int i = Integer.parseInt(obsDataNamePrefix.substring(fileIndex+1));
-			initValue = RegressionResult.result[i];
-		}
-		System.out.println("Init values:\t"+Arrays.toString(initValue));
-		
-
-		Setup setting = ABCSetup(dataDir, null, obsDataName, NO_SEQ_PER_TIME, noTimePoint , initValue, summarySetting);
-	}
-	
 	public static void startSimulation(String[] args) {
 		
 	
@@ -176,7 +117,7 @@ public class Main {
 
 		
 		int seqLength = 750;
-		String[] paramList = new String[]{"mu", "popsize"};
+		String[] paramList = new String[]{"Mu", "Theta"};
 		String[] statList = new String[]{"dist", "chisq", "var", "sitePattern"};
 //		String[] statList = new String[]{ "sitePattern"};
 				
@@ -186,7 +127,8 @@ public class Main {
 		setting.setSummarySetting(summarySetting);
 		setting.setStat(stat);
 		setting.setObsFile(obsFileName);
-
+		setting.setAlignmentFile(alignmentName);
+		setting.setBCCControlFile(controlName);
 		setting.setParamList(paramList);
 		setting.setStatList(statList);
 		setting.setSeqInfo(seqLength, noSeqPerTime, noTime);
@@ -201,36 +143,34 @@ public class Main {
 		double thetaLower = thetaMean / 5;;
 		double thetaUpper = thetaMean * 5;
 		
-		ParaMu unifMu = new ParaMu(new UniformDistribution(muLower, muUpper));
-		ParaPopsize unifPopsize = new ParaPopsize(new UniformDistribution(thetaLower, thetaUpper));
+		ParaMu priorMu = new ParaMu(new UniformDistribution(muLower, muUpper));
+		ParaPopsize priorTheta = new ParaPopsize(new UniformDistribution(thetaLower, thetaUpper));
 
+		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
+		pMu.setInitValue(muMean);
+//		pMu.setInitValue();
+		
+		ParaPopsize pTheta = new ParaPopsize(new TruncatedNormalDistribution(thetaMean, thetaMean/2, thetaLower, thetaUpper));
+		pTheta.setInitValue(thetaMean);
+//		pTheta.setInitValue();
 		
 		
 		double initScale = 0.75;
 		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
-		
-		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
-		pMu.setInitValue(muMean);
 		pMu.setProposal(new Scale(initScale ));
-//		pMu.setInitValue();
-		
-		ParaPopsize pPop = new ParaPopsize(new TruncatedNormalDistribution(thetaMean, thetaMean/2, thetaLower, thetaUpper));
-		pPop.setInitValue(thetaMean);
-		pPop.setProposal(new Scale(initScale ));
-//		pTheta.setInitValue();
-
+		pTheta.setProposal(new Scale(initScale ));
 		
 //		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{muTune, thetaTune}, new String[] { "Normal", "Normal" });
 //		pMu.setProposal(new NormalDistribution(muMean, muTune));
 //		pTheta.setProposal(new NormalDistribution(thetaMean, thetaTune));
 
-		ParametersCollection allPars = new ParametersCollection(paramList, pMu, pPop); 
-		ParametersCollection allParsPrior = new ParametersCollection(paramList, unifMu, unifPopsize);
+		
 		
 		setting.setTunePar(tPar);
-		setting.setAllPar(allPars);
-		setting.setAllParPrior(allParsPrior);
+		setting.setAllParArrayList(pMu, pTheta);
+		setting.setAllParPriorArrayList(priorMu, priorTheta);
 
+		
 		return setting;
 	}
 	
@@ -253,8 +193,8 @@ public class Main {
 			String[] paramList = setting.getParamList();
 			String[] statsList = setting.getStatList();
 	
-			ParametersCollection allParUniformPrior = setting.getAllParPrior();
-//			CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile(), noTime, setting.getNoSeqPerTime());
+			ArrayList<Parameters> allParUniformPrior = setting.getAllParPriorArrayList();//new ArrayList<Parameters>();
+			CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile(), noTime, setting.getNoSeqPerTime());
 			SiteAlignment sa = new SiteAlignment(setting);
 			AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
 			
@@ -263,9 +203,8 @@ public class Main {
 			ArrayLogFormatterD traceLogParam = new ArrayLogFormatterD(6, tu.createTraceAL(paramList));
 			ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAL(statsList));
 	
-			SSC simulator = new SSC(3, 50, 400);
-//			RunExt proc = new RunExt(setting.getfWorkingDir());
-//			proc.setPar(softwareName, cFile.getControlFile(), noSimPerPar, switchPar);
+			RunExt proc = new RunExt(setting.getfWorkingDir());
+			proc.setPar(softwareName, cFile.getControlFile(), noSimPerPar, switchPar);
 	
 			long startTime = System.currentTimeMillis();
 			try{	
@@ -274,22 +213,13 @@ public class Main {
 				oResult.println("Ite\t" + traceLogParam.getLabels() +"\t"+ traceLogStats.getLabels());
 				
 				for (int i = 0; i < nRun; i++) {
-					allParUniformPrior.getNextProir();
-					//TODO: which way?
+					cFile.setParPrior(allParUniformPrior);
 					
-					//
-					Alignment ali = null;
-					jebl.evolution.alignments.Alignment al2 = null;
-					ali.getSequence(1);
-					al2.getSequenceList();
-					
-					simulator.simulateAlignment(allParUniformPrior);
-						
-					
-					sa.updateAlignment(ali); 
+					cFile.updateFile();
+					sa = updateAlignment(sa, proc, setting);
 					newStat.updateSiteAlignment(sa);
 					
-					traceLogParam.logValues( allParUniformPrior.getValues());
+					traceLogParam.logValues( cFile.getAllPar());
 					traceLogStats.logValues( newStat.getCurStat(statsList));
 					oResult.println(i + "\t" + traceLogParam.getLine(i) + "\t"	+ traceLogStats.getLine(i));
 		
@@ -339,9 +269,9 @@ public class Main {
 		System.out.println("Start ABCMCMC");
 		long startTime = System.currentTimeMillis();
 
-		ParametersCollection allPar = setting.getAllPar();
+		ArrayList<Parameters> allPar = setting.getAllParArrayList();
 		TunePar tPar = setting.getTunePar(); 
-		int noPar = allPar.getSize();
+		int noPar = allPar.size();
 		int noTime = setting.getNoTime();
 		double[] saveGap = new double[noPar];
 		SavePar sPar = new SavePar(TUNESIZE);
@@ -360,15 +290,14 @@ public class Main {
 		
 
 		CreateControlFile cFile = new CreateControlFile(setting.getBCCControlFile(), noTime, setting.getNoSeqPerTime());
-//		RunExt proc = new RunExt(setting.getfWorkingDir());
-//		proc.setPar(softwareName, cFile.getControlFile(), noSimPerPar, switchPar);
+		RunExt proc = new RunExt(setting.getfWorkingDir());
+		proc.setPar(softwareName, cFile.getControlFile(), noSimPerPar, switchPar);
 
-//		cFile.setInitPar(allPar);
+		cFile.setInitPar(allPar);
 		cFile.updateFile();
 
 //		double[] logValues = Doubles.concat(cFile.getAllPar(), saveGap);
-//		double[] logValues = Doubles.concat(cFile.getAllPar());
-		double[] logValues = allPar.getValues();
+		double[] logValues = Doubles.concat(cFile.getAllPar());
 		traceLog.logValues( logValues );
 
 		PrintWriter oResult = new PrintWriter(new BufferedWriter(new FileWriter(setting.getResultOutFile())));
@@ -382,9 +311,8 @@ public class Main {
 		for (int i = 0; i < nRun; i++) {
 
 			
-			for (int p = 0; p < allPar.getSize(); p++) {
-				allPar.getNextProposal(p);
-//				cFile.setParProposal(allPar, p);
+			for (int p = 0; p < allPar.size(); p++) {
+				cFile.setParProposal(allPar, p);
 				
 				cFile.updateFile();
 				
@@ -408,8 +336,8 @@ public class Main {
 					// newStat.calIndStat2(obsStat);
 					// System.out.print("FreqGap: " + saveGap[p]+"\t");
 
-					if (MH.accept(allPar.getParameter(p))) { //TODO: think about this
-						allPar.acceptNewValue(p);
+					if (MH.accept(allPar.get(p))) {
+						allPar.get(p).acceptNewValue();
 						// System.out.println( i + "\t" +
 						// allPar.get(p).getAcceptCount() + "\t" + cFile.getMu()
 						// + "\t" + cFile.getTheta() + "\t"+
@@ -425,31 +353,31 @@ public class Main {
 				tPar.update(sPar, i);
 //				System.out.println(Arrays.toString(tPar.getTunePar()));
 				
-				for (int j = 0; j < allPar.getSize(); j++) {
-//					TODO recode this
-					allPar.getParameter(j).updateProposalDistVar(tPar.getTunePar(j));
+				for (int j = 0; j < allPar.size(); j++) {
+					//TODO recode this
+					allPar.get(j).updateProposalDistVar(tPar.getTunePar(j));
 				}
 //				double accRate = tPar.getMeanAccRate();
 //				error = updateErrorRate(i, nRun, error, accRate );
 				
 				
-				if (allPar.getAcceptCount(0) == 0 & allPar.getAcceptCount(1) == 0 & i>(TUNESIZE*10)){
-					allPar.getNextProir();
-					
+				if (allPar.get(0).getAcceptCount() == 0 & allPar.get(1).getAcceptCount() == 0 & i>(TUNESIZE*10)){
+					allPar.get(0).nextPrior();
+					allPar.get(1).nextPrior();
 					
 				}
 				
 			}
 			
 			if ((i % logInt) == 0) {
-				System.out.println("Ite:\t"+i + "\t"+ allPar.getAcceptCount(0) +
-						"\t" + allPar.getAcceptCount(1) + "\t" +
+				System.out.println("Ite:\t"+i + "\t"+ allPar.get(0).getAcceptCount() +
+						"\t" + allPar.get(1).getAcceptCount() + "\t" +
 						Arrays.toString(tPar.getEachAccRate()) + "\t" +
 //						+allPar.get(0).getValue() + "\t" + allPar.get(1).getValue() + "\t"
 						setting.getWorkingDir());
 
 //				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()}, saveGap);
-				logValues = allPar.getValues();
+				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()});
 				traceLog.logValues(logValues);
 //				TraceUtil.logValue(tMu, allPar.get(0).getValue());
 //				TraceUtil.logValue(tTheta, allPar.get(1).getValue());
@@ -656,4 +584,5 @@ public class Main {
 	
 	}
 
+	
 }

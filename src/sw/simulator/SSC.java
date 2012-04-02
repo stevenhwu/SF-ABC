@@ -1,205 +1,247 @@
 package sw.simulator;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Iterator;
+
+import sw.abc.parameter.ParametersCollection;
 
 import jebl.evolution.alignments.Alignment;
 import jebl.evolution.coalescent.ConstantPopulation;
-import jebl.evolution.coalescent.DemographicFunction;
-import jebl.evolution.io.NexusExporter;
 import jebl.evolution.trees.RootedTree;
-
-import jebl.evolution.treesimulation.CoalescentIntervalGenerator;
-import jebl.evolution.treesimulation.IntervalGenerator;
 import jebl.evolution.treesimulation.TreeSimulator;
 
 import com.google.common.primitives.Doubles;
 
-import dr.app.seqgen.SeqGen;
-import dr.evolution.io.Importer;
-import dr.evolution.io.NexusImporter;
-import dr.evolution.io.TreeImporter;
+import dr.evolution.io.Importer.ImportException;
+import dr.evolution.io.NewickImporter;
+import dr.evolution.tree.Tree;
+import dr.evolution.util.Taxon;
 import dr.evomodel.sitemodel.GammaSiteModel;
 import dr.evomodel.sitemodel.SiteModel;
 import dr.evomodel.substmodel.FrequencyModel;
 import dr.evomodel.substmodel.HKY;
-import dr.evolution.tree.Tree;;
-/*
- Watch out on changes at pop size
- either use numerical intergration
- or intergrated over time properly
- or full scare sample every interval 
- */
+
+
 public class SSC {
 
-	public SSC() {
+	final private int seqLength = 750;
+			
+	private int popSize = 3000;
+	private double substitutionRate = 1E-5;
+	
+	private ConstantPopulation constPop = new ConstantPopulation(3000);
+	private CoalescentIntervalGeneratorMod intervals = new CoalescentIntervalGeneratorMod(constPop);
+	private TreeSimulator treeSim;
+	private SeqGenMod seqGen;
+	private String prefix;
+	
+	public SSC(int noTime, int noSeq, int timeGap) {
+		this(noTime, noSeq, timeGap, "Tip_");
+	}
+	
+	public SSC(int noTime, int noSeq, int timeGap, String prefix) {
 
-		jeblGenTree();
-		testSegGen();
-
+//		double[] samplingTimes = genTimeSetting(noTime, noSeq, timeGap);
+//		jeblGenTree(samplingTimes, popSize);
+		this.prefix = prefix;
+		
+		setupDefaultModel();
+		
+		int[] samplingCounts = new int[noTime];
+		Arrays.fill(samplingCounts, noSeq);
+		double[] samplingTimes = genTimeSetting(noTime, timeGap);
+		treeSim = new TreeSimulator(this.prefix, samplingCounts, samplingTimes);
+		
+//		simulateAlignment(popSize, substitutionRate);
 	}
 
-	public void jeblGenTree() {
+	public Tree simulateTree(int pSize){//, double sRate) {
+		this.popSize = pSize;
+//		this.substitutionRate = sRate;
 
-		double N0 = 3000;
-		DemographicFunction dfConstant = new ConstantPopulation(N0);
-		CoalescentIntervalGenerator ci = new CoalescentIntervalGenerator(
-				dfConstant);
+		constPop.setN0(popSize);
+		intervals.setDemographicFunction(constPop);
+//		seqGen.setSubstitutionRate(substitutionRate);
 
-		TreeSimulator tSim = new TreeSimulator("T1", new double[] { 0, 10, 10,
-				20 });
-		// tSim.main(new String[] { "A" });
-		double[] t0 = new double[50];
-		double[] t1 = new double[50];
-		double[] t2 = new double[50];
-		Arrays.fill(t0, 0);
-		Arrays.fill(t1, 400);
-		Arrays.fill(t2, 800);
-		double[] samplingTimes = Doubles.concat(t0, t1, t2);
-		// double[] samplingTimes = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0,
-		// 400.0,
-		// 400.0, 400.0, 400.0, 400.0 };
+		Tree sTree = simTree();
+//		Alignment alignment = simSeq(sTree);
+		return sTree;
+	}
+	
+	public Alignment simulateAlignment(ParametersCollection allPar) {
+		this.popSize = (int) allPar.getValues("popsize");
+		this.substitutionRate = allPar.getValues("mu");
+		return simulateAlignment();
+	}
+	
+	public Alignment simulateAlignment(int pSize, double sRate) {
+		this.popSize = pSize;
+		this.substitutionRate = sRate;
+		return simulateAlignment();
+	}
+	
+	private Alignment simulateAlignment(){
+		constPop.setN0(popSize);
+		intervals.setDemographicFunction(constPop);
+		seqGen.setSubstitutionRate(substitutionRate);
 
-		ConstantPopulation constantPopulation = new ConstantPopulation();
-		constantPopulation.setN0(N0);
+		Tree sTree = simTree();
+		
+		Alignment alignment = simSeq(sTree);
+		
+		return alignment;
+	}
 
-		IntervalGenerator intervals = new CoalescentIntervalGenerator(
-				constantPopulation);
-		TreeSimulator sim = new TreeSimulator("tip", samplingTimes);
-		// RootedTree tree1 = sim.simulate(true);
-		// RootedTree tree2 = sim.oldSimulate(true);
-		//
-		// List<Double> heights1 = new ArrayList<Double>();
-		// for (Node node : tree1.getInternalNodes()) {
-		// heights1.add(tree1.getHeight(node));
-		// }
-		//
-		// List<Double> heights2 = new ArrayList<Double>();
-		// for (Node node : tree2.getInternalNodes()) {
-		// heights2.add(tree2.getHeight(node));
-		// }
-		//
-		// Collections.sort(heights1);
-		// Collections.sort(heights2);
-		//
-		// for (int i = 0; i < heights1.size(); i++) {
-		// System.out.println(i + "\t" + heights1.get(i) + "\t" +
-		// heights2.get(i));
-		// }
+	
+	private Tree simTree() {
 
-		int REPLICATE_COUNT = 1;
-		System.out.println(REPLICATE_COUNT);
-		try {
-			RootedTree[] trees = new RootedTree[REPLICATE_COUNT];
+		RootedTree jTree = treeSim.simulate(intervals, false);
+		Tree bTree = convertJEBLTreeToBEASTTree(jTree);
 
-			System.err.println("Simulating " + REPLICATE_COUNT + " trees of "
-					+ samplingTimes.length + " tips:");
-			System.err.print("[");
-			for (int i = 0; i < REPLICATE_COUNT; i++) {
+		return bTree;
+	}
 
-				trees[i] = sim.simulate(intervals, true);
-				if (i != 0 && i % 100 == 0) {
-					System.err.print(".");
-				}
+	private Alignment simSeq(Tree bTree) {
+		Alignment alignment = seqGen.simulate(bTree);
+		
+		return alignment;
+	}
 
-			}
+	private Tree[] simTrees(int noReplication) {
 
-			System.err.println("]");
-
-			Writer writer = new FileWriter("simulated.trees");
-			NexusExporter exporter = new NexusExporter(writer);
-			exporter.exportTrees(Arrays.asList(trees));
-
-			writer.close();
-
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
+		Tree[] bTrees = new Tree[noReplication];
+		for (int i = 0; i < noReplication; i++) {
+			bTrees[i] = simTree();
 		}
+		return bTrees;
 
-		System.out.println("End");
 	}
 
-	public void testSegGen() {
+	
+	private Alignment[] simSeqs(Tree[] bTrees) {
 
-		System.out.println("testSeqGen");
-		String treeFileName = "simulated.trees";
-		String outputFileStem = "simulated.seq";
+		Alignment[] alignments = new Alignment[bTrees.length];
+		for (int i = 0; i < bTrees.length; i++) {
 
-		int length = 470;
+			alignments[i] = seqGen.simulate(bTrees[i]);
+
+		}
+		return alignments;
+
+	}
+	
+	private Alignment[] simSeqsSameTree(Tree bTree, int noRep) {
+
+		Alignment[] alignments = new Alignment[noRep];
+		for (int i = 0; i < noRep; i++) {
+			alignments[i] = seqGen.simulate(bTree);
+		}
+		return alignments;
+
+	}
+	private void setupDefaultModel(){
 
 		double[] frequencies = new double[] { 0.25, 0.25, 0.25, 0.25 };
-		double kappa = 10.0;
-		double alpha = 0.5;
-		double substitutionRate = 1.0E-9;
-		int categoryCount = 0;
-		double damageRate = 1.56E-6;
+		double kappa = 1;
+		double damageRate = 0;//1.56E-6;
 
 		FrequencyModel freqModel = new FrequencyModel(
 				dr.evolution.datatype.Nucleotides.INSTANCE, frequencies);
 
 		HKY hkyModel = new HKY(kappa, freqModel);
-		SiteModel siteModel = null;
+		SiteModel siteModel = new GammaSiteModel(hkyModel);
 
-		if (categoryCount > 1) {
-			siteModel = new GammaSiteModel(hkyModel, alpha, categoryCount);
-		} else {
-			// no rate heterogeneity
-			siteModel = new GammaSiteModel(hkyModel);
+//		int categoryCount = 0;
+//		double alpha = 0.5;
+//		SiteModel siteModel = null;
+//		if (categoryCount > 1) {
+//			siteModel = new GammaSiteModel(hkyModel, alpha, categoryCount);
+//		} else {
+//			// no rate heterogeneity
+//			siteModel = new GammaSiteModel(hkyModel);
+//		}
+//		
+		seqGen = new SeqGenMod(seqLength, substitutionRate, freqModel,
+				hkyModel, siteModel, damageRate);
+		
+	}
+	
+	private double[] genTimeSetting(int noTime, double timeGap) {
+		double timePoint = 0;
+		double[] samplingTimes = new double[noTime];
+		for (int i = 0; i < noTime; i++) {
+			samplingTimes[i] = timePoint;
+			timePoint += timeGap;
 		}
+		return samplingTimes;
+	}
+	
+	private double[] genTimeSetting(int noTime, int noSeq, double timeGap) {
+	
+		double timePoint = 0;
+		double[][] samplingTimes = new double[noTime][noSeq];
+		for (int i = 0; i < noTime; i++) {
+			samplingTimes[i] = new double[noSeq];
+			Arrays.fill(samplingTimes[i], timePoint);
+			timePoint += timeGap;
+		}
+//		TreeSimulator simt = new TreeSimulator(prefix, samplingTimes);
+		return Doubles.concat(samplingTimes);
 
-		List<Tree> trees = new ArrayList<dr.evolution.tree.Tree>();
+	}
+	/**
+	 * @param popSize the popSize to set
+	 */
+	public void setPopSize(int popSize) {
+		this.popSize = popSize;
+	}
 
-		FileReader reader = null;
+	/**
+	 * @param substitutionRate the substitutionRate to set
+	 */
+	public void setSubstitutionRate(double substitutionRate) {
+		this.substitutionRate = substitutionRate;
+	}
+
+	/**
+	 * @return the popSize
+	 */
+	public int getPopSize() {
+		return popSize;
+	}
+
+	/**
+	 * @return the substitutionRate
+	 */
+	public double getSubstitutionRate() {
+		return substitutionRate;
+	}
+
+	public static Tree convertJEBLTreeToBEASTTree(RootedTree jTree) {
+		
+		Tree bTree = null;
 		try {
-			reader = new FileReader(treeFileName);
-			TreeImporter importer = new NexusImporter(reader);
-
-			while (importer.hasTree()) {
-				Tree tree = importer.importNextTree();
-				trees.add(tree);
-			}
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return;
-		} catch (Importer.ImportException e) {
-			e.printStackTrace();
-			return;
+			String treeS = jebl.evolution.trees.Utils.toNewick(jTree);
+			NewickImporter importer = new NewickImporter(treeS);
+			bTree = importer.importNextTree();
 		} catch (IOException e) {
 			e.printStackTrace();
-			return;
+		} catch (ImportException e) {
+			e.printStackTrace();
 		}
+		
+		return bTree;
+		
+	}
 
-		SeqGen seqGen = new SeqGen(length, substitutionRate, freqModel,
-				hkyModel, siteModel, damageRate);
-		int i = 1;
-		for (Tree tree : trees) {
-			Alignment alignment = seqGen.simulate(tree);
+	public void setPopSize(ParametersCollection allParUniformPrior) {
+		setPopSize((int) allParUniformPrior.getValues("popSize"));
+		
+	}
 
-			FileWriter writer = null;
-			try {
-				writer = new FileWriter(outputFileStem
-						+ (i < 10 ? "00" : (i < 100 ? "0" : "")) + i + ".nex");
-				NexusExporter exporter = new NexusExporter(writer);
-
-				exporter.exportAlignment(alignment);
-
-				writer.close();
-
-				i++;
-			} catch (IOException e) {
-				e.printStackTrace();
-				return;
-			}
-		}
-
+	public void setSubstitutionRate(ParametersCollection allParUniformPrior) {
+		setSubstitutionRate(allParUniformPrior.getValues("mu"));
+		
 	}
 }

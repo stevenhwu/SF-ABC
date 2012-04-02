@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import sw.abc.parameter.ParaMu;
-import sw.abc.parameter.ParaTheta;
+import sw.abc.parameter.ParaPopsize;
 import sw.abc.parameter.Parameters;
 
-
+@Deprecated
 public class CreateControlFile {
 
 	final static String MU = "Mu";
@@ -75,7 +75,7 @@ public class CreateControlFile {
 		if (p instanceof ParaMu) {
 			setParam(MU, p.getValue());
 		}
-		else if (p instanceof ParaTheta) {
+		else if (p instanceof ParaPopsize) {
 			setParam(THETA, p.getValue());
 		}
 	}
@@ -91,10 +91,11 @@ public class CreateControlFile {
 		if (p instanceof ParaMu) {
 			setParam(MU, p.nextPrior());
 		}
-		else if (p instanceof ParaTheta) {
+		else if (p instanceof ParaPopsize) {
 			setParam(THETA, p.nextPrior());
 		}
 	}
+	
 	public void setParProposal(ArrayList<Parameters> par, int ind){
 
 		Parameters p = par.get(ind);
@@ -102,7 +103,7 @@ public class CreateControlFile {
 			setParam(MU, p.nextProposal());
 			setParam(THETA, par.get(ind+1).getValue());
 		}
-		else if (p instanceof ParaTheta) {
+		else if (p instanceof ParaPopsize) {
 			setParam(THETA, p.nextProposal());
 			setParam(MU, par.get(ind-1).getValue());
 		}

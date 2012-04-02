@@ -66,7 +66,6 @@ public class SiteAlignment {
 		try {
 			this.ali = imp.importAlignment();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		for (int i = 0; i < noTime; i++) {
@@ -111,6 +110,7 @@ public class SiteAlignment {
 			simpA.addSequence(ali.getSequence(i));	
 		}
 		
+//		jebl.evolution.alignments.Alignment a = new 
 		return simpA;
 	}
 	

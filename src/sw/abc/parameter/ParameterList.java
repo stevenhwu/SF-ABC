@@ -1,8 +1,8 @@
 package sw.abc.parameter;
 
 public enum ParameterList {
-	Mu (0),
-	Theta (1);
+	mu (0),
+	popsize (1);
 	
 	
 

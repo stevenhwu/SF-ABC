@@ -58,8 +58,7 @@ public abstract class AbstractParameter implements Parameters {
 	
 	@Override
 	public double nextPrior(){
-		value =  priorDist.init();
-		logP = priorDist.getLogPrior(value);
+		setInitValue();
 		return value;
 	}
 	@Override
@@ -92,14 +91,14 @@ public abstract class AbstractParameter implements Parameters {
 	}
 
 	@Override
-	public void updateProposal(double var) {
+	public void updateProposalDistVar(double var) {
 		proposalDist.updateVar(var);
 		
 	}
 	
 	public void setInitValue(double v) {
 		value = v;
-		logP = priorDist.getLogPrior(v);
+		logP = priorDist.getLogPrior(value);
 	}
 
 	public void setInitValue() {
