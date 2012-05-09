@@ -69,9 +69,11 @@ public class SeqGenMod {
         damageMap.put(Nucleotides.G_STATE, new State[]{Nucleotides.A_STATE});
         damageMap.put(Nucleotides.T_STATE, new State[]{Nucleotides.C_STATE});
 
-        BasicAlignment alignment = new BasicAlignment();
+//        BasicAlignment alignment = new BasicAlignment();
 
         List<NucleotideState> nucs = jebl.evolution.sequences.Nucleotides.getCanonicalStates();
+        
+BasicSequence[] allSeq = new BasicSequence[tree.getExternalNodeCount()];
         for (int i = 0; i < tree.getExternalNodeCount(); i++) {
             NodeRef node = tree.getExternalNode(i);
             int[] seq = (int[]) tree.getNodeTaxon(node).getAttribute("seq");
@@ -87,9 +89,10 @@ public class SeqGenMod {
             BasicSequence sequence = new BasicSequence(SequenceType.NUCLEOTIDE,
                     Taxon.getTaxon(tree.getNodeTaxon(node).getId()),
                     states);
-            alignment.addSequence(sequence);
+//            alignment.addSequence(sequence);
+            allSeq[i] = sequence;
         }
-
+        BasicAlignment alignment = new BasicAlignment(allSeq);
         return alignment;
     }
 

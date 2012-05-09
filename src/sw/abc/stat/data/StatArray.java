@@ -5,9 +5,7 @@ public class StatArray {
 	double[] stats;
 	String name;
 	
-	public StatArray(){
-		this(null);
-	}
+
 	public StatArray(String string) {
 		this.name = string;
 	}

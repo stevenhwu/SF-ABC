@@ -5,10 +5,10 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import sw.abc.stat.data.AlignmentStat;
-import sw.main.Setup;
 import sw.sequence.Importer;
 import sw.sequence.SiteAlignment;
+import sw.zold.OldSetup;
+import sw.zold.abc.stat.AlignmentStat;
 
 public class AlignmentStatTest {
 
@@ -24,7 +24,7 @@ public class AlignmentStatTest {
 
 		String dataDir = userDir + sysSep + "data" + sysSep;
 
-		Setup setting = new Setup(dataDir, fileName);
+		OldSetup setting = new OldSetup(dataDir, fileName);
 		// setting.setStat(null);
 		// setting.setStat(new SStatBig());
 
@@ -34,12 +34,11 @@ public class AlignmentStatTest {
 
 		setting.setAlignmentFile(fileName);
 		setting.setSeqInfo(seqLength, noSeqPerTime, noTime);
-
+		setting.setTimeGap(400);
 		sa = new SiteAlignment(setting);
-
+		Importer imp = new Importer(setting.getAlignmentFile(), noSeqPerTime*noTime);
 		try {
-			sa.updateAlignment(new Importer(setting.getAlignmentFile(), setting)
-					.importAlignment());
+			sa.updateAlignment(imp.importAlignment());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -9,7 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import sw.main.Main;
-import sw.main.Setup;
+import sw.zold.OldSetup;
 import dr.evolution.alignment.Alignment;
 import dr.evolution.alignment.SimpleAlignment;
 import dr.evolution.sequence.Sequence;
@@ -19,24 +19,20 @@ public class Importer {
 	File aliFile;
 	private int noSeq;
 
-	@Deprecated
-	public Importer(File aliFile) {
-		this.aliFile = aliFile;
-	}
 
-	@Deprecated
 	public Importer(String f) {
 		aliFile = new File(f);
 	}
 
-	
-	public Importer(Setup s) {
+	@Deprecated
+	public Importer(OldSetup s) {
 //		aliFile = s.getfAliFile();
 		noSeq = s.getNoTotalSeq();
 		updateAliFile(s.getAlignmentFile());
 	}
-
-	public Importer(String f, Setup s) {
+	
+	@Deprecated
+	public Importer(String f, OldSetup s) {
 //		aliFile = new File(f);
 		updateAliFile(f);
 		noSeq = s.getNoTotalSeq();

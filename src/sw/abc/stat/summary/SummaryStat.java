@@ -17,4 +17,6 @@ public interface SummaryStat {
 	double calStatMu(double[]... par);
 
 	double calStatTheta(double[]... par);
+
+	
 }

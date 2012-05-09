@@ -30,9 +30,9 @@ public class TraceUtil {
 		this.noTime = noTime;
 		this.noParam = noParam;
 		int noComb = Combination.calNoComb(this.noTime);
-		summaryStatCollection.put("Mu", 1);
-		summaryStatCollection.put("Theta", 1);
-		summaryStatCollection.put("Gap", this.noParam);
+		summaryStatCollection.put("mu", 1);
+		summaryStatCollection.put("popsize", 1);
+		summaryStatCollection.put("gap", this.noParam);
 		
 		summaryStatCollection.put("dist", -1);
 		summaryStatCollection.put("chisq", this.noTime);
@@ -50,6 +50,7 @@ public class TraceUtil {
 		
 		ArrayList<Trace> allAL = new ArrayList<Trace>();
 		for (String key : paramList) {
+			System.out.println(key);
 			int noTrace = summaryStatCollection.get(key);	
 			if(noTrace == 0){
 	            System.err.println("Check noParam OR parameter name: "+ key);

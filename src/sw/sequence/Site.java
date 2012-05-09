@@ -21,10 +21,10 @@ public class Site {
 
 	}
 
-	public Site(int index, double[] freqs) {
-		this.index = index;
-		this.freqs = freqs;
-	}
+//	public Site(int index, double[] freqs) {
+//		this.index = index;
+//		this.freqs = freqs;
+//	}
 
 	public Site(double[] freqs) {
 		this.freqs = freqs;

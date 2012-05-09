@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import sw.abc.parameter.ParametersCollection;
+import sw.main.Setting;
 
 import jebl.evolution.alignments.Alignment;
 import jebl.evolution.coalescent.ConstantPopulation;
@@ -39,7 +40,9 @@ public class SSC {
 	public SSC(int noTime, int noSeq, int timeGap) {
 		this(noTime, noSeq, timeGap, "Tip_");
 	}
-	
+	public SSC(Setting setting) {
+		this(setting.getNoTime(), setting.getNoSeqPerTime(), setting.getTimeGap());
+	}	
 	public SSC(int noTime, int noSeq, int timeGap, String prefix) {
 
 //		double[] samplingTimes = genTimeSetting(noTime, noSeq, timeGap);
@@ -53,8 +56,11 @@ public class SSC {
 		double[] samplingTimes = genTimeSetting(noTime, timeGap);
 		treeSim = new TreeSimulator(this.prefix, samplingCounts, samplingTimes);
 		
+		
 //		simulateAlignment(popSize, substitutionRate);
 	}
+
+
 
 	public Tree simulateTree(int pSize){//, double sRate) {
 		this.popSize = pSize;
@@ -81,6 +87,7 @@ public class SSC {
 		return simulateAlignment();
 	}
 	
+
 	private Alignment simulateAlignment(){
 		constPop.setN0(popSize);
 		intervals.setDemographicFunction(constPop);

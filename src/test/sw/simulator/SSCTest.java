@@ -53,7 +53,7 @@ import dr.math.matrixAlgebra.Vector;
 import sw.simulator.SSC;
 import sw.simulator.SeqGenMod;
 
-public class TestSSC {
+public class SSCTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -104,6 +104,7 @@ public class TestSSC {
 		for (int i = 0; i < noTime; i++) {
 			for (int j = 0; j < noSeq; j++) {
 				Taxon t = Taxon.getTaxon("Tip_"+seqCount+"_"+currentTime);
+				
 				expectedList.add(t);
 				expectedSet.add(t);
 				seqCount++;

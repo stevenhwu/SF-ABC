@@ -6,8 +6,9 @@ import java.util.HashMap;
 import com.google.common.primitives.Doubles;
 
 import sw.abc.stat.summary.SummaryStat;
-import sw.main.Setup;
+import sw.main.Setting;
 import sw.sequence.SiteAlignment;
+import sw.zold.OldSetup;
 
 public class AlignmentStatFlex {
 
@@ -29,17 +30,21 @@ public class AlignmentStatFlex {
 	private String[] statsList;
 	private double[] summaryStatAll;
 	
-	private HashMap<String, StatArray> siteStats = new HashMap<String, StatArray>(); 
+	private HashMap<String, StatArray> siteStats = new HashMap<String, StatArray>();
+
+	private SiteAlignment siteAlig; 
 
 
 
-	public AlignmentStatFlex(Setup setting) {
-		this.sumStat = setting.getStat();
+	public AlignmentStatFlex(Setting setting) {
+		
+		this.sumStat = setting.getSummaryStat();
 		this.statsList = setting.getStatList();
 		siteStats.put("dist", siteDists);
 		siteStats.put("chisq", siteChiDist);
 		siteStats.put("var", siteVarinace);
 		siteStats.put("sitePattern", sitePattern);
+		
 	}
 
 	
@@ -55,10 +60,12 @@ public class AlignmentStatFlex {
 	
 	// TODO fix adding/cal/updating
 	public void updateSiteAlignment(SiteAlignment sa) {
-		addSiteDists(sa);
-		addSiteFreqSpec(sa);
-		addSiteVar(sa);
-		addSitePattern(sa);
+		siteAlig = sa;
+		
+		addSiteDists();
+		addSiteFreqSpec();
+		addSiteVar();
+		addSitePattern();
 		// addSiteKurtosis(sa);
 		// addSiteSecondM(sa);
 		// addSiteSkewness(sa);
@@ -66,26 +73,27 @@ public class AlignmentStatFlex {
 	}
 
 
-	private void addSiteDists(SiteAlignment sa) {
-
-		this.siteDists.setStats(sa.calDists() );
+	private void addSiteDists() {
+		
+		this.siteDists.setStats(siteAlig.calDists() );
 
 	}
 
-	private void addSiteVar(SiteAlignment sa) {
+	private void addSiteVar() {
 
-		this.siteVarinace.setStats( sa.getVar() );
+		this.siteVarinace.setStats( siteAlig.getVar() );
 	}
 
-	private void addSiteFreqSpec(SiteAlignment sa) {
+	private void addSiteFreqSpec() {
 
-		double[][] siteFreqSpec = sa.getFreqSpectrumAll();
-		this.siteFreqSpecEach = sa.getFreqSpectrumEach();
+		double[][] siteFreqSpec = siteAlig.getFreqSpectrumAll();
+		this.siteFreqSpecEach = siteAlig.getFreqSpectrumEach();
 		this.siteChiDist.setStats( FrequencyStat.calChiDiff(siteFreqSpec) );
+		
 	}
 	
-	private void addSitePattern(SiteAlignment sa) {
-		double[][] stat2d = sa.calSitePattern();
+	private void addSitePattern() {
+		double[][] stat2d = siteAlig.calSitePattern();
 		this.sitePattern.setStats( Doubles.concat(stat2d) );
 		
 	}
@@ -106,9 +114,9 @@ public class AlignmentStatFlex {
 
 	}
 	
-	public double calDelta(AlignmentStatFlex obsStat) {
+	public double calDelta(double[] obsStatAll) {
 		calSumStat();
-		double[] obsStatAll = obsStat.getSummaryStatAll();
+//		double[] obsStatAll = obsStat.getSummaryStatAll();
 //		System.out.println(Arrays.toString(summaryStatAll));
 		double delta = 0;
 		for (int i = 0; i < summaryStatAll.length; i++) {

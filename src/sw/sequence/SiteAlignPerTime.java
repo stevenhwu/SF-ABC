@@ -2,6 +2,7 @@ package sw.sequence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.math.stat.StatUtils;
 import org.apache.commons.math.stat.descriptive.moment.Kurtosis;
@@ -9,24 +10,39 @@ import org.apache.commons.math.stat.descriptive.moment.SecondMoment;
 import org.apache.commons.math.stat.descriptive.moment.Skewness;
 import sw.math.FrequencyUtils;
 
-import dr.evolution.alignment.SimpleAlignment;
+
+import jebl.evolution.alignments.BasicAlignment;
+import jebl.evolution.alignments.Pattern;
+import jebl.evolution.sequences.Sequence;
+import jebl.evolution.sequences.State;
 
 public class SiteAlignPerTime {
 
 //	private static final int SITE_PATTERN_COUNT = Site.PATTERN;
-	final static double SITE_SPEC_BIN_SIZE = 0.05;
-	final static int SITE_SPEC_NO_BIN = (int) (1/SITE_SPEC_BIN_SIZE);
-	
+	static final double SITE_SPEC_BIN_SIZE = 0.05;
+	static final int SITE_SPEC_NO_BIN = (int) (1/SITE_SPEC_BIN_SIZE);
+	static final int NO_STATE = 4;
 
 	private ArrayList<Site> allSites;
+	//TODO change to Stie[] ? faster?
 	private double[] siteSpecturm; 
 	private double[] siteSpecturmEach;
-	private SimpleAlignment saAlignment;
+	private BasicAlignment saAlignment;
+//	private SimpleAlignment saAlignment;
+	//TODO triple check this as well
 	
 	public SiteAlignPerTime(int n) {
 		allSites = init(n);
 		siteSpecturm = new double[SITE_SPEC_NO_BIN+1];
 		siteSpecturmEach = new double[9];
+		saAlignment = new BasicAlignment();
+	}
+
+	public SiteAlignPerTime(int n, List<Sequence> allSeqArray) {
+		allSites = init(n);
+		siteSpecturm = new double[SITE_SPEC_NO_BIN+1];
+		siteSpecturmEach = new double[9];
+		saAlignment = new BasicAlignment(allSeqArray);
 	}
 
 	public ArrayList<Site> init(int n){
@@ -41,45 +57,61 @@ public class SiteAlignPerTime {
 
 	public void calcFreq() {
 
-		int noState = saAlignment.getStateCount();
-		int noSite = saAlignment.getSiteCount();
-		int noSeq = saAlignment.getSequenceCount();
-
-		double[] freqs = new double[noState];
-		int[] pattern;
-		//		int[] freqCount = new int[noState];
-		int[] freqCount = new int[18];
-		int i, j;
-
-		//			ArrayList<Site> allSites = new ArrayList<Site>(noSite);
-		//			Site s = new Site();
-
-		for (i = 0; i < noSite; i++) {
-			freqs = new double[noState];
-			freqCount = new int[18];
-			pattern = saAlignment.getPattern(i);
-			for (j = 0; j < noSeq; j++) {
-				freqCount[pattern[j]]++;
-			}
-			double sum = 0.0+freqCount[0]+freqCount[1]+freqCount[2]+freqCount[3];
-			for (int k = 0; k < 4; k++) {
-				freqs[k] = freqCount[k]/sum;
-			}
-			//				s.updateSite(i, freqs);
-			allSites.get(i).updateSite(freqs);
-
+		List<Pattern> allPatterns =  saAlignment.getPatterns();
+		for (int i = 0; i < allPatterns.size(); i++) {
+			Pattern p = allPatterns.get(i);
+			double[] freq = getFrequentState( p.getStates() );
+			allSites.get(i).updateSite(freq);
 		}
+////		Pattern pp = pat.get(0);
+//		
+//		
+//		System.out.println(Arrays.toString(freq));
+//		
+//		int noState = saAlignment.getStateCount();
+//		int noSite = saAlignment.getSiteCount();
+//		int noSeq = saAlignment.getSequenceCount();
+//
+//		double[] freqs = new double[noState];
+//		int[] pattern;
+//		//		int[] freqCount = new int[noState];
+//		int[] freqCount = new int[18];
+//		int i, j;
+//
+//		//			ArrayList<Site> allSites = new ArrayList<Site>(noSite);
+//		//			Site s = new Site();
+//
+//		for (i = 0; i < noSite; i++) {
+//			freqs = new double[noState];
+//			freqCount = new int[18];
+//			pattern = saAlignment.getPattern(i);
+//			for (j = 0; j < noSeq; j++) {
+//				freqCount[pattern[j]]++;
+//			}
+//			double sum = 0.0+freqCount[0]+freqCount[1]+freqCount[2]+freqCount[3];
+//			for (int k = 0; k < 4; k++) {
+//				freqs[k] = freqCount[k]/sum;
+//			}
+//			//				s.updateSite(i, freqs);
+//			
+//
+//		}
 
 	}
-//
-//	private void calcSpectrumProb(){
-//		
-//		double n = allSites.size();
-//		siteSpecturmProb = new double[siteSpecturm.length];
-//		for (int i = 0; i < siteSpecturm.length; i++) {
-//			siteSpecturmProb[i] = siteSpecturm[i] / n;
-//		}  
-//	}
+
+	 public double[] getFrequentState(List<State> allState) {
+
+		 int[] counts = new int[4];
+         for (State state : allState) {
+             counts[state.getIndex()] += 1;
+         }
+         double[] freq = new double[4];
+         double size = allState.size();
+         for (int i = 0; i < freq.length; i++) {
+			freq[i] = counts[i]/size;
+		}
+        return freq;
+     }
 
 	public void calcSpectrum() {
 		
@@ -166,11 +198,18 @@ public class SiteAlignPerTime {
 		return dist;
 	}
 
-	public void addAlignment(SimpleAlignment timeAlignment) {
+	public void addAlignment(BasicAlignment timeAlignment) {
 		this.saAlignment = timeAlignment;
 		
 	}
-
+	public void addSequence(Sequence s) {
+		this.saAlignment.addSequence(s);
+		
+	}
+	public BasicAlignment getAlignment() {
+		return saAlignment;
+		
+	}
 	public double calVar() {
 		double[] siteDist = new double[allSites.size()];
 		for (int i = 0; i < allSites.size(); i++) {

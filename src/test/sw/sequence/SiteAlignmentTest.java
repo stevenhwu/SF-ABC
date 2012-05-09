@@ -21,12 +21,12 @@ import org.apache.commons.math3.util.MathUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import sw.main.Setup;
 import sw.sequence.Importer;
 import sw.sequence.Site;
 import sw.sequence.SiteAlignPerTime;
 import sw.sequence.SiteAlignment;
 import sw.simulator.SSC;
+import sw.zold.OldSetup;
 import dr.evolution.alignment.SimpleAlignment;
 import dr.evolution.io.NexusImporter;
 
@@ -48,27 +48,28 @@ public class SiteAlignmentTest {
 		File dataDir = new File(userDir+sysSep+"data"+sysSep);
 		String alignmentFileName = dataDir.toString()+sysSep+fileName;
 		NexusImporter importer;
-		
+		int noTime = 2;
+		double timeGap = 400;
 		try {
 			importer = new NexusImporter(new FileReader(alignmentFileName));
-			saOld = new SiteAlignment(importer.importAlignment());
+			saOld = new SiteAlignment(importer.importAlignment(), noTime, timeGap, true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 
-		int[] t1 = new int[40];
-		for (int i = 0; i < t1.length; i++) {
-			t1[i] = i;
-		}
-
-		int[] t2 = new int[40];
-		for (int i = 0; i < t2.length; i++) {
-			t2[i] = i+40;
-		}
-
-		saOld.addTimeGroup(t1);
-		saOld.addTimeGroup(t2);
+//		int[] t1 = new int[noTime];
+//		for (int i = 0; i < t1.length; i++) {
+//			t1[i] = i;
+//		}
+//
+//		int[] t2 = new int[noTime];
+//		for (int i = 0; i < t2.length; i++) {
+//			t2[i] = i+40;
+//		}
+//
+//		saOld.addTimeGroup(t1);
+//		saOld.addTimeGroup(t2);
 		
 	}
 	private void setUpB() throws Exception{		
@@ -76,13 +77,13 @@ public class SiteAlignmentTest {
 		String dataName = "junit.paup";
 //		String dataDir = userDir+sysSep+"data"+sysSep;
 		String dataDir = "/dev/shm/JUnit/";
-		Setup setting = new Setup(dataDir, dataName);
+		OldSetup setting = new OldSetup(dataDir, dataName);
 		setting.setObsFile(dataName);
 		int noSeqPerTime = 40;
 		int noTime = 2;
 		int seqLength = 750;
 		setting.setSeqInfo(seqLength, noSeqPerTime, noTime);
-		
+		setting.setTimeGap(400);
 		sa = new SiteAlignment(setting);
 		Importer imp = new Importer(setting.getDataFile(), noSeqPerTime*noTime);
 		try {
@@ -139,7 +140,6 @@ public class SiteAlignmentTest {
 	public void testCalcVar() {
 		
 		double[] siteVar = sa.getVar();
-		System.out.println(Arrays.toString(siteVar));
 		double[] exp = {0.01457378, 0.01952424};
 		assertArrayEquals(exp, siteVar, 1E-5);
 		
@@ -148,37 +148,39 @@ public class SiteAlignmentTest {
 	}
 	
 	@Test
-		public void testCalcSiteSpectrum() {
-			
-			double[][] freqSpec = sa.getFreqSpectrumAll();
-			double[][] exp = {
-					{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6, 7, 1, 57, 5, 6, 44,
-							36, 583 },
-					{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 45, 4, 8, 7, 5, 9, 27,
-							47, 587 } };
-			for (int i = 0; i < exp.length; i++) {
-				for (int j = 0; j < exp[i].length; j++) {
-					exp[i][j] = exp[i][j]/750;
-				}
+	public void testCalcSiteSpectrum() {
+		
+		double[][] freqSpec = sa.getFreqSpectrumAll();
+		double[][] exp = {
+				{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 6, 7, 1, 57, 5, 6, 44,
+						36, 583 },
+				{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 45, 4, 8, 7, 5, 9, 27,
+						47, 587 } };
+		for (int i = 0; i < exp.length; i++) {
+			for (int j = 0; j < exp[i].length; j++) {
+				exp[i][j] = exp[i][j]/750;
 			}
-			//	57, 5(8), 6(3), 44,
-			// check rounding error  8, 7, 5(12), 9(2), 27 
-	
-			assertArrayEquals(exp[0], freqSpec[0] , 0.01);
-			assertArrayEquals(exp[1], freqSpec[1] , 0.01);
-			
-			
 		}
+		//	57, 5(8), 6(3), 44,
+		// check rounding error  8, 7, 5(12), 9(2), 27 
+
+		assertArrayEquals(exp[0], freqSpec[0] , 0.01);
+		assertArrayEquals(exp[1], freqSpec[1] , 0.01);
+		
+		
+	}
 	@Test
 	public void testCalcSitePattern() {
 		
 		double[][] sitePattern = sa.calSitePattern();
 		double[][] exp = {{0.704, 0.152, 0.140, 0.004, 0.0}};
 
-		for (int i = 0; i < exp.length; i++) {
-			System.out.println(ArrayUtils.toString(sitePattern));
-		}
-		assertArrayEquals(exp[0], sitePattern[0], 0.0 );
+//		for (int i = 0; i < exp.length; i++) {
+//			System.out.println(ArrayUtils.toString(sitePattern));
+//		}
+		assertEquals(exp[0][0], sitePattern[0][0], 0.0 );
+		assertEquals(exp[0][1], sitePattern[0][1], 0.0 );
+		assertEquals(exp[0][2], sitePattern[0][2], 0.0 );
 
 	}
 	
@@ -210,15 +212,15 @@ public class SiteAlignmentTest {
 			dr.evolution.sequence.Sequence drS = new dr.evolution.sequence.Sequence(s.getString());
 			allSiteAlignment[timeIndex].addSequence( drS);
 
-			System.out.println(drS.getSequenceString());
+//			System.out.println(drS.getSequenceString());
 			
 //			System.out.println(sequence.getTaxon() + "\t"
 //					+ sequence.getString());
 		}
 		for (int i = 0; i < allSiteAlignment.length; i++) {
 			SimpleAlignment s = allSiteAlignment[i];
-			System.out.println(s.getSequenceCount());
-			System.out.println(s.getSequence(1).getSequenceString());
+//			System.out.println(s.getSequenceCount());
+//			System.out.println(s.getSequence(1).getSequenceString());
 		}
 
 	}

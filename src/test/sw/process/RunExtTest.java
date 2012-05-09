@@ -5,8 +5,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import sw.process.RunExt;
+import sw.zold.RunExt;
 
+@Deprecated
 public class RunExtTest {
 
 	RunExt proc;

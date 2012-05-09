@@ -9,12 +9,11 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
-import sw.main.Setup;
 
 @SuppressWarnings("unused")
 public class OldMain {
 	
-	private static double[] readBrLn(Setup setting) throws IOException {
+	private static double[] readBrLn(OldSetup setting) throws IOException {
 		int noSeqPerTime = setting.getNoSeqPerTime();
 		double[] record = new double[noSeqPerTime * setting.getNoTime() - 1];
 

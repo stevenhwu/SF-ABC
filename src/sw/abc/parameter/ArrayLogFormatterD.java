@@ -1,6 +1,7 @@
 package sw.abc.parameter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -198,6 +199,7 @@ public class ArrayLogFormatterD<T> {
 				summary[i][j] = d[j];
 			}
 		}
+
 		return summary;
 	}
 

@@ -6,8 +6,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import sw.main.CreateControlFile;
+import sw.zold.CreateControlFile;
 
+@Deprecated
 public class CreateControlFileTest {
 
 	CreateControlFile cFile;
