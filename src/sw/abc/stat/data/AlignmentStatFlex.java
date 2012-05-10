@@ -3,12 +3,11 @@ package sw.abc.stat.data;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import com.google.common.primitives.Doubles;
-
 import sw.abc.stat.summary.SummaryStat;
 import sw.main.Setting;
 import sw.sequence.SiteAlignment;
-import sw.zold.OldSetup;
+
+import com.google.common.primitives.Doubles;
 
 public class AlignmentStatFlex {
 
@@ -24,6 +23,7 @@ public class AlignmentStatFlex {
 	
 	private StatArray siteDists = new StatArray("dist");
 	private StatArray siteVarinace = new StatArray("var");
+	private StatArray siteCovarinace = new StatArray("covar");
 	private StatArray siteChiDist = new StatArray("chisq");
 	private StatArray sitePattern = new StatArray("sitePattern");
 
@@ -32,7 +32,11 @@ public class AlignmentStatFlex {
 	
 	private HashMap<String, StatArray> siteStats = new HashMap<String, StatArray>();
 
-	private SiteAlignment siteAlig; 
+	private SiteAlignment siteAlig;
+
+	private double[] obsStat;
+
+	
 
 
 
@@ -43,6 +47,7 @@ public class AlignmentStatFlex {
 		siteStats.put("dist", siteDists);
 		siteStats.put("chisq", siteChiDist);
 		siteStats.put("var", siteVarinace);
+		siteStats.put("covar", siteCovarinace);
 		siteStats.put("sitePattern", sitePattern);
 		
 	}
@@ -58,13 +63,14 @@ public class AlignmentStatFlex {
 	
 
 	
-	// TODO fix adding/cal/updating
+	// TODO fix adding/cal/updating/preprocessing then cal stat
 	public void updateSiteAlignment(SiteAlignment sa) {
 		siteAlig = sa;
 		
 		addSiteDists();
 		addSiteFreqSpec();
 		addSiteVar();
+		addSiteCovar();
 		addSitePattern();
 		// addSiteKurtosis(sa);
 		// addSiteSecondM(sa);
@@ -84,6 +90,10 @@ public class AlignmentStatFlex {
 		this.siteVarinace.setStats( siteAlig.getVar() );
 	}
 
+	private void addSiteCovar() {
+
+		this.siteCovarinace.setStats( siteAlig.getCovar() );
+	}
 	private void addSiteFreqSpec() {
 
 		double[][] siteFreqSpec = siteAlig.getFreqSpectrumAll();
@@ -114,7 +124,7 @@ public class AlignmentStatFlex {
 
 	}
 	
-	public double calDelta(double[] obsStatAll) {
+	public double calDelta() {
 		calSumStat();
 //		double[] obsStatAll = obsStat.getSummaryStatAll();
 //		System.out.println(Arrays.toString(summaryStatAll));
@@ -122,9 +132,9 @@ public class AlignmentStatFlex {
 		for (int i = 0; i < summaryStatAll.length; i++) {
 			//
 			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
-			double dif = summaryStatAll[i] - obsStatAll[i];
-			double s = Math.abs(dif / obsStatAll[i] );
-//			System.out.println(s+"\t"+summaryStatAll[i] +"\t"+ obsStatAll[i]+"\t"); //TODO remove
+			double dif = summaryStatAll[i] - obsStat[i];
+			double s = Math.abs(dif / obsStat[i] );
+//			System.out.println(s+"\t"+summaryStatAll[i] +"\t"+ obsStat[i]+"\t"); 
 			delta += s;
 			// System.out.print(statAll[i] +"\t");
 			// System.out.print(
@@ -153,7 +163,14 @@ public class AlignmentStatFlex {
 		for (String key : statsList) {
 			stat = Doubles.concat(stat, siteStats.get(key).getStats());
 		}
+
 		return stat;
+		
+	}
+
+
+	public void setObsStat(double[] obsStat) {
+		this.obsStat = obsStat;
 		
 	}
 

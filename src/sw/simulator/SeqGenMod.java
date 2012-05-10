@@ -1,5 +1,6 @@
 package sw.simulator;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import dr.evomodel.substmodel.SubstitutionModel;
 public class SeqGenMod {
 	
 	double substitutionRate;
+    double[][][] transitionProbabilities;
 
     public SeqGenMod(final int length, double substitutionRate, final FrequencyModel freqModel, final SubstitutionModel substModel, final SiteModel siteModel, final double damageRate) {
         this.length = length;
@@ -34,6 +36,11 @@ public class SeqGenMod {
         this.substModel = substModel;
         this.siteModel = siteModel;
         this.damageRate = damageRate;
+        int stateCount = substModel.getDataType().getStateCount();
+        
+
+        transitionProbabilities = new double[length][stateCount][stateCount];
+        
     }
 
     /**
@@ -45,13 +52,15 @@ public class SeqGenMod {
 
 	public Alignment simulate(Tree tree) {
 
+
         int[] initialSequence = new int[length];
 
         drawSequence(initialSequence, freqModel);
 
         int[] siteCategories = new int[length];
-
+        
         drawSiteCategories(siteModel, siteCategories);
+
 
         double[] rates = new double[siteModel.getCategoryCount()];
         for (int i = 0; i < rates.length; i++) {
@@ -63,11 +72,12 @@ public class SeqGenMod {
             evolveSequences(initialSequence, tree, child, substModel, siteCategories, rates);
         }
 
-        Map<State, State[]> damageMap = new HashMap<State, State[]>();
-        damageMap.put(Nucleotides.A_STATE, new State[]{Nucleotides.G_STATE});
-        damageMap.put(Nucleotides.C_STATE, new State[]{Nucleotides.T_STATE});
-        damageMap.put(Nucleotides.G_STATE, new State[]{Nucleotides.A_STATE});
-        damageMap.put(Nucleotides.T_STATE, new State[]{Nucleotides.C_STATE});
+            
+//        Map<State, State[]> damageMap = new HashMap<State, State[]>();
+//        damageMap.put(Nucleotides.A_STATE, new State[]{Nucleotides.G_STATE});
+//        damageMap.put(Nucleotides.C_STATE, new State[]{Nucleotides.T_STATE});
+//        damageMap.put(Nucleotides.G_STATE, new State[]{Nucleotides.A_STATE});
+//        damageMap.put(Nucleotides.T_STATE, new State[]{Nucleotides.C_STATE});
 
 //        BasicAlignment alignment = new BasicAlignment();
 
@@ -82,17 +92,19 @@ BasicSequence[] allSeq = new BasicSequence[tree.getExternalNodeCount()];
                 states[j] = nucs.get(seq[j]);
             }
 
-            if (damageRate > 0) {
-                damageSequence(states, damageRate, tree.getNodeHeight(node), damageMap);
-            }
+//            if (damageRate > 0) {
+//                damageSequence(states, damageRate, tree.getNodeHeight(node), damageMap);
+//            }
 
-            BasicSequence sequence = new BasicSequence(SequenceType.NUCLEOTIDE,
+            allSeq[i] = new BasicSequence(SequenceType.NUCLEOTIDE,
                     Taxon.getTaxon(tree.getNodeTaxon(node).getId()),
                     states);
-//            alignment.addSequence(sequence);
-            allSeq[i] = sequence;
         }
         BasicAlignment alignment = new BasicAlignment(allSeq);
+
+//BasicAlignment alignment = new BasicAlignment();
+
+
         return alignment;
     }
 
@@ -125,7 +137,7 @@ BasicSequence[] allSeq = new BasicSequence[tree.getExternalNodeCount()];
 
         int[] sequence1 = new int[sequence0.length];
 
-        double[][][] transitionProbabilities = new double[siteCategories.length][stateCount][stateCount];
+//        double[][][] transitionProbabilities = new double[siteCategories.length][stateCount][stateCount];
 
         for (int i = 0; i < categoryRates.length; i++) {
             double branchLength = tree.getBranchLength(node) * categoryRates[i];
@@ -144,7 +156,7 @@ BasicSequence[] allSeq = new BasicSequence[tree.getExternalNodeCount()];
             }
         }
 
-        evolveSequence(sequence0, siteCategories, transitionProbabilities, sequence1);
+        evolveSequence(sequence0, siteCategories, sequence1);
 
         if (!tree.isExternal(node)) {
             for (int i = 0; i < tree.getChildCount(node); i++) {
@@ -158,11 +170,11 @@ BasicSequence[] allSeq = new BasicSequence[tree.getExternalNodeCount()];
 
     private void evolveSequence(int[] ancestralSequence,
                                 int[] siteCategories,
-                                double[][][] cumulativeTransitionProbabilities,
+//                                double[][][] cumulativeTransitionProbabilities,
                                 int[] descendentSequence) {
 
         for (int i = 0; i < ancestralSequence.length; i++) {
-            descendentSequence[i] = draw(cumulativeTransitionProbabilities[siteCategories[i]][ancestralSequence[i]]);
+            descendentSequence[i] = draw(transitionProbabilities[siteCategories[i]][ancestralSequence[i]]);
         }
     }
 
@@ -189,9 +201,10 @@ BasicSequence[] allSeq = new BasicSequence[tree.getExternalNodeCount()];
      * @param cumulativeFrequencies
      * @return
      */
-    private int draw(double[] cumulativeFrequencies) {
-        double r = Random.nextDouble();
 
+    private static int draw(double[] cumulativeFrequencies) {
+        double r = Random.nextDouble();
+    	
         // defensive - make sure that it is actually set...
         int state = -1;
 

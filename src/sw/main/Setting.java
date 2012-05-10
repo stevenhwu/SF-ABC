@@ -79,8 +79,8 @@ public class Setting {
 
 			
 			if(!fOutputDir.exists()){
-				fOutputDir.mkdir();
-				System.out.println("Creating dir:"+fOutputDir.toPath() +"\t"+ fOutputDir.exists());
+				fOutputDir.mkdir();		
+				System.out.println("Creating dir:"+fOutputDir.toString() +"\t"+ fOutputDir.exists());
 				
 			}
 		} catch (Exception e) {

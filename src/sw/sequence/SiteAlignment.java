@@ -1,12 +1,8 @@
 package sw.sequence;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.lang3.SerializationUtils;
 
 import jebl.evolution.alignments.Alignment;
 import jebl.evolution.alignments.BasicAlignment;
@@ -16,11 +12,7 @@ import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.taxa.Taxon;
 import sw.main.Setting;
 import sw.math.Combination;
-import sw.zold.OldSetup;
-
-//import dr.evolution.alignment.Alignment;
 import dr.evolution.alignment.SimpleAlignment;
-import dr.evolution.sequence.Sequences;
 
 
 public class SiteAlignment {
@@ -40,23 +32,19 @@ public class SiteAlignment {
 	private double[] timeGroups;
 	// private
 
-	private boolean isJUnit;
+	
 
-	private ArrayList<SiteAlignPerTime> stTemplate;
+	private int[][] combs;
 
 	public SiteAlignment(Setting setting) {
 		this.noTime = setting.getNoTime();
 		this.noSite = setting.getSeqLength();
-		setTimeGap(setting.getTimeGap());
-		
-		stTemplate = new ArrayList<SiteAlignPerTime>();
-		//TODO: how to make this faster?
-		for (int i = 0; i < noTime; i++) {
-			stTemplate.add(new SiteAlignPerTime(noSite));
-		}
+		setTimeGroups(setting.getTimeGap());
+
+		combs = Combination.ListCombination(noTime);
 	}
 	
-	private void setTimeGap(double timeGap) {
+	private void setTimeGroups(double timeGap) {
 		this.timeGap = timeGap;
 		timeGroups = new double[noTime];
 		double time = 0;
@@ -102,26 +90,6 @@ public class SiteAlignment {
 		return jAlignment;
 	}
 	
-	@Deprecated
-	private void parseAlignmentOld() {
-		
-		List<Sequence> allSeq = ali.getSequenceList();
-		st = new ArrayList<SiteAlignPerTime>();
-		//TODO: how to make this faster?
-		for (int i = 0; i < noTime; i++) {
-			st.add(new SiteAlignPerTime(noSite));
-		}
-
-		for (Sequence seq : allSeq) {
-			String name = seq.getTaxon().getName();
-			int index = parseTaxonNameToTime(name);
-			st.get(index).addSequence(seq);
-
-		}
-
-	}
-	
-
 	private void parseAlignment() {
 		
 		List<Sequence> allSeq = ali.getSequenceList();
@@ -165,9 +133,6 @@ public class SiteAlignment {
 		return ali.getSiteCount();
 	}
 
-//	public int getNoTimeGroup() {
-//		return timeGroup.size();
-//	}
 
 	public ArrayList<Site> calcFreqTime(int t, ArrayList<Site> allSite) {
 		return calcFreq(getTimeGroup(t), allSite);
@@ -187,9 +152,13 @@ public class SiteAlignment {
 	
 
 	private void calAllFreq() {
-		for (int i = 0; i < noTime; i++) {
-			st.get(i).calcFreq();
+//		st.size();
+		for (SiteAlignPerTime stTime : st) {
+			stTime.calcFreq();
 		}
+//		for (int i = 0; i < noTime; i++) {
+//			st.get(i).calcFreq();
+//		}
 	}
 	
 	private void calAllSpectrum() {
@@ -230,16 +199,14 @@ public class SiteAlignment {
 	
 	public double[] calDists() {
 		
-		
-		int[][] comb = Combination.ListCombination(noTime);
 
-		double[] dist = new double[comb.length+noTime];
+		double[] dist = new double[combs.length+noTime];
 		//Inter then intra
-		for (int i = 0; i < comb.length; i++) {
-			dist[i] = st.get(comb[i][0]).calInterDist(st.get( comb[i][1] ));
+		for (int i = 0; i < combs.length; i++) {
+			dist[i] = st.get(combs[i][0]).calInterDist(st.get( combs[i][1] ));
 		}
 		for (int i = 0; i < noTime; i++) {
-			dist[i+comb.length] = st.get(i).calIntraDist();
+			dist[i+combs.length] = st.get(i).calIntraDist();
 		}
 
 		return dist;
@@ -256,6 +223,15 @@ public class SiteAlignment {
 		}
 
 		return var;
+	}
+	
+	public double[] getCovar() {
+		double[] covar = new double[combs.length];
+		for (int i = 0; i < noTime; i++) {
+			covar[i] = st.get(combs[i][0]).calCovar(st.get( combs[i][1] ));
+		}
+
+		return covar;
 	}
 
 	
@@ -290,193 +266,184 @@ public class SiteAlignment {
 		parseAlignment();
 		calAllFreq();
 		calAllSpectrum();
-		
+
 	}
-
-	@Deprecated
-		public SiteAlignment(dr.evolution.alignment.Alignment alignment, 
-				int noTime, double timeGap, boolean isJUnit) {
-			
-			this.isJUnit = isJUnit;
-			this.ali = convertDrAlignmentToJEBLAlignment(alignment);
-			noSite = alignment.getSiteCount(); // 750 length
-	//		noSeq = ali.getSequenceCount(); // 80 = 40*2  
-			this.noTime = noTime;
-			setTimeGap(timeGap);
-	//		timeGroup = new ArrayList<int[]>();
-			parseAlignment();
-	//		for (int i = 0; i < noTime; i++) {
-	//			st.get(i).addAlignment(getTimeGroup(i));
-	//		}
-			calAllFreq();
-			calAllSpectrum();
-		}
-
-	//	public SiteAlignment(int[] info) {
-	//		this(info[0], info[1], DNASTATCOUNT);
-	//	}
-	//	@Deprecated
-	//	public SiteAlignment(int noSite, int noSeq) {
-	//		this(noSite, noSeq, DNASTATCOUNT);
-	//	}
-	//	@Deprecated
-	//	public SiteAlignment(int noSite, int noSeq, int noState) {
-	//
-	//		this.noSite = noSite; // 750 length
-	////		this.noSeq = noSeq; // 80 = 40*2  
-	////		this.noState = noState; // 4
-	//		timeGroup = new ArrayList<int[]>();
-	//
-	//	}
-		@Deprecated
-		public SiteAlignment(OldSetup setting) {
-	//		noSite = setting.getno; // 750 length
-	//		noSeq = ali.getSequenceCount(); // 80 = 40*2  
-			this.noTime = setting.getNoTime();
-			this.noSite = setting.getSeqLength();
-			setTimeGap(setting.getTimeGap());
-	//		timeGroup = new ArrayList<int[]>();
-	//		parseAlignment();
-	//		for (int i = 0; i < noTime; i++) {
-	//			st.get(i).addAlignment(getTimeGroup(i));
-	//		}
-	//		calAllFreq();
-	//		calAllSpectrum();
-	//		this(setting.getAlignmentInfo());;
-			
-	//		addAllTimeGroup(setting.setupTimeGroup());	
-	//		
-	//		for (int i = 0; i < noTime; i++) {
-	//			st.add(new SiteAlignPerTime(noSite));
-	//		}
-	//		ArrayList<Site> allSite0 = Site.init(setting.getSeqLength());
-	//		ArrayList<Site> allSite1 = Site.init(setting.getSeqLength());
-			
-		}
-
-	@Deprecated
-	public void updateAlignment(Importer imp) {
-		
-		try {
-	
-			this.ali =  convertDrAlignmentToJEBLAlignment(imp.importAlignment());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		parseAlignment();
-	
-		calAllFreq();
-		calAllSpectrum();
-		
-	}
-
-	@Deprecated
-		public void updateAlignment(dr.evolution.alignment.Alignment sa) {
-			
-			this.ali =  convertDrAlignmentToJEBLAlignment( sa);
-			parseAlignment();
-	//		for (int i = 0; i < noTime; i++) {
-	//			st.get(i).addAlignment(getTimeGroup(i));
-	//		}
-			calAllFreq();
-			calAllSpectrum();
-			
-		}
-
-	//
-	//	@Deprecated
-	//	public void addAllTimeGroup(int[]... t) {
-	//
-	//		this.noTime = t.length;
-	//		for (int i = 0; i < noTime; i++) {
-	//			timeGroup.add(t[i]);
-	////			addTimeGroup(t[i]);
-	//		}
-	//	}
-	//	@Deprecated
-	//	public void addTimeGroup(int[] t) {
-	//		timeGroup.add(t);		
-	//	}
-		
-		@Deprecated
-		public SimpleAlignment getTimeGroup(int index){
-			
-			
-			BasicAlignment tempA = st.get(index).getAlignment();
-			SimpleAlignment sa = convertJEBLAlignmentToDrAlignment( tempA );
-	//		int[] t = timeGroup.get(index);
-	//		SimpleAlignment simpA = new SimpleAlignment();
-	//
-	//		for (int i : t) {
-	//			simpA.addSequence(ali.getSequence(i));	
-	//		}
-	//		jebl.evolution.alignments.Alignment a = new 
-			return sa;
-		}
-
-	//	
-	
-	@Deprecated
-	public String summary() {
-		
-		StringBuilder sb = new StringBuilder();
-		sb.append("No Seq: ").append(getPatternCount()).append(" No Site: ").append(getSiteCount())
-		.append(" No of time group: ").append(Arrays.toString(timeGroups));
-		
-		return sb.toString();
-		
-	}
-
-	@Deprecated
-		public static ArrayList<Site> calcFreq(SimpleAlignment sa, ArrayList<Site> allSites) {
-		
-				int noState = sa.getStateCount();
-				double[] freqs = new double[noState];
-				int[] pattern;
-		//		int[] freqCount = new int[noState];
-				int[] freqCount = new int[18];
-				int i, j;
-				int noSite = sa.getSiteCount();
-				int noSeq = sa.getSequenceCount();
-	//			ArrayList<Site> allSites = new ArrayList<Site>(noSite);
-	//			Site s = new Site();
-				
-				for (i = 0; i < noSite; i++) {
-					freqs = new double[noState];
-					freqCount = new int[18];
-					pattern = sa.getPattern(i);
-					for (j = 0; j < noSeq; j++) {
-						freqCount[pattern[j]]++;
-					}
-					double sum = 0.0+freqCount[0]+freqCount[1]+freqCount[2]+freqCount[3];
-					for (int k = 0; k < 4; k++) {
-						freqs[k] = freqCount[k]/sum;
-					}
-		
-	//				s.updateSite(i, freqs);
-					allSites.get(i).updateSite(freqs);
-						
-				}
-				return allSites;
-			}
 
 	public void updateAlignment(List<Alignment> importAlignments) {
 		
 		if( importAlignments.size() == 1){
 			updateJEBLAlignment(importAlignments.get(0));
 			List<Sequence> s = importAlignments.get(0).getSequenceList();
-			System.out.println(importAlignments.get(0).getSiteCount());
-			System.out
-					.println(importAlignments.get(0).getPatternLength());
-			for (Sequence sequence : s) {
-//				System.out.println(sequence.getString());
-			}
+	
 		}
 		else{
 			System.err.println("Multiple Alignments"+"\t"+ importAlignments.size());
 			System.exit(-1);
 		}
 		
+	}
+
+	@Deprecated
+	public SiteAlignment(dr.evolution.alignment.Alignment alignment,
+			int noTime, double timeGap, boolean isJUnit) {
+
+//		this.isJUnit = isJUnit;
+		this.ali = convertDrAlignmentToJEBLAlignment(alignment);
+		noSite = alignment.getSiteCount(); // 750 length
+		// noSeq = ali.getSequenceCount(); // 80 = 40*2
+		this.noTime = noTime;
+		setTimeGroups(timeGap);
+		// timeGroup = new ArrayList<int[]>();
+		parseAlignment();
+		// for (int i = 0; i < noTime; i++) {
+		// st.get(i).addAlignment(getTimeGroup(i));
+		// }
+		calAllFreq();
+		calAllSpectrum();
+	}
+
+	// public SiteAlignment(int[] info) {
+	// this(info[0], info[1], DNASTATCOUNT);
+	// }
+	// @Deprecated
+	// public SiteAlignment(int noSite, int noSeq) {
+	// this(noSite, noSeq, DNASTATCOUNT);
+	// }
+	// @Deprecated
+	// public SiteAlignment(int noSite, int noSeq, int noState) {
+	//
+	// this.noSite = noSite; // 750 length
+	// // this.noSeq = noSeq; // 80 = 40*2
+	// // this.noState = noState; // 4
+	// timeGroup = new ArrayList<int[]>();
+	//
+	// }
+
+	@Deprecated
+	public void updateAlignment(Importer imp) {
+
+		try {
+
+			this.ali = convertDrAlignmentToJEBLAlignment(imp.importAlignment());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		parseAlignment();
+
+		calAllFreq();
+		calAllSpectrum();
+
+	}
+
+	@Deprecated
+	public void updateAlignment(dr.evolution.alignment.Alignment sa) {
+
+		this.ali = convertDrAlignmentToJEBLAlignment(sa);
+		parseAlignment();
+		// for (int i = 0; i < noTime; i++) {
+		// st.get(i).addAlignment(getTimeGroup(i));
+		// }
+		calAllFreq();
+		calAllSpectrum();
+
+	}
+
+	//
+	// @Deprecated
+	// public void addAllTimeGroup(int[]... t) {
+	//
+	// this.noTime = t.length;
+	// for (int i = 0; i < noTime; i++) {
+	// timeGroup.add(t[i]);
+	// // addTimeGroup(t[i]);
+	// }
+	// }
+	// @Deprecated
+	// public void addTimeGroup(int[] t) {
+	// timeGroup.add(t);
+	// }
+
+	@Deprecated
+	public SimpleAlignment getTimeGroup(int index) {
+
+		BasicAlignment tempA = st.get(index).getAlignment();
+		SimpleAlignment sa = convertJEBLAlignmentToDrAlignment(tempA);
+		// int[] t = timeGroup.get(index);
+		// SimpleAlignment simpA = new SimpleAlignment();
+		//
+		// for (int i : t) {
+		// simpA.addSequence(ali.getSequence(i));
+		// }
+		// jebl.evolution.alignments.Alignment a = new
+		return sa;
+	}
+
+	//
+
+	@Deprecated
+	public String summary() {
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("No Seq: ").append(getPatternCount()).append(" No Site: ")
+				.append(getSiteCount()).append(" No of time group: ")
+				.append(Arrays.toString(timeGroups));
+
+		return sb.toString();
+
+	}
+
+	@Deprecated
+	private void parseAlignmentOld() {
+		
+		List<Sequence> allSeq = ali.getSequenceList();
+		st = new ArrayList<SiteAlignPerTime>();
+		//TODO: how to make this faster?
+		for (int i = 0; i < noTime; i++) {
+			st.add(new SiteAlignPerTime(noSite));
+		}
+	
+		for (Sequence seq : allSeq) {
+			String name = seq.getTaxon().getName();
+			int index = parseTaxonNameToTime(name);
+			st.get(index).addSequence(seq);
+	
+		}
+	
+	}
+
+	@Deprecated
+	public static ArrayList<Site> calcFreq(SimpleAlignment sa,
+			ArrayList<Site> allSites) {
+
+		int noState = sa.getStateCount();
+		double[] freqs = new double[noState];
+		int[] pattern;
+		// int[] freqCount = new int[noState];
+		int[] freqCount = new int[18];
+		int i, j;
+		int noSite = sa.getSiteCount();
+		int noSeq = sa.getSequenceCount();
+		// ArrayList<Site> allSites = new ArrayList<Site>(noSite);
+		// Site s = new Site();
+
+		for (i = 0; i < noSite; i++) {
+			freqs = new double[noState];
+			freqCount = new int[18];
+			pattern = sa.getPattern(i);
+			for (j = 0; j < noSeq; j++) {
+				freqCount[pattern[j]]++;
+			}
+			double sum = 0.0 + freqCount[0] + freqCount[1] + freqCount[2]
+					+ freqCount[3];
+			for (int k = 0; k < 4; k++) {
+				freqs[k] = freqCount[k] / sum;
+			}
+
+			// s.updateSite(i, freqs);
+			allSites.get(i).updateSite(freqs);
+
+		}
+		return allSites;
 	}
 	
 

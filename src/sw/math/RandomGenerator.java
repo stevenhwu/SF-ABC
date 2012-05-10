@@ -14,6 +14,11 @@ public class RandomGenerator {
 		
 	}
 	
+	public static double nextLogDouble() {
+		return Math.log(nextDouble());
+		
+	}
+	
 	public static double nextDouble() {
 		synchronized (random) {
 			return random.nextDouble();

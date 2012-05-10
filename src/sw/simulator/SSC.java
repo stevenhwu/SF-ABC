@@ -71,7 +71,7 @@ public class SSC {
 //		seqGen.setSubstitutionRate(substitutionRate);
 
 		Tree sTree = simTree();
-//		Alignment alignment = simSeq(sTree);
+
 		return sTree;
 	}
 	

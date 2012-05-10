@@ -60,7 +60,7 @@ public class ParaTest {
 				else if(allPar.get(j) instanceof ParaPopsize){
 					isTrue = value == 1001+i;
 				}
-				System.out.println(i+"\t"+value+"\t"+isTrue);
+//				System.out.println(i+"\t"+value+"\t"+isTrue);
 				assertTrue( isTrue);
 				allPar.get(j).acceptNewValue();
 			}

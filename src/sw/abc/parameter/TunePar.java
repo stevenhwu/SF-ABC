@@ -8,10 +8,6 @@ import org.apache.commons.math.stat.StatUtils;
 
 import sw.math.NormalDistribution;
 
-//import bmde.core.Setting;
-//import bmde.math.Constant;
-//import bmde.math.NormalDistribution;
-
 // TUNESIZE = average of tuneSize iterations
 // TuneGroup = over tuenGroup
 //		overall, averaging over TuneSize*tuneGroup iterations
@@ -20,19 +16,20 @@ import sw.math.NormalDistribution;
 public class TunePar {
 	
 
-	final public static double OPTIMRATE = 0.1; // Use different value for ABC-MCMC 0.234;
+	final public static double OPTIMRATE = 0.2; // Use different value for ABC-MCMC 0.234;
 	final public static double ACCTOL=0.05;
 	final public static int TUNESIZE = 500 ;
 	final public static int TUNEGROUP = 6;
 	final public static int TUNEGROUP1 = TUNEGROUP - 1;
-	final public static double TUNESTEPSIZE = 0.05; //used for scale tuning
+	final public static double TUNESTEPSIZE = 0.02; //used for scale tuning
 //	final public static double TUNEINITSIZE = 2.38;
 	
 	
 	private double[] tunePar;
 	private double[][] accept;
 	private int[] tuneType;
-
+	double[] accRate;
+	
 	private final double INV_OPT_ACC = NormalDistribution.quantile(OPTIMRATE / 2);
 	// private int count=0;
 
@@ -62,6 +59,7 @@ public class TunePar {
 		this.tuneGroup1 = tuneGroup - 1;
 		this.accept = new double[noTunePar][tuneGroup];
 
+		accRate = new double[noTunePar];
 		setType(type);
 		
 //		tuneInitSize = 2.38;
@@ -107,7 +105,7 @@ public class TunePar {
 		int index = ite / tuneSize;
 
 		double[] newAcc = all.calAccRate(tuneSize);
-		double[] accRate = new double[newAcc.length];
+		
 		if (index >= tuneGroup) {
 
 			for (int i = 0; i < accRate.length; i++) {
@@ -126,6 +124,7 @@ public class TunePar {
 			}
 
 		}
+//		System.out.println("T:"+"\t"+ Arrays.toString(newAcc) +"\t"+ Arrays.toString(accRate) );
 //		for (int i = 0; i < tunePar.length; i++) {
 //			tunePar[i] = checkRate(tunePar[i], accRate[i], tuneType[i], initValue[i]);
 //		}
@@ -153,9 +152,13 @@ public class TunePar {
 
 		}
 
-		if (tp <= 0 | tp >= 1) {
-			tp = rd.nextUniform(0.7, 0.8);
+		if (tp <= 0 ){
+			tp = 0.05;
 		}
+		if ( tp >= 1) {
+			tp = 0.95;
+		}
+			
 
 		return tp;
 
@@ -247,6 +250,10 @@ public class TunePar {
 		
 		return rMean;
 
+	}
+	public double[] getAccRate() {
+
+		return accRate;
 	}
 	
 	public double[] getTunePar() {

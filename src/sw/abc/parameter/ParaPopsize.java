@@ -7,7 +7,6 @@ public class ParaPopsize extends AbstractParameter  {
 
 	public ParaPopsize(DistributionPrior d) {
 		setPrior(d);
-//		nextPrior();
 		
 	}
 	

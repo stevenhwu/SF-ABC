@@ -138,13 +138,13 @@ public class SiteAlignPerTime {
 		int ind = 8;
 		if(max>=0.99){
 			ind = 0;
-		}else if(max>=0.97){
+		}else if(max>=0.98){
 			ind = 1;
-		}else if(max>=0.95){
+		}else if(max>=0.96){
 			ind = 2;
-		}else if(max>=0.92){
+		}else if(max>=0.94){
 			ind = 3;
-		}else if(max>=0.95){
+		}else if(max>=0.92){
 			ind = 4;
 		}else if(max>=0.9){
 			ind = 5;
@@ -184,10 +184,6 @@ public class SiteAlignPerTime {
 		return dist;
 	}
 
-	public Site getSite(int i) {
-		return allSites.get(i);
-	}
-
 	public double calIntraDist() {
 
 		double dist = 0;
@@ -198,18 +194,6 @@ public class SiteAlignPerTime {
 		return dist;
 	}
 
-	public void addAlignment(BasicAlignment timeAlignment) {
-		this.saAlignment = timeAlignment;
-		
-	}
-	public void addSequence(Sequence s) {
-		this.saAlignment.addSequence(s);
-		
-	}
-	public BasicAlignment getAlignment() {
-		return saAlignment;
-		
-	}
 	public double calVar() {
 		double[] siteDist = new double[allSites.size()];
 		for (int i = 0; i < allSites.size(); i++) {
@@ -218,6 +202,43 @@ public class SiteAlignPerTime {
 		return StatUtils.variance(siteDist);
 	}
 
+	public double calCovar(SiteAlignPerTime st2) {
+		double[] siteDist = new double[allSites.size()];
+		for (int i = 0; i < allSites.size(); i++) {
+			siteDist[i] = allSites.get(i).calDist(st2.getSite(i));
+		}
+		return StatUtils.variance(siteDist);
+	}
+
+	public double[] calSitePattern(SiteAlignPerTime st2) {
+	
+			int[] pattern = new int[allSites.size()];
+			for (int i = 0; i < allSites.size(); i++) {
+				pattern[i] = allSites.get(i).calPattern(st2.getSite(i));
+			}		
+	//		System.out.println(Arrays.toString(pattern));
+			//Sum up to one, so take out the last position
+			double[] table = FrequencyUtils.summaryTable(pattern, Site.PATTERN_COUNT);
+			return table;
+		}
+
+public Site getSite(int i) {
+		return allSites.get(i);
+	}
+
+	//	public void addAlignment(BasicAlignment timeAlignment) {
+//		this.saAlignment = timeAlignment;
+//		
+//	}
+	public void addSequence(Sequence s) {
+		this.saAlignment.addSequence(s);
+		
+	}
+	public BasicAlignment getAlignment() {
+		return saAlignment;
+		
+	}
+	@Deprecated
 	public double calKurtosis() {
 		double[] siteDist = new double[allSites.size()];
 		for (int i = 0; i < allSites.size(); i++) {
@@ -226,7 +247,7 @@ public class SiteAlignPerTime {
 		Kurtosis k = new Kurtosis();
 		return k.evaluate(siteDist) ;
 	}
-
+	@Deprecated
 	public double calSkewness() {
 		double[] siteDist = new double[allSites.size()];
 		for (int i = 0; i < allSites.size(); i++) {
@@ -235,7 +256,7 @@ public class SiteAlignPerTime {
 		Skewness s = new Skewness();
 		return s.evaluate(siteDist) ;
 	}
-
+	@Deprecated
 	public double cal2ndMoment() {
 				
 		double[] siteDist = new double[allSites.size()];
@@ -244,18 +265,7 @@ public class SiteAlignPerTime {
 		}
 		SecondMoment s = new SecondMoment();
 		return s.evaluate(siteDist) ;
-
-	}
-
-	public double[] calSitePattern(SiteAlignPerTime st2) {
-
-		int[] pattern = new int[allSites.size()];
-		for (int i = 0; i < allSites.size(); i++) {
-			pattern[i] = allSites.get(i).calPattern(st2.getSite(i));
-		}		
-		//Sum up to one, so take out the last position
-		double[] table = FrequencyUtils.summaryTable(pattern, Site.PATTERN_COUNT);
-		return table;
+	
 	}
 
 

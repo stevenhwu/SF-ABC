@@ -8,13 +8,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import sw.logger.NumberColumn;
 import sw.math.Combination;
 import sw.sequence.Site;
 import sw.util.TraceFactory.TraceType;
 
 
 
-import sw.abc.parameter.NumberColumn;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class TraceUtil {
@@ -37,6 +37,7 @@ public class TraceUtil {
 		summaryStatCollection.put("dist", -1);
 		summaryStatCollection.put("chisq", this.noTime);
 		summaryStatCollection.put("var", this.noTime);
+		summaryStatCollection.put("covar", noComb);
 		summaryStatCollection.put("sitePattern", Site.PATTERN_COUNT*noComb);
 		summaryStatCollection.put("freq", 9);
 	}
@@ -46,11 +47,10 @@ public class TraceUtil {
 
 	}
 	
-	public ArrayList<Trace> createTraceAL(String[] paramList){
+	public ArrayList<Trace> createTraceAll(String[] paramList){
 		
 		ArrayList<Trace> allAL = new ArrayList<Trace>();
 		for (String key : paramList) {
-			System.out.println(key);
 			int noTrace = summaryStatCollection.get(key);	
 			if(noTrace == 0){
 	            System.err.println("Check noParam OR parameter name: "+ key);

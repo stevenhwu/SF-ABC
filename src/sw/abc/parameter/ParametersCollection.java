@@ -73,28 +73,39 @@ public class ParametersCollection {
 		return v;
 	}
 
-	public double[] getValues(){
-		for (int i = 0; i < keys.length; i++) {
-			currentValue[i] = allParams.get(keys[i]).getValue();
-		}
-		return currentValue;
-	}
+
 
 	public void acceptNewValue(int p) {
 		allParams.get(keys[p]).acceptNewValue();
 		
 	}
 
+	public int[] getAcceptCounts() {
+		int[] c = new int[size];
+		for (int i = 0; i < c.length; i++) {
+			c[i] = getAcceptCount(i); 
+		}
+		return c;
+	}
+	
 	public int getAcceptCount(int i) {
 		
 		return allParams.get(keys[i]).getAcceptCount();
 	}
-
+	public double[] getValues(){
+		for (int i = 0; i < keys.length; i++) {
+			currentValue[i] = allParams.get(keys[i]).getValue();
+		}
+		return currentValue;
+	}
 	public double getValues(String s) {
 		
 		return allParams.get(s).getValue();
 	}
-	
+	public double getValues(int i) {
+		
+		return allParams.get(keys[i]).getValue();
+	}
 //	public void setParam(String s, double value) {
 //		params.put(s, value);
 //	}

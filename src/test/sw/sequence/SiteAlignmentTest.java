@@ -1,32 +1,26 @@
 package test.sw.sequence;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import jebl.evolution.alignments.Alignment;
-import jebl.evolution.io.AlignmentImporter;
-import jebl.evolution.io.SequenceImporter;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.taxa.Taxon;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.stat.StatUtils;
-import org.apache.commons.math3.util.MathUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import sw.main.Setting;
 import sw.sequence.Importer;
 import sw.sequence.Site;
-import sw.sequence.SiteAlignPerTime;
 import sw.sequence.SiteAlignment;
 import sw.simulator.SSC;
-import sw.zold.OldSetup;
 import dr.evolution.alignment.SimpleAlignment;
 import dr.evolution.io.NexusImporter;
 
@@ -73,16 +67,17 @@ public class SiteAlignmentTest {
 		
 	}
 	private void setUpB() throws Exception{		
-
+		
 		String dataName = "junit.paup";
 //		String dataDir = userDir+sysSep+"data"+sysSep;
-		String dataDir = "/dev/shm/JUnit/";
-		OldSetup setting = new OldSetup(dataDir, dataName);
-		setting.setObsFile(dataName);
+		String dataDir = "/home/sw167/workspace/SF-ABC/data";
+		Setting setting = new Setting(dataDir, dataDir, dataName);
+//		setting.setObsFile(dataName);
 		int noSeqPerTime = 40;
 		int noTime = 2;
 		int seqLength = 750;
-		setting.setSeqInfo(seqLength, noSeqPerTime, noTime);
+		int timeGap = 400;
+		setting.setSeqInfo(seqLength, noSeqPerTime, noTime, timeGap);
 		setting.setTimeGap(400);
 		sa = new SiteAlignment(setting);
 		Importer imp = new Importer(setting.getDataFile(), noSeqPerTime*noTime);

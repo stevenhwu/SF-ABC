@@ -7,7 +7,7 @@ import org.apache.commons.math.stat.StatUtils;
 
 public class Site {
 
-	public static final int PATTERN_COUNT = 4-1; //4 different patterns, but sum up to one, so take out the last position
+	public static final int PATTERN_COUNT = 5-1; //N different patterns, but sum up to one, so take out the last position
 	private int index;
 	private double[] freqs;
 	private double maxFreq;
@@ -109,55 +109,19 @@ public class Site {
 		return ArrayUtils.indexOf(freqs, maxFreq);
 
 	}
-/*
-	public int calPattern(Site site) {
-
-		int pattern = -1;
-		int maxIndex = getMaxFreqIndex();
-		int maxInd2 = site.getMaxFreqIndex();
-		if (maxIndex == maxInd2) {
-			if (freqs[maxIndex] == 1 && site.getFreqs()[maxIndex] == 1) {
-				pattern = 0; // no change
-			} else if (freqs[maxIndex] == 1 || site.getFreqs()[maxIndex] == 1) {
-				pattern = 1; // 1 time no change
-			} else {
-				pattern = 2; // majority all equal
-			}
-		} else if (site.getFreqs()[maxIndex] != 0 || freqs[maxInd2] != 0) {
-			pattern = 3; // majority and non zero
-		}
-//		else if (site.getFreqs()[maxIndex] == 0 || freqs[maxInd2] == 0) {
-//			pattern = 444;
-//			System.out.println(pattern + "\t"
-//					+ (maxIndex == site.getMaxFreqIndex()) + "\t"
-//					+ Arrays.toString(freqs) + "\t"
-//					+ Arrays.toString(site.getFreqs()));
-//		}
-		else {
-			pattern = 4; // both "majority and zero"
-			// 4 false [0.625, 0.0, 0.0, 0.375] [0.0, 0.0, 0.55, 0.45]
-			// 4 false [0.4, 0.575, 0.0, 0.025] [0.4, 0.0, 0.6, 0.0]
-			// 4 false [0.5, 0.5, 0.0, 0.0] [0.0, 0.4, 0.0, 0.6]	
-//			System.out.println(pattern + "\t"
-//			+ (maxIndex == site.getMaxFreqIndex()) + "\t"
-//			+ Arrays.toString(freqs) + "\t"
-//			+ Arrays.toString(site.getFreqs()));
-			
-		}
-
-		return pattern;
-	}*/
+	
 
 	public int calPattern(Site site) {
 
 		int pattern = -1;
 		int maxIndex = getMaxFreqIndex();
 		int maxInd2 = site.getMaxFreqIndex();
+		
 		if (maxIndex == maxInd2) {
 			if (freqs[maxIndex] == 1 && site.getFreqs()[maxIndex] == 1) {
 				pattern = 0; // no change
 			} else if (freqs[maxIndex] == 1 || site.getFreqs()[maxIndex] == 1) {
-				pattern = 1; // 1 time no change
+				pattern = 1; // 1 time point has no changes
 			} else {
 				pattern = 2; // majority all equal
 			}
@@ -165,16 +129,9 @@ public class Site {
 			pattern = 3; //TEMP majority and non zero
 
 		}
-//		else if (site.getFreqs()[maxIndex] == 0 || freqs[maxInd2] == 0) {
-//			pattern = 444;
-//			System.out.println(pattern + "\t"
-//					+ (maxIndex == site.getMaxFreqIndex()) + "\t"
-//					+ Arrays.toString(freqs) + "\t"
-//					+ Arrays.toString(site.getFreqs()));
-//		}
 		else {
-			pattern = 3; //TEMP both "majority and zero"
-			// too few of them, merge with 3
+			pattern = 4; //diff maj 
+			// OLD: TEMP both "majority and zero", too few of them, merge with 3
 			// 4 false [0.625, 0.0, 0.0, 0.375] [0.0, 0.0, 0.55, 0.45]
 			// 4 false [0.4, 0.575, 0.0, 0.025] [0.4, 0.0, 0.6, 0.0]
 			// 4 false [0.5, 0.5, 0.0, 0.0] [0.0, 0.4, 0.0, 0.6]	
