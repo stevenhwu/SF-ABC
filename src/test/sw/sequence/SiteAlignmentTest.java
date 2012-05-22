@@ -78,7 +78,7 @@ public class SiteAlignmentTest {
 		int seqLength = 750;
 		int timeGap = 400;
 		setting.setSeqInfo(seqLength, noSeqPerTime, noTime, timeGap);
-		setting.setTimeGap(400);
+		
 		sa = new SiteAlignment(setting);
 		Importer imp = new Importer(setting.getDataFile(), noSeqPerTime*noTime);
 		try {
@@ -220,11 +220,9 @@ public class SiteAlignmentTest {
 
 	}
 	
-	private void name() {
-		
-	}
+
 	
-	private int searchTimeIndex(Taxon name, String[] timeLabel) {
+	private static int searchTimeIndex(Taxon name, String[] timeLabel) {
 		int index = -1;
 		String s = name.getName();
 		for (int i = 0; i < timeLabel.length; i++) {

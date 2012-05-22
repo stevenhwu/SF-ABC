@@ -1,6 +1,7 @@
 package test.sw.main;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -42,13 +43,13 @@ public class SettingTest {
 		setting.setParamList(paramListName);
 		setting.setStatList(statList);				
 		
-		setting.setSummarySettingString("summarySetting");
+//		setting.setSummarySettingString("summarySetting");
 		setting.setSeqInfo(750, 50, 3, 400);
 		
 		assertArrayEquals(paramListName, setting.getParamList() );
 		assertArrayEquals(statList, setting.getStatList() );
 		
-		assertEquals("summarySetting", setting.getSummarySettingString());
+		assertEquals("summarySetting", setting.toString());
 		
 		assertEquals(750, setting.getSeqLength() );
 		assertEquals(50, setting.getNoSeqPerTime() );
@@ -56,14 +57,9 @@ public class SettingTest {
 		assertEquals(400, setting.getTimeGap() );
 		assertEquals(50*3, setting.getNoTotalSeq());
 		
-		assertArrayEquals(new int[]{750, 50*3, 3, 400}, setting.getAlignmentInfo());
-		assertArrayEquals(new int[]{3, 50}, setting.getTimeInfo());
-		
-		
-		assertEquals("wDir/", setting.getWorkingDir());
 		assertEquals("wDir/dataName", setting.getDataFile());
 		assertEquals("wDir/dataName_regressionCoef.coef", setting.getRegressionCoefFile());
-		assertEquals(true, setting.isDoRegression());
+		assertEquals(true, setting.getDoRegression());
 		assertEquals("outDir/dataName_summary.log", setting.getResultOutFile());
 		
 	}

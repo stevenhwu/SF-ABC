@@ -6,9 +6,9 @@ import sw.math.RandomGenerator;
 public class MH {
 
 	
-	public MH() {
-		// TODO Auto-generated constructor stub
-	}
+//	public MH() {
+//		// TODO Auto-generated constructor stub
+//	}
 
 	public static boolean accept(double logq) {
 		return accept(0, logq);

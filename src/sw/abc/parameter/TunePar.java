@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.commons.math.stat.StatUtils;
+import org.junit.Assert;
 
 import sw.math.NormalDistribution;
 
@@ -252,7 +253,8 @@ public class TunePar {
 
 	}
 	public double[] getAccRate() {
-
+//		System.out.println(Arrays.toString(accRate) +"\t"+ Arrays.toString(getEachAccRate()));
+		Assert.assertArrayEquals(accRate, getEachAccRate(), 0.00001);
 		return accRate;
 	}
 	

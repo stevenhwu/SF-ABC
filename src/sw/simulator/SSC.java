@@ -2,22 +2,19 @@ package sw.simulator;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
-
-import sw.abc.parameter.ParametersCollection;
-import sw.main.Setting;
 
 import jebl.evolution.alignments.Alignment;
 import jebl.evolution.coalescent.ConstantPopulation;
 import jebl.evolution.trees.RootedTree;
 import jebl.evolution.treesimulation.TreeSimulator;
+import sw.abc.parameter.ParametersCollection;
+import sw.main.Setting;
 
 import com.google.common.primitives.Doubles;
 
 import dr.evolution.io.Importer.ImportException;
 import dr.evolution.io.NewickImporter;
 import dr.evolution.tree.Tree;
-import dr.evolution.util.Taxon;
 import dr.evomodel.sitemodel.GammaSiteModel;
 import dr.evomodel.sitemodel.SiteModel;
 import dr.evomodel.substmodel.FrequencyModel;

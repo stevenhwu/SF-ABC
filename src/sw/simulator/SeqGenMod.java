@@ -1,7 +1,5 @@
 package sw.simulator;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +7,6 @@ import jebl.evolution.alignments.Alignment;
 import jebl.evolution.alignments.BasicAlignment;
 import jebl.evolution.sequences.BasicSequence;
 import jebl.evolution.sequences.NucleotideState;
-import jebl.evolution.sequences.Nucleotides;
 import jebl.evolution.sequences.SequenceType;
 import jebl.evolution.sequences.State;
 import jebl.evolution.taxa.Taxon;

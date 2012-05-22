@@ -1,18 +1,13 @@
 package test.sw.sequence;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.text.TabableView;
-
 import jebl.evolution.alignments.BasicAlignment;
-import jebl.evolution.alignments.Pattern;
 import jebl.evolution.sequences.BasicSequence;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.SequenceType;
-import jebl.evolution.sequences.State;
 import jebl.evolution.taxa.Taxon;
 
 import org.junit.After;
@@ -21,9 +16,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import dr.evolution.alignment.SimpleAlignment;
-
 import sw.simulator.SSC;
+import dr.evolution.alignment.SimpleAlignment;
 
 public class SiteAlignPerTimeTest {
 

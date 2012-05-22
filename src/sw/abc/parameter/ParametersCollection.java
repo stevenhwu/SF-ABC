@@ -1,6 +1,5 @@
 package sw.abc.parameter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.commons.math.random.RandomDataImpl;

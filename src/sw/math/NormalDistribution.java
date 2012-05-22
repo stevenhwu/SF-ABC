@@ -62,8 +62,6 @@ public class NormalDistribution extends RandomGenerator implements DistributionP
 
 	@Override
 	public double getLogq() {
-		// TODO Auto-generated method stub
-//		logq=1;
 		return logq;
 	}
 	

@@ -11,10 +11,6 @@ import com.google.common.primitives.Doubles;
 
 public class AlignmentStatFlex {
 
-	//
-	// private double statMu;
-	// private double statTheta;
-
 	private SummaryStat sumStat;
 
 	// Alignment properties
@@ -132,8 +128,8 @@ public class AlignmentStatFlex {
 		for (int i = 0; i < summaryStatAll.length; i++) {
 			//
 			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
-			double dif = summaryStatAll[i] - obsStat[i];
-			double s = Math.abs(dif / obsStat[i] );
+
+			double s = calAbsDiff(obsStat[i], summaryStatAll[i]);
 //			System.out.println(s+"\t"+summaryStatAll[i] +"\t"+ obsStat[i]+"\t"); 
 			delta += s;
 			// System.out.print(statAll[i] +"\t");
@@ -147,6 +143,8 @@ public class AlignmentStatFlex {
 
 	}
 
+	
+	
 	public void calSumStat() {
 		summaryStatAll = sumStat.calStat(getCurStat(statsList));
 	}
@@ -175,6 +173,12 @@ public class AlignmentStatFlex {
 	}
 
 
-
+	public static double calAbsDiff(double expectStat, double obsStat){
+		double diff = (obsStat - expectStat);
+		double stat = Math.abs ( (diff*diff) /expectStat); 
+//		double stat = ( (diff*diff) /expectStat);
+				
+		return stat;
+	}
 
 }

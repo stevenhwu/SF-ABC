@@ -1,6 +1,6 @@
 package test.sw.simulator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import jebl.evolution.alignments.Alignment;
@@ -27,16 +26,14 @@ import jebl.evolution.treesimulation.CoalescentIntervalGenerator;
 import jebl.evolution.treesimulation.IntervalGenerator;
 import jebl.evolution.treesimulation.TreeSimulator;
 
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.hamcrest.core.Is;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-//import dr.app.seqgen.SeqGen;
+import sw.simulator.SSC;
+import sw.simulator.SeqGenMod;
 import dr.evolution.io.Importer;
 import dr.evolution.io.NexusImporter;
 import dr.evolution.io.TreeImporter;
@@ -46,12 +43,6 @@ import dr.evomodel.sitemodel.SiteModel;
 import dr.evomodel.substmodel.FrequencyModel;
 import dr.evomodel.substmodel.HKY;
 import dr.math.matrixAlgebra.Vector;
-
-
-
-
-import sw.simulator.SSC;
-import sw.simulator.SeqGenMod;
 
 public class SSCTest {
 

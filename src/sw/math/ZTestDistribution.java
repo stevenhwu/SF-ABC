@@ -29,7 +29,6 @@ public class ZTestDistribution extends RandomGenerator implements DistributionPr
 
 	@Override
 	public double getLogPrior(double x) {
-		// TODO Auto-generated method stub
 		return 1;
 	}
 

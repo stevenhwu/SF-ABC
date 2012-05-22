@@ -392,24 +392,6 @@ public class SiteAlignment {
 
 	}
 
-	@Deprecated
-	private void parseAlignmentOld() {
-		
-		List<Sequence> allSeq = ali.getSequenceList();
-		st = new ArrayList<SiteAlignPerTime>();
-		//TODO: how to make this faster?
-		for (int i = 0; i < noTime; i++) {
-			st.add(new SiteAlignPerTime(noSite));
-		}
-	
-		for (Sequence seq : allSeq) {
-			String name = seq.getTaxon().getName();
-			int index = parseTaxonNameToTime(name);
-			st.get(index).addSequence(seq);
-	
-		}
-	
-	}
 
 	@Deprecated
 	public static ArrayList<Site> calcFreq(SimpleAlignment sa,

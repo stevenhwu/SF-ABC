@@ -9,7 +9,6 @@ package sw.simulator;
  * Lesser Gnu Public Licence (LGPL)
  */
 
-import jebl.evolution.coalescent.ConstantPopulation;
 import jebl.evolution.coalescent.DemographicFunction;
 import jebl.evolution.treesimulation.IntervalGenerator;
 

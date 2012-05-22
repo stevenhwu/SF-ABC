@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.math.stat.StatUtils;
-import org.apache.commons.math.stat.descriptive.moment.Kurtosis;
-import org.apache.commons.math.stat.descriptive.moment.SecondMoment;
-import org.apache.commons.math.stat.descriptive.moment.Skewness;
-import sw.math.FrequencyUtils;
-
-
 import jebl.evolution.alignments.BasicAlignment;
 import jebl.evolution.alignments.Pattern;
 import jebl.evolution.sequences.Sequence;
 import jebl.evolution.sequences.State;
+
+import org.apache.commons.math.stat.StatUtils;
+import org.apache.commons.math.stat.descriptive.moment.Kurtosis;
+import org.apache.commons.math.stat.descriptive.moment.SecondMoment;
+import org.apache.commons.math.stat.descriptive.moment.Skewness;
+
+import sw.math.FrequencyUtils;
 
 public class SiteAlignPerTime {
 

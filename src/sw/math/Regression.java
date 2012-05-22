@@ -1,6 +1,7 @@
 package sw.math;
 
 import java.util.Arrays;
+
 import org.apache.commons.math.stat.regression.OLSMultipleLinearRegression;
 
 import sw.util.Trace;
