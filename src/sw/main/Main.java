@@ -13,8 +13,8 @@ import jebl.evolution.alignments.Alignment;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.NexusImporter;
 
+import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.commons.math3.stat.StatUtils;
-import org.netlib.util.doubleW;
 
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaPopsize;
@@ -28,7 +28,6 @@ import sw.math.Combination;
 import sw.math.Scale;
 import sw.math.TruncatedNormalDistribution;
 import sw.math.UniformDistribution;
-import sw.sequence.SiteAlignment;
 import sw.simulator.SSC;
 import sw.util.TraceUtil;
 import flanagan.analysis.Regression;
@@ -41,16 +40,19 @@ public class Main {
 	 * @author Steven Wu
 	 * @version $Id$
 	 */
-	private static final int TUNESIZE = 50 ;
-	private static final int TUNEGROUP = 6;
-	
+	private static RandomDataImpl rd = new RandomDataImpl();
 	
 	private static final int NO_SEQ_PER_TIME = 50;
 	private static final int SEQ_LENGTH = 750;
 	private static final int NO_TIME_POINT = 3;
 	private static final int TIME_GAP = 400;
-	private static final int NO_REPEAT_CAL_ERROR = 1000;
-	private static final int NO_REPEAT_PER_PARAMETERS = 100;
+	
+	private static final int TUNESIZE = 500 ; //500
+	private static final int TUNEGROUP = 8; //8
+	private static final int NO_REPEAT_CAL_ERROR = 1000; //1000
+	private static final int NO_REPEAT_PER_PARAMETERS = 100; //100
+	
+	private static final double initScale = 0.75;
 //	private static String noSimPerPar = "1";
 	
 	
@@ -67,21 +69,17 @@ public class Main {
 	public static void main(String[] args) {
 		
 		startSimulation(args);
-//		SSC ssc = new SSC(3,5,100);
-
        
 	}
 	
 	public static void startSimulation(String[] args) {
 		
-		String obsDataName = args[0];
-		
-		int noItePreprocess = Integer.parseInt(args[1]);
-		int noIteMCMC = Integer.parseInt(args[2]); 
-		int thinning = Integer.parseInt(args[3]);
+		final String obsDataName = args[0];
+		final int noItePreprocess = Integer.parseInt(args[1]);
+		final int noIteMCMC = Integer.parseInt(args[2]); 
+		final int thinning = Integer.parseInt(args[3]);
 //		double error = Double.parseDouble(args[4]);
  		
-
 		Setting setting = ABCSetup(obsDataName);
 		setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
 		setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
@@ -89,8 +87,9 @@ public class Main {
 		
 		generateStatFile(setting);
 		
-		System.out.println(setting.toString());
+		
 		try {
+			System.out.println(setting.toString());
 			ABCUpdateMCMC(setting);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -101,9 +100,7 @@ public class Main {
 
 	public static Setting ABCSetup(String obsDataName) {
 
-		
-		
-		
+			
 		String obsDataNamePrefix = obsDataName.split("\\.")[0];
 		String workingDir = System.getProperty("user.dir")+File.separatorChar+"TemplateFiles"+File.separatorChar;
 		String outputDir = workingDir+obsDataNamePrefix+File.separatorChar;
@@ -122,14 +119,14 @@ public class Main {
 		double muLower = muMean / 10;
 		double muUpper = muMean * 10;
 		
-		double thetaMean = initValue[1];
-		double thetaLower = thetaMean / 5;;
-		double thetaUpper = thetaMean * 5;
+		double popSizeMean = initValue[1];
+		double popSizeLower = popSizeMean / 5;
+		double popSizeUpper = popSizeMean * 5;
 		
 		ParaMu unifMu = new ParaMu(new UniformDistribution(muLower, muUpper));
-		ParaPopsize unifPopsize = new ParaPopsize(new UniformDistribution(thetaLower, thetaUpper));
+		ParaPopsize unifPopsize = new ParaPopsize(new UniformDistribution(popSizeLower, popSizeUpper));
 	
-		double initScale = 0.75;
+		
 		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
 
 		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
@@ -137,8 +134,8 @@ public class Main {
 		pMu.setProposal(new Scale(initScale ));
 //		pMu.setProposal(new NormalDistribution(muMean, muMean/5));
 		
-		ParaPopsize pPop = new ParaPopsize(new TruncatedNormalDistribution(thetaMean, thetaMean/2, thetaLower, thetaUpper));
-		pPop.setInitValue(thetaMean);
+		ParaPopsize pPop = new ParaPopsize(new TruncatedNormalDistribution(popSizeMean, popSizeMean/2, popSizeLower, popSizeUpper));
+		pPop.setInitValue(popSizeMean);
 		pPop.setProposal(new Scale(initScale ));
 //		pPop.setProposal(new NormalDistribution(thetaMean, thetaMean/5));
 
@@ -168,15 +165,14 @@ public class Main {
 		if(setting.getDoRegression()){
 			
 			System.out.println("Preprocessing: semi-auto regression");
-			int nRun = setting.getNoItePreprocess();
-			int thinning = setting.getThinning();
-			int noTime = setting.getNoTime();
+			final int nRun = setting.getNoItePreprocess();
+			final int thinning = setting.getThinning();
+			final int noTime = setting.getNoTime();
 			String[] paramList = setting.getParamList();
 			String[] statsList = setting.getStatList();
 	
 			ParametersCollection allParUniformPrior = setting.getAllParPrior();
 
-			SiteAlignment sa = new SiteAlignment(setting);
 			AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
 			
 			SSC simulator = new SSC(setting);
@@ -186,13 +182,12 @@ public class Main {
 			ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAll(statsList));
 	
 
-			long startTime = System.currentTimeMillis();
+			final long startTime = System.currentTimeMillis();
 			for (int i = 0; i < nRun; i++) {
 				allParUniformPrior.getNextProir();
 									
 				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
-				sa.updateJEBLAlignment(jeblAlignment);
-				newStat.updateSiteAlignment(sa);
+				newStat.updateAlignment(jeblAlignment);
 
 				traceLogParam.logValues( allParUniformPrior.getValues() );
 				traceLogStats.logValues( newStat.getCurStat(statsList) );
@@ -235,148 +230,94 @@ public class Main {
 		setting.setError(error);
 		
 		return setting;
-		
-		
-		 
 	
 	}
 
+	public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
 
-public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
-			
-	//		nRun = 10;
-	//		nRepeat = 10;
-			
-			SSC simulator = new SSC(setting);
-			
-			SiteAlignment sa = new SiteAlignment(setting);
-			AlignmentStatFlex[] newStat = new AlignmentStatFlex[nRepeat];
-			double[] repeatStat = new double[nRepeat];
-			for (int i = 0; i < newStat.length; i++) {
-				newStat[i] = new AlignmentStatFlex(setting);
-			}
-			
-			ParametersCollection allParUniformPrior = setting.getAllParPrior();
-	
-			
-	//		newStat.setObsStat(setting.getObsStat()) ;
-	//		setting.setObsStat( calObsStat(setting) );
-			
-			int[][] listAllComb = Combination.ListCombination(nRepeat);
-			int noOfComb = listAllComb.length;
-			double[] expectedError = new double[noOfComb*2];
-			double[] meanOfMean = new double[nRun];
-			for (int i = 0; i < nRun; i++) {
-			
-					allParUniformPrior.getNextProir();
-					
-					for (int j = 0; j < nRepeat; j++) {
-						Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
-						sa.updateJEBLAlignment(jeblAlignment);
-						
-						newStat[j].updateSiteAlignment(sa);	
-						newStat[j].calSumStat();
-						repeatStat[j] = newStat[j].getSummaryStatAll()[0];
-	//					System.out.println(newStat[j].calDelta());
-	//					System.out.println(Arrays.toString(newStat[j].getSummaryStatAll()));
-	//					System.out.println(repeatStat[j]);
-	//					System.out.println();
-					}
-					
-				for (int j = 0; j < noOfComb; j++) {
-					double s1 = repeatStat[listAllComb[j][0]]; 
-					double s2 = repeatStat[listAllComb[j][1]];
-					expectedError[j] = AlignmentStatFlex.calAbsDiff(s1, s2);
-					expectedError[j+noOfComb] = AlignmentStatFlex.calAbsDiff(s2, s1);
-	//				System.out.println(s1 +"\t"+ s2 +"\t"+ expectedError[j] +"\t"+ expectedError[j+noOfComb]);
-					// System.out.println(listAllComb[j][0] +"\t"+
-					// listAllComb[j][1]);
-	
-				}
-				meanOfMean[i] = StatUtils.mean(expectedError);
-			}
-			return(StatUtils.mean(meanOfMean));
-	
+		// nRun = 10;
+		// nRepeat = 10;
+
+		ParametersCollection allParUniformPrior = setting.getAllParPrior();
+		SSC simulator = new SSC(setting);
+		AlignmentStatFlex[] newStat = new AlignmentStatFlex[nRepeat];
+		for (int i = 0; i < newStat.length; i++) {
+			newStat[i] = new AlignmentStatFlex(setting);
 		}
+
+		double[] repeatStat = new double[nRepeat];
+		int[][] listAllComb = Combination.ListCombination(nRepeat);
+		int noOfComb = listAllComb.length;
+		double[] expectedError = new double[noOfComb * 2];
+		double[] meanOfMean = new double[nRun];
+		
+		for (int i = 0; i < nRun; i++) {
+			allParUniformPrior.getNextProir();
+			
+			for (int j = 0; j < nRepeat; j++) {
+				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
+				newStat[j].updateAlignmentAndStat(jeblAlignment);
+				repeatStat[j] = newStat[j].getSummaryStatAll()[0];
+			}
+
+			for (int j = 0; j < noOfComb; j++) {
+				double s1 = repeatStat[listAllComb[j][0]];
+				double s2 = repeatStat[listAllComb[j][1]];
+				expectedError[j] = AlignmentStatFlex.calAbsDiff(s1, s2);
+				expectedError[j + noOfComb] = AlignmentStatFlex.calAbsDiff(s2, s1);
+//				System.out.println(s1 +"\t"+ s2 +"\t"+ expectedError[j]
+//						+"\t"+ expectedError[j+noOfComb]);
+//				 	System.out.println(listAllComb[j][0] +"\t"+
+//				 			listAllComb[j][1]);
+
+			}
+			meanOfMean[i] = StatUtils.mean(expectedError);
+		}
+		return (StatUtils.mean(meanOfMean));
+
+	}
 
 	//	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void ABCUpdateMCMC(Setting setting) throws Exception {
 
-		int nRun = setting.getNoIteMCMC();
-		int thinning = setting.getThinning();
-		double error = setting.getError();
-		
-		System.out.println("Start ABCMCMC");
-		System.out.println("Tolerance:\t"+error);
-		long startTime = System.currentTimeMillis();
+		final long startTime = System.currentTimeMillis();
+		final int nRun = setting.getNoIteMCMC();
+		final int thinning = setting.getThinning();
+		final int noTime = setting.getNoTime();
 
-		
-		SSC simulator = new SSC(setting);
+		double error = setting.getError();
 		ParametersCollection allPar = setting.getAllPar();
 		TunePar tPar = setting.getTunePar();
+		
+		SSC simulator = new SSC(setting);
 		SavePar sPar = new SavePar(TUNESIZE);
-		
-		int noPar = allPar.getSize();
-		int noTime = setting.getNoTime();
-		double[] saveGap = new double[noPar];
-		
-		
-		
-		SiteAlignment sa = new SiteAlignment(setting);
 		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
 		newStat.setObsStat(setting.getObsStat()) ;
 
-//		String[] paramList = new String[setting.getParamList().length+1];
-//		System.arraycopy(setting.getParamList(), 0, paramList, 0, setting.getParamList().length);
-//		paramList[setting.getParamList().length] = "Gap";
-//		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAL(paramList));
-		
-		TraceUtil ut = new TraceUtil(noTime, noPar);
+		TraceUtil ut = new TraceUtil(noTime, allPar.getSize());
 		ArrayLogFormatterD traceLog = new ArrayLogFormatterD(6, ut.createTraceAll(setting.getParamList()));
-		double[] logValues = allPar.getValues();
-		traceLog.logValues( logValues );
+		traceLog.logValues( allPar.getValues() );
 
 		PrintWriter oResult = new PrintWriter(new BufferedWriter(new FileWriter(setting.getResultOutFile())));
 		oResult.println("# "+setting.getDataFile()+"\t"+setting.toString());
 		oResult.println("Ite\t" + traceLog.getLabels());
 		oResult.flush();
-
-//		double[] deltaDup = new double[10];
 		
 		
+		System.out.println("Start ABCMCMC\nTolerance:\t"+error);
 		for (int i = 0; i < nRun; i++) {
-
-			
 			for (int p = 0; p < allPar.getSize(); p++) {
 				allPar.getNextProposal(p);
 
 				Alignment jeblAlignment = simulator.simulateAlignment(allPar);
-				sa.updateJEBLAlignment(jeblAlignment);
-				newStat.updateSiteAlignment(sa);
-	
-
+				newStat.updateAlignmentAndStat(jeblAlignment);
 				
-				
-				saveGap[p] = newStat.calDelta();
-//				saveGap[p] = newStat.calDeltaSep(obsStat, p);
-				
+				double saveGap = newStat.calDelta();
 
-				// for (int dup = 0; dup < deltaDup.length; dup++) {
-				// newStat.addParIndex(cFile.getAllPar());
-				// deltaDup[dup] = newStat.calDelta(obsStat);
-				// }
-				// double delta = newStat.calMultiDelta(obsStat);
-				// saveGap[p] = StatUtils.mean(deltaDup);
-				// System.out.println(saveGap[p]+"\t"+StatUtils.min(deltaDup)+"\t"+Arrays.toString(deltaDup));
-
-				if (saveGap[p] < error) {
-					// newStat.calIndStat2(obsStat);
-//					 System.out.print("FreqGap: " + saveGap[p]+"\n");
-
+				if (saveGap < error) {
 					if (MH.accept(allPar.getParameter(p))) { //TODO: think about this
 						allPar.acceptNewValue(p);
 					}
-
 				}
 			}
 			sPar.add(allPar);
@@ -384,68 +325,55 @@ public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
 			if (i % TUNESIZE == 0 & i!=0) {
 				
 				tPar.update(sPar, i);
-//				System.out.println(Arrays.toString(tPar.getTunePar()));
-//				error = updateTol(tPar.getAccRate(), error);
-//				System.out.println(error);
-				for (int j = 0; j < allPar.getSize(); j++) {
-//					TODO recode this
-					allPar.getParameter(j).updateProposalDistVar(tPar.getTunePar(j));
-				}
-//				double accRate = tPar.getMeanAccRate();
-//				error = updateErrorRate(i, nRun, error, accRate );
-				
-				
-				if (allPar.getAcceptCount(0) == 0 & allPar.getAcceptCount(1) == 0 & i>(TUNESIZE*10)){
-					allPar.getNextProir();
-				}
+				allPar.updateProposalDistVar(tPar);
+				error = updateTol(tPar.getAccRate(), error);
+
+//				for (int j = 0; j < allPar.getSize(); j++) {
+////					TODO recode this
+//					allPar.getParameter(j).updateProposalDistVar(tPar.getTunePar(j));
+//				}
+//				double[] accRate = tPar.getEachAccRate();
+//				if ((accRate[0] == 0.0) & (accRate[1] == 0) & i>(TUNESIZE*10)){
+////					allPar.getNextProir();
+//				}
 				
 			}
 			
 			if ((i % thinning) == 0) {
-				System.out.println("Ite:\t"+i + "\t"+ Arrays.toString(allPar.getAcceptCounts()) + "\t" + error +"\t"+ 
+				System.out.println("Ite:\t"+i + "\t"+ Arrays.toString(allPar.getAcceptCounts()) + "\t" + 
+						error +"\t"+ 
+						allPar.getParameter(0).getProposalDistVar() +"\t"+ allPar.getParameter(1).getProposalDistVar() +"\t"+ 
 						Arrays.toString(tPar.getEachAccRate()) + "\t" +
 						Arrays.toString(allPar.getValues()) );
 
-//				logValues = Doubles.concat(new double[]{allPar.get(0).getValue(), allPar.get(1).getValue()}, saveGap);
-				logValues = allPar.getValues();
-				traceLog.logValues(logValues);
-//				TraceUtil.logValue(tMu, allPar.get(0).getValue());
-//				TraceUtil.logValue(tTheta, allPar.get(1).getValue());
-//				TraceUtil.logValue(tGap, saveGap);
-
-				// TraceUtil.logValue(tDist, 0);
-
+				traceLog.logValues(allPar.getValues());
 				String s = i + "\t" + traceLog.getLine(i / thinning);
-
-				// System.out.println(s + "\t" + setting.getWorkingDir());
 				oResult.println(s);
 				oResult.flush();
+				
 			}
 
 		}
-		System.out.println(Arrays.toString( tPar.getEachAccRate() ));
 		oResult.close();
-
+		
+		System.out.println(Arrays.toString( tPar.getEachAccRate() ));
 		System.out.println("Time:\t"+ Math.round((System.currentTimeMillis() - startTime) / 60e3) + " mins");
-		// System.out
-		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(0))));
-		// System.out
-		// .println(StatUtils.mean(TraceUtil.toPrimitive(allTrace.get(1))));
-
+		
 	}
 
 
 
 
-	private static double updateTol(double[] ds, double error) {
-		double rate = StatUtils.mean(ds);
+	private static double updateTol(double[] accRate, double error) {
+		
+		double aveAccRate = StatUtils.mean(accRate);
 		
 		double newError = error;
-		if(rate > 0.5){
-			newError -= 0.02;
-		}
-		if(rate < 0.1){
-			newError += 0.02;
+		if (aveAccRate > 0.5) {
+			newError -= rd.nextUniform(0, 0.02);
+		} 
+		if (aveAccRate < 0.1) {
+			newError += rd.nextUniform(0, 0.02);
 		}
 		return newError;
 	}
@@ -489,28 +417,27 @@ public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
 
 	private static double[] calObsStat(Setting setting) {
 	
-		System.out.println("Calculate observed stat");
-		SiteAlignment sa = new SiteAlignment(setting);
+//		System.out.println("Calculate observed stat");
+//		SiteAlignment sa = new SiteAlignment(setting);
 		
 //		Importer imp = new Importer(setting.getDataFile());
 		AlignmentStatFlex aliStat = new AlignmentStatFlex(setting);
 
 		try {
 
-			NexusImporter imp = new NexusImporter(new FileReader(
-					setting.getDataFile()));
-			sa.updateAlignment(imp.importAlignments());
+			NexusImporter imp = new NexusImporter(new FileReader(setting.getDataFile()));
+			Alignment jeblAlignment = imp.importAlignments().get(0);
+			aliStat.updateAlignmentAndStat(jeblAlignment);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ImportException e) {
 			e.printStackTrace();
 		}
-
-		aliStat.updateSiteAlignment(sa);
-
-		aliStat.calSumStat();
+//
+//		aliStat.updateSiteAlignment(sa);
+//		aliStat.calSumStat();
 	
-		System.out.println("Observed stat:\t"+aliStat.toString());
+		System.out.println("Calculating observed stat:\t"+aliStat.toString());
 		
 		return aliStat.getSummaryStatAll();
 	
@@ -560,8 +487,6 @@ public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
 System.out.println(lm.getAdjustedCoefficientOfDetermination());
 		}
 		else{
-
-
 			
 			Regression lm = new Regression(xxData, traceLogParam.toArray(0) );
 			lm.linear();	

@@ -182,7 +182,7 @@ public class SiteAlignmentTest {
 	@Test
 	public void testDifferentAlignmentClass() throws Exception {
 		
-		String infile = "simulated2.seq001.nex";
+		String infile = "simulated.seq001.nex";
 		int noTime = 3;
 		int timeGap = 1000;
 		jebl.evolution.io.NexusImporter ni = new jebl.evolution.io.NexusImporter(new FileReader(infile));
@@ -199,7 +199,7 @@ public class SiteAlignmentTest {
 		SimpleAlignment[] allSiteAlignment = new SimpleAlignment[noTime];
 		SimpleAlignment temp = new SimpleAlignment();
 		
-		String[] timeLabel = {"_0.0","1000.0","2000.0"}; 
+		String[] timeLabel = {"_0.0","_5.0"}; 
 		Arrays.fill(allSiteAlignment, temp);
 		for (Sequence s : allS) {
 			Taxon name = s.getTaxon();

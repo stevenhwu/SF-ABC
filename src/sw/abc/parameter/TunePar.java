@@ -43,8 +43,8 @@ public class TunePar {
 	private double tuneStepSize = TUNESTEPSIZE;
 //	private double tuneInitSize = TUNEINITSIZE;
 	// private double accTol = Constant.ACCTOL;
-	private double accLower = OPTIMRATE - ACCTOL;
-	private double accUpper = OPTIMRATE + ACCTOL;
+	private double accLower = 0.1;//OPTIMRATE - ACCTOL;
+	private double accUpper = 0.4;//OPTIMRATE + ACCTOL;
 	private double[] initValue;
 
 	private static RandomDataImpl rd = new RandomDataImpl();
@@ -146,21 +146,20 @@ public class TunePar {
 
 	private double checkScale(double tp, double d) {
 
+	
 		if (d >= accUpper) {
 			tp -= rd.nextUniform(0, tuneStepSize);
 		} else if (d < accLower) {
 			tp += rd.nextUniform(0, tuneStepSize);
-
 		}
-
-		if (tp <= 0 ){
-			tp = 0.05;
+		
+		if (tp <= 0.25){
+			tp = 0.25;
 		}
-		if ( tp >= 1) {
-			tp = 0.95;
+		if ( tp >= 0.9) {
+			tp = 0.9;
 		}
-			
-
+		
 		return tp;
 
 	}

@@ -17,9 +17,9 @@ public class Scale implements  DistributionProposal {
 	@Override
 	public double next(double mean) {
 	    
-	    double scale = (scaleFactor + (RandomGenerator.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)));
+	    final double scale = (scaleFactor + (RandomGenerator.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)));
 	    logq = -Math.log(scale);
-	    double newValue = scale * mean;
+	    final double newValue = scale * mean;
 
 		return newValue;
 	}
@@ -34,7 +34,14 @@ public class Scale implements  DistributionProposal {
 	@Override
 	public void updateVar(double sFactor) {
 		
-		this.scaleFactor = sFactor;
+		scaleFactor = sFactor;
+	}
+
+
+
+	@Override
+	public double getVar() {
+		return scaleFactor;
 	}
 
 

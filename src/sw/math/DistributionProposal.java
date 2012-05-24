@@ -9,5 +9,7 @@ public interface DistributionProposal  {
 	public double getLogq();
 
 	public void updateVar(double var);
+
+	public double getVar();
 	
 }

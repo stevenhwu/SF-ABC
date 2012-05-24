@@ -273,7 +273,7 @@ public class SiteAlignment {
 		
 		if( importAlignments.size() == 1){
 			updateJEBLAlignment(importAlignments.get(0));
-			List<Sequence> s = importAlignments.get(0).getSequenceList();
+//			List<Sequence> s = importAlignments.get(0).getSequenceList();
 	
 		}
 		else{

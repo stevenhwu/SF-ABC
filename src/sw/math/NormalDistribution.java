@@ -92,4 +92,9 @@ public class NormalDistribution extends RandomGenerator implements DistributionP
 		
 	}
 
+	@Override
+	public double getVar() {
+		return sigma;
+	}
+
 }

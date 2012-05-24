@@ -36,5 +36,8 @@ public interface Parameters {
 	public abstract int getAcceptCount();
 
 	public void updateProposalDistVar(double var);
+	
+
+	public double getProposalDistVar();
 
 }

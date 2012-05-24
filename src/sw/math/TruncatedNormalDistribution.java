@@ -254,7 +254,7 @@ public class TruncatedNormalDistribution implements DistributionPrior {
 		double newX;
 		do {
 			newX = nd.init();
-		} while (newX < lower && newX > upper);
+		} while (newX < lower || newX > upper);
 		return newX;
 	}
 }

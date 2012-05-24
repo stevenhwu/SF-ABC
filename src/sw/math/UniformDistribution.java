@@ -52,4 +52,10 @@ public class UniformDistribution extends RandomGenerator implements Distribution
 		// do nothing
 	}
 
+
+	@Override
+	public double getVar() {
+		return 0;
+	}
+
 }

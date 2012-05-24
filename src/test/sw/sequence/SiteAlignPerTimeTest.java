@@ -71,9 +71,9 @@ public class SiteAlignPerTimeTest {
 			Taxon t = Taxon.getTaxon(seq.getTaxon().toString());
 			assertEquals(actualSeq, jAlignment.getSequence(t).getString() );
 		}
-		System.out.println(jeblAlignment.getPatternCount());
-		System.out.println(jeblAlignment.getSiteCount());
-		System.out.println(jeblAlignment.getPatternLength());
+		assertEquals(750, jeblAlignment.getPatternCount());
+		assertEquals(750, jeblAlignment.getSiteCount());
+		assertEquals(20,  jeblAlignment.getPatternLength());
 		
 	
 	}

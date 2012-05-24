@@ -159,8 +159,8 @@ public class SSCTest {
 		try {
 			RootedTree[] trees = new RootedTree[REPLICATE_COUNT];
 
-			System.err.println("Simulating " + REPLICATE_COUNT + " trees of " + samplingTimes.length + " tips:");
-			System.err.print("[");
+//			System.err.println("Simulating " + REPLICATE_COUNT + " trees of " + samplingTimes.length + " tips:");
+//			System.err.print("[");
 			for (int i = 0; i < REPLICATE_COUNT; i++) {
 
 				trees[i] = sim.simulate(intervals, true);
@@ -168,7 +168,7 @@ public class SSCTest {
 					System.err.print(".");
 				}
 			}
-			System.err.println("]");
+//			System.err.println("]");
 
 			Writer writer = new FileWriter("simulated.trees");
 			NexusExporter exporter = new NexusExporter(writer);
@@ -187,7 +187,7 @@ public class SSCTest {
 	@Test
 	public void testSeqGen() {
 		//from BEAST
-		System.out.println("testSeqGen");
+//		System.out.println("testSeqGen");
 		String treeFileName = "simulated.trees";
 		String outputFileStem = "simulated.seq";
 
@@ -277,12 +277,12 @@ public class SSCTest {
 	    HKY hky = new HKY(kappa,freqModel);
 	    double[] probs = new double[16];
 	    hky.getTransitionProbabilities(time,probs);
-	    System.out.println("kappa="+kappa+" probs = "+new Vector(probs));
+//	    System.out.println("kappa="+kappa+" probs = "+new Vector(probs));
 	    
 	    kappa = 2;
 	    hky.setKappa(kappa);
 	    hky.getTransitionProbabilities(time,probs);
-	    System.out.println("kappa="+kappa+" probs = "+new Vector(probs));
+//	    System.out.println("kappa="+kappa+" probs = "+new Vector(probs));
 		
 	
 	}

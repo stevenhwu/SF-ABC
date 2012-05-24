@@ -3,6 +3,8 @@ package sw.abc.stat.data;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import jebl.evolution.alignments.Alignment;
+
 import sw.abc.stat.summary.SummaryStat;
 import sw.main.Setting;
 import sw.sequence.SiteAlignment;
@@ -40,6 +42,8 @@ public class AlignmentStatFlex {
 		
 		this.sumStat = setting.getSummaryStat();
 		this.statsList = setting.getStatList();
+		this.siteAlig = new SiteAlignment(setting);
+		
 		siteStats.put("dist", siteDists);
 		siteStats.put("chisq", siteChiDist);
 		siteStats.put("var", siteVarinace);
@@ -59,21 +63,32 @@ public class AlignmentStatFlex {
 	
 
 	
-	// TODO fix adding/cal/updating/preprocessing then cal stat
-	public void updateSiteAlignment(SiteAlignment sa) {
-		siteAlig = sa;
-		
+//	// TODO fix adding/cal/updating/preprocessing then cal stat
+//	public void updateSiteAlignment(SiteAlignment sa) {
+//		siteAlig = sa;
+//		updateStieStat();
+//
+//	}
+
+	public void updateAlignmentAndStat(Alignment jeblAlignment) {
+		updateAlignment(jeblAlignment);
+		calSumStat();		
+	}
+
+	
+	public void updateAlignment(Alignment jeblAlignment) {
+		siteAlig.updateJEBLAlignment(jeblAlignment);
+		updateStieStat();
+	}
+
+	private void updateStieStat(){
 		addSiteDists();
 		addSiteFreqSpec();
 		addSiteVar();
 		addSiteCovar();
 		addSitePattern();
-		// addSiteKurtosis(sa);
-		// addSiteSecondM(sa);
-		// addSiteSkewness(sa);
-
+		
 	}
-
 
 	private void addSiteDists() {
 		
@@ -121,7 +136,7 @@ public class AlignmentStatFlex {
 	}
 	
 	public double calDelta() {
-		calSumStat();
+//		calSumStat();
 //		double[] obsStatAll = obsStat.getSummaryStatAll();
 //		System.out.println(Arrays.toString(summaryStatAll));
 		double delta = 0;

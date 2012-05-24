@@ -37,6 +37,7 @@ public class Setting {
 	private double[] obsStat;
 
 	private double error;
+	
 	private int seqLength;
 	private int noSeqPerTime;
 	private int noTime;

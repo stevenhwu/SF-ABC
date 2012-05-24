@@ -96,6 +96,11 @@ public abstract class AbstractParameter implements Parameters {
 		
 	}
 	
+	public double getProposalDistVar(){
+		
+		return proposalDist.getVar();
+	}
+	
 	public void setInitValue(double v) {
 		value = v;
 		logP = priorDist.getLogPrior(value);

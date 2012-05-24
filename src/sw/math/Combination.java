@@ -7,7 +7,7 @@ public class Combination {
 	public static int calNoComb(int n){
 //		int noComb = (int)( ArithmeticUtils.factorial(n)/ArithmeticUtils.factorial(n-2)/2.0 );
 //		try {
-			long longList = ArithmeticUtils.binomialCoefficient(n ,2);
+			final long longList = ArithmeticUtils.binomialCoefficient(n ,2);
 			if( longList > Integer.MAX_VALUE){
 				try {
 					throw new Exception("n too big" +"\t"+ longList +" > "+ Integer.MAX_VALUE);
@@ -19,14 +19,14 @@ public class Combination {
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-		int noComb = (int) longList;
+		final int noComb = (int) longList;
 		return noComb;
 	}
 	
 	public static int[][] ListCombination(int n) {
 
-		int noComb = calNoComb(n);
-		int comb[][] = new int[noComb][2];
+		final int noComb = calNoComb(n);
+		final int comb[][] = new int[noComb][2];
 		int i = 0;
 		for (int j = 0; j < n; j++) {
 			for (int k = j+1; k < n; k++) {

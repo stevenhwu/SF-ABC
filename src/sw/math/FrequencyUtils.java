@@ -16,7 +16,7 @@ public class FrequencyUtils {
 			table[i]++;
 		}
 		table = normalise(table, count.length);
-		double[] result = new double[noElement];
+		final double[] result = new double[noElement];
 		System.arraycopy(table, 0, result, 0, result.length);
 		return result;
 	}
@@ -26,7 +26,7 @@ public class FrequencyUtils {
 //		int[] unique = removeDuplicates(count);
 		double[] table = new double[elementList.length];
 		for (int i : count) {
-			int index = ArrayUtils.indexOf(elementList, i);
+			final int index = ArrayUtils.indexOf(elementList, i);
 			table[index]++;
 		}
 		table = normalise(table, count.length);
@@ -41,9 +41,9 @@ public class FrequencyUtils {
 	}
 	
 	private static int[] removeDuplicates(int... array) {
-	    Integer[] ints = ArrayUtils.toObject(array);
-	    Set<Integer> set = new LinkedHashSet<Integer>(Arrays.asList(ints));
-	    int[] temp = ArrayUtils.toPrimitive(set.toArray(new Integer[set.size()]));
+	    final Integer[] ints = ArrayUtils.toObject(array);
+	    final Set<Integer> set = new LinkedHashSet<Integer>(Arrays.asList(ints));
+	    final int[] temp = ArrayUtils.toPrimitive(set.toArray(new Integer[set.size()]));
 	    Arrays.sort(temp);
 	    return temp;
 	}

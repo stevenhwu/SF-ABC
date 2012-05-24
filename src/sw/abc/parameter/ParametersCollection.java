@@ -105,6 +105,14 @@ public class ParametersCollection {
 		
 		return allParams.get(keys[i]).getValue();
 	}
+	
+	public void updateProposalDistVar(TunePar tPar){
+	
+		for (int i = 0; i < allParams.size(); i++) {
+	//		TODO recode this
+			allParams.get(keys[i]).updateProposalDistVar(tPar.getTunePar(i));
+		}
+	}
 //	public void setParam(String s, double value) {
 //		params.put(s, value);
 //	}

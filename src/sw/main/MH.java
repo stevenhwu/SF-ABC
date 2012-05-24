@@ -17,9 +17,9 @@ public class MH {
 	
 	public static boolean accept(double logP, double logq) {
 		
-		double stat = logP+logq;
-		double alpha = RandomGenerator.nextLogDouble();
-		boolean isAccept = (alpha < stat);
+		final double stat = logP+logq;
+		final double alpha = RandomGenerator.nextLogDouble();
+		final boolean isAccept = (alpha < stat);
 //		System.out.println("p:"+logP+"\tq: "+logq+"\talpha: "+alpha);
 		return isAccept;
 	}
