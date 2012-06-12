@@ -25,6 +25,7 @@ import sw.abc.stat.data.AlignmentStatFlex;
 import sw.abc.stat.summary.SStatFlexable;
 import sw.logger.ArrayLogFormatterD;
 import sw.math.Combination;
+import sw.math.OneOverDistribution;
 import sw.math.Scale;
 import sw.math.TruncatedNormalDistribution;
 import sw.math.UniformDistribution;
@@ -115,26 +116,31 @@ public class Main {
 		setting.setParamList(paramListName);
 		setting.setStatList(statList);				
 
+		double scaleFactor = 5.0;
 		double muMean = initValue[0];
-		double muLower = muMean / 10;
-		double muUpper = muMean * 10;
+		double muLower = muMean / scaleFactor;
+		double muUpper = muMean * scaleFactor;
 		
 		double popSizeMean = initValue[1];
-		double popSizeLower = popSizeMean / 5;
-		double popSizeUpper = popSizeMean * 5;
+		double popSizeLower = popSizeMean / scaleFactor;
+		double popSizeUpper = popSizeMean * scaleFactor;
 		
 		ParaMu unifMu = new ParaMu(new UniformDistribution(muLower, muUpper));
 		ParaPopsize unifPopsize = new ParaPopsize(new UniformDistribution(popSizeLower, popSizeUpper));
 	
 		
 		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
-
-		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
+// TODO plot proir against posterior
+//		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
+//		ParaMu pMu = new ParaMu(new UniformDistribution(muLower, muUpper));
+		ParaMu pMu = new ParaMu(new UniformDistribution(0,1) );
 		pMu.setInitValue(muMean);
 		pMu.setProposal(new Scale(initScale ));
 //		pMu.setProposal(new NormalDistribution(muMean, muMean/5));
 		
-		ParaPopsize pPop = new ParaPopsize(new TruncatedNormalDistribution(popSizeMean, popSizeMean/2, popSizeLower, popSizeUpper));
+//		ParaPopsize pPop = new ParaPopsize(new TruncatedNormalDistribution(popSizeMean, popSizeMean/2, popSizeLower, popSizeUpper));
+//		ParaPopsize pPop = new ParaPopsize(new UniformDistribution(popSizeLower, popSizeUpper));
+		ParaPopsize pPop = new ParaPopsize(new OneOverDistribution(popSizeMean));		
 		pPop.setInitValue(popSizeMean);
 		pPop.setProposal(new Scale(initScale ));
 //		pPop.setProposal(new NormalDistribution(thetaMean, thetaMean/5));
