@@ -1,6 +1,6 @@
 package sw.math;
 
-public interface DistributionProposal  {
+public interface DistributionProposal {
 
 
 	

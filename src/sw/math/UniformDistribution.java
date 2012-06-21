@@ -1,11 +1,12 @@
 package sw.math;
 
-public class UniformDistribution extends RandomGenerator implements DistributionPrior , DistributionProposal{
 
-	double lower;
-	double upper;
+public class UniformDistribution extends AbstractDistributionProposal implements DistributionPrior{
+
+	private double lower;
+	private double upper;
 	
-	double logPrior;
+	private double logPrior;
 	
 	public UniformDistribution(double lower, double upper) {
 		this.lower = lower;
@@ -15,7 +16,7 @@ public class UniformDistribution extends RandomGenerator implements Distribution
 	}
 
 	
-	public double next() {
+	public double nextPrior() {
 
 		return r.nextUniform(lower, upper);
 	}
@@ -23,18 +24,9 @@ public class UniformDistribution extends RandomGenerator implements Distribution
 	@Override
 	public double next(double mean) {
 		
-		return next();
+		return nextPrior();
 	}
-	@Override
-	public double init() {
 
-		return next();
-	}
-	@Override
-	public double getLogq() {
-		
-		return 1;
-	}
 
 	@Override
 	public double getLogPrior(double x) {

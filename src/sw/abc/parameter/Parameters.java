@@ -15,13 +15,13 @@ public interface Parameters {
 	public void setProposal(DistributionProposal d);
 	
 	// generated from proprsal
-	public double nextProposal();
+	public void nextProposal();
 	
 	// generated from prior
-	public double nextPrior();
+	public void nextPrior();
 
 	
-	double getLogq();
+	double getLogQ();
 
 //	void setNewValue(double newValue);
 
@@ -39,5 +39,7 @@ public interface Parameters {
 	
 
 	public double getProposalDistVar();
+
+	double getNewValue();
 
 }

@@ -134,26 +134,34 @@ public class AlignmentStatFlex {
 		return delta;
 
 	}
-	
-	public double calDelta() {
-//		calSumStat();
-//		double[] obsStatAll = obsStat.getSummaryStatAll();
-//		System.out.println(Arrays.toString(summaryStatAll));
-		double delta = 0;
-		for (int i = 0; i < summaryStatAll.length; i++) {
-			//
-			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
+//	
+//	public double calDelta() {
+////		calSumStat();
+////		double[] obsStatAll = obsStat.getSummaryStatAll();
+////		System.out.println(Arrays.toString(summaryStatAll));
+//		double delta = 0;
+//		for (int i = 0; i < summaryStatAll.length; i++) {
+//			//
+//			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
+//
+//			double s = calAbsDiff(obsStat[i], summaryStatAll[i]);
+////			System.out.println(s+"\t"+summaryStatAll[i] +"\t"+ obsStat[i]+"\t"); 
+//			delta += s;
+//			 
+//			// System.out.print(
+//			// Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i] + "\t");
+//			// System.out.print( (dif*dif)/obsStatAll[i] + "\t");
+//		}
+//		// System.out.println();
+//		delta /= summaryStatAll.length;
+//		return delta;
+//
+//	}
 
-			double s = calAbsDiff(obsStat[i], summaryStatAll[i]);
-//			System.out.println(s+"\t"+summaryStatAll[i] +"\t"+ obsStat[i]+"\t"); 
-			delta += s;
-			// System.out.print(statAll[i] +"\t");
-			// System.out.print(
-			// Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i] + "\t");
-			// System.out.print( (dif*dif)/obsStatAll[i] + "\t");
-		}
-		// System.out.println();
-		delta /= summaryStatAll.length;
+
+	public double calDelta(int i) {
+
+		double delta = calAbsDiff(obsStat[i], summaryStatAll[i]);
 		return delta;
 
 	}
@@ -176,7 +184,7 @@ public class AlignmentStatFlex {
 		for (String key : statsList) {
 			stat = Doubles.concat(stat, siteStats.get(key).getStats());
 		}
-
+//		System.out.println(Arrays.toString(stat));
 		return stat;
 		
 	}
@@ -190,7 +198,8 @@ public class AlignmentStatFlex {
 
 	public static double calAbsDiff(double expectStat, double obsStat){
 		double diff = (obsStat - expectStat);
-		double stat = Math.abs ( (diff*diff) /expectStat); 
+		diff *= diff;
+		double stat = Math.abs ( (diff) /expectStat ); 
 //		double stat = ( (diff*diff) /expectStat);
 				
 		return stat;

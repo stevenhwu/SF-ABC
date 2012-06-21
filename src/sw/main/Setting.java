@@ -3,6 +3,7 @@ package sw.main;
 import java.io.File;
 import java.util.Arrays;
 
+import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.ParametersCollection;
 import sw.abc.parameter.TunePar;
 import sw.abc.stat.summary.SummaryStat;
@@ -46,6 +47,7 @@ public class Setting {
 	private int thinning;
 	private int noIteMCMC;
 	private int noItePreprocess;
+	private ParaTheta pTheta;
 
 	public Setting(String workingDir, String outputDir, String dataFileName) {
 
@@ -275,6 +277,15 @@ public class Setting {
 			this.doRegression = true;
 		}
 
+	}
+
+	public void setTheta(ParaTheta pTheta) {
+		this.pTheta = pTheta;
+		
+	}
+
+	public ParaTheta getTheta() {
+		return pTheta;
 	}
 
 }

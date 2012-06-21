@@ -2,12 +2,11 @@ package sw.math;
 
 
 
-// should be Operator class NOT Distribution
-public class Scale implements  DistributionProposal {
 
-	private double scaleFactor;
-	double logq;
-	
+// should be Operator class NOT Distribution
+public class Scale extends AbstractDistributionProposal {
+
+	protected double scaleFactor;
 	public Scale(double s){
 		scaleFactor = s;
 	}
@@ -17,20 +16,13 @@ public class Scale implements  DistributionProposal {
 	@Override
 	public double next(double mean) {
 	    
-	    final double scale = (scaleFactor + (RandomGenerator.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)));
-	    logq = -Math.log(scale);
+	    final double scale = (scaleFactor + (RandomGenerator.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)) );
+	    logQ = -Math.log(scale);
 	    final double newValue = scale * mean;
 
 		return newValue;
 	}
 	
-	@Override
-	public double getLogq() {
-		return logq;
-	}
-
-
-
 	@Override
 	public void updateVar(double sFactor) {
 		

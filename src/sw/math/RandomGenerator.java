@@ -1,11 +1,11 @@
 package sw.math;
 
-import org.apache.commons.math.random.RandomDataImpl;
+import org.apache.commons.math3.random.RandomDataImpl;
 
 
 public class RandomGenerator {
 
-	private static final MersenneTwisterFast random = MersenneTwisterFast.DEFAULT_INSTANCE;
+	protected static final MersenneTwisterFast random = MersenneTwisterFast.DEFAULT_INSTANCE;
 
 	static RandomDataImpl r = new RandomDataImpl();
 

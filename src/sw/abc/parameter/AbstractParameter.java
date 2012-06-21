@@ -6,63 +6,34 @@ import sw.math.DistributionProposal;
 
 public abstract class AbstractParameter implements Parameters {
 
-	double value;
-	double newValue;
-
-
+	
 	private double logQ;
-	private double logP;	
-	private double newLogP;
-
-	DistributionPrior priorDist;
-	DistributionProposal proposalDist;
-	private int acceptCount;
 	
-//	
-//	public AbstractParameter() {
-//		super();
-//	}
-	
-//	@Override
-//	public void setNewValue(double newValue) {
-//		this.newValue = newValue;
-//	}
+	protected int acceptCount;
+	protected double value;
+	protected double newValue;
+	protected double logP;	
+	protected double newLogP;
 
-	@Override
-	public int getAcceptCount() {
-		return acceptCount;
-	}
-	@Override
+	protected DistributionPrior priorDist;
+	protected DistributionProposal proposalDist;
+	
+	
+	public AbstractParameter(){}
+@Override
 	public void acceptNewValue(){
 		value = newValue;
 		logP = newLogP;
 		acceptCount++;
 	}
 	@Override
-	public double getLogq() {
-//		System.out.println("logq\t"+logq);
-		return logQ;
-	}
-	
-	@Override
-	public double getPriorRatio(){
-		return (newLogP - logP);
-	}
-	
-	@Override
-	public double getValue() {
-		return value;
-	}
-	
-
-	
-	@Override
-	public double nextPrior(){
-		setInitValue();
-		return value;
+	public void nextPrior(){
+		value = priorDist.nextPrior();
+		newValue = value;
+		logP = priorDist.getLogPrior(value);
 	}
 	@Override
-	public double nextProposal(){
+	public void nextProposal(){
 
 		newValue = proposalDist.next(value);
 		newLogP = priorDist.getLogPrior(newValue);
@@ -71,10 +42,41 @@ public abstract class AbstractParameter implements Parameters {
 			newLogP = priorDist.getLogPrior(newValue);
 		}	
 		logQ = proposalDist.getLogq();
-		return newValue;
+		
 	}
 	
 
+	//	
+	//	public AbstractParameter() {
+	//		super();
+	//	}
+		
+	//	@Override
+	//	public void setNewValue(double newValue) {
+	//		this.newValue = newValue;
+	//	}
+	
+		@Override
+	public double getValue() {
+		return value;
+	}
+	@Override
+	public double getNewValue() {
+		return newValue;
+	}
+		@Override
+	public double getPriorRatio(){
+		return (newLogP - logP);
+	}
+	@Override
+		public double getLogQ() {
+	//		System.out.println("logq\t"+logq);
+			return logQ;
+		}
+	@Override
+	public int getAcceptCount() {
+		return acceptCount;
+	}
 	@Override
 	public void setPrior(DistributionPrior d) {
 		priorDist = d;
@@ -90,24 +92,22 @@ public abstract class AbstractParameter implements Parameters {
 		
 	}
 
+	public void setInitValue(double v) {
+		value = v;
+		newValue = value;
+		logP = priorDist.getLogPrior(value);
+	}
+	
+	
 	@Override
 	public void updateProposalDistVar(double var) {
 		proposalDist.updateVar(var);
 		
 	}
 	
+	@Override
 	public double getProposalDistVar(){
 		
 		return proposalDist.getVar();
-	}
-	
-	public void setInitValue(double v) {
-		value = v;
-		logP = priorDist.getLogPrior(value);
-	}
-
-	public void setInitValue() {
-		value = priorDist.init();
-		logP = priorDist.getLogPrior(value);
 	}
 }

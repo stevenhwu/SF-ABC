@@ -1,6 +1,7 @@
 package sw.math;
 
-public class ZTestDistribution extends RandomGenerator implements DistributionPrior, DistributionProposal {
+
+public class ZTestDistribution extends AbstractDistributionProposal implements DistributionPrior{
 
 	double mean;
 	
@@ -10,26 +11,21 @@ public class ZTestDistribution extends RandomGenerator implements DistributionPr
 
 
 	@Override
-	public double init() {
+	public double nextPrior() {
 
-		return mean;
+		return mean++;
 	}
 	
 
 	@Override
 	public double next(double mean) {
-		return mean+1;
-	}
-
-	@Override
-	public double getLogq() {
-
-		return 1;
+		logQ = mean;
+		return mean+2;
 	}
 
 	@Override
 	public double getLogPrior(double x) {
-		return 1;
+		return x/2;
 	}
 
 

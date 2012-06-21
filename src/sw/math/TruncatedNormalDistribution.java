@@ -1,11 +1,17 @@
 package sw.math;
 
-import dr.math.ErrorFunction;
-import dr.math.UnivariateFunction;
 
-public class TruncatedNormalDistribution implements DistributionPrior {
+public class TruncatedNormalDistribution extends AbstractDistributionProposal implements DistributionPrior {
 
-	NormalDistribution nd;
+	private NormalDistribution nd;
+
+
+	private double m;
+	private double sd;
+	private double lower;
+	private double upper;
+	private double T;
+	
 	public TruncatedNormalDistribution(double mean, double sd, double lower, double upper) {
 	
 		if (lower == upper)
@@ -19,41 +25,14 @@ public class TruncatedNormalDistribution implements DistributionPrior {
 		this.lower = lower;
 		this.upper = upper;
 	
-		this.T = standardNormalCdf((upper - mean) / sd)
+		this.T = calcT(this.m, this.sd, this.lower, this.upper);
+		this.nd = new NormalDistribution(this.m, this.sd);
+	}
+
+	private static double calcT(double mean, double sd, double lower, double upper) {
+		double T = standardNormalCdf((upper - mean) / sd)
 				- standardNormalCdf((lower - mean) / sd);
-		this.nd = new NormalDistribution(mean, sd);
-	}
-
-	public double getMean() {
-		return m;
-	}
-
-	public void setMdean(double m) {
-		this.m = m;
-	}
-
-	public double getSD() {
-		return sd;
-	}
-
-	public void setSD(double sd) {
-		this.sd = sd;
-	}
-
-	public double getLower() {
-		return lower;
-	}
-
-	public void setLower(double lower) {
-		this.lower = lower;
-	}
-
-	public double getUpper() {
-		return upper;
-	}
-
-	public void setUpper(double upper) {
-		this.upper = upper;
+		return T;
 	}
 
 	public double pdf(double x) {
@@ -109,34 +88,6 @@ public class TruncatedNormalDistribution implements DistributionPrior {
 			return quantileSearch(y, q, u, step - 1);
 	}
 
-	public double mean() {
-		return mean(m, sd, lower, upper);
-	}
-
-	public double variance() {
-		return mean(m, sd, lower, upper);
-	}
-
-	public UnivariateFunction getProbabilityDensityFunction() {
-		return pdfFunction;
-	}
-
-	private UnivariateFunction pdfFunction = new UnivariateFunction() {
-		@Override
-		public final double evaluate(double x) {
-			return pdf(x);
-		}
-
-		@Override
-		public final double getLowerBound() {
-			return lower;
-		}
-
-		@Override
-		public final double getUpperBound() {
-			return upper;
-		}
-	};
 
 	/**
 	 * probability density function of the standard normal distribution
@@ -152,6 +103,18 @@ public class TruncatedNormalDistribution implements DistributionPrior {
 		return a * Math.exp(b);
 	}
 
+	public static double logStandardNormalPdf(double x, double mean, double sd, double lower, double upper){
+		double T = calcT(mean, sd, lower, upper);
+		double stdX = (((x - mean) / sd) / sd);
+		
+		return Math.log(standardNormalPdf(stdX) / T);
+	}
+	
+
+
+	public double logStandardNormalPdf(double x, double mean){
+		return logStandardNormalPdf(x, mean, sd, lower, upper);
+	}
 	/**
 	 * the natural log of the probability density function of the standard
 	 * normal distribution
@@ -178,83 +141,82 @@ public class TruncatedNormalDistribution implements DistributionPrior {
 		return 0.5 * (1.0 + ErrorFunction.erf(a));
 	}
 
-	/**
-	 * mean
-	 * 
-	 * @param m
-	 *            mean
-	 * @param sd
-	 *            standard deviation
-	 * @param lower
-	 *            the lower limit
-	 * @param upper
-	 *            the upper limit
-	 * @return mean
-	 */
-	public static double mean(double m, double sd, double lower, double upper) {
-		double au, al, pu, pl, cu, cl;
 
-		au = (upper - m) / sd;
-		al = (lower - m) / sd;
-
-		pu = standardNormalPdf(au);
-		pl = standardNormalPdf(al);
-
-		cu = standardNormalCdf(au);
-		cl = standardNormalCdf(al);
-
-		return m - sd * (pu - pl) / (cu - cl);
-	}
-
-	/**
-	 * variance
-	 * 
-	 * @param m
-	 *            mean
-	 * @param sd
-	 *            standard deviation
-	 * @param lower
-	 *            the lower limit
-	 * @param upper
-	 *            the upper limit
-	 * @return variance
-	 */
-	public static double variance(double m, double sd, double lower,
-			double upper) {
-		double au, al, pu, pl, cu, cl, T1, T2;
-
-		au = (upper - m) / sd;
-		al = (lower - m) / sd;
-
-		pu = standardNormalPdf(au);
-		pl = standardNormalPdf(al);
-
-		cu = standardNormalCdf(au);
-		cl = standardNormalCdf(al);
-
-		T1 = (au * pu - al * pl) / (cu - cl);
-		T2 = (pu - pl) / (cu - cl);
-
-		return sd * sd * (1.0 - T1 - T2 * T2);
-	}
-
-	private double m;
-	private double sd;
-	private double lower;
-	private double upper;
-	private double T;
-
+	
 	@Override
 	public double getLogPrior(double x) {
 		return logPdf(x);
 	}
 
 	@Override
-	public double init() {
+	public double nextPrior() {
 		double newX;
 		do {
-			newX = nd.init();
+			newX = nd.nextPrior();
 		} while (newX < lower || newX > upper);
 		return newX;
 	}
+
+	
+	@Override
+	public double next(double current) {
+
+		double newValue = Double.NaN;
+		
+		try {
+
+			do {
+				newValue = r.nextGaussian(current, sd);
+			} while (newValue > upper || newValue < lower);
+
+			double limit = Math.log(calcT(current, sd, lower, upper));
+			double newGivenCur = logStandardNormalPdf(newValue, current) - limit;
+
+			limit = Math.log(calcT(newValue, sd, lower, upper));
+			double curGivenNew = logStandardNormalPdf(current, newValue) - limit;
+			logQ =  curGivenNew - newGivenCur;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return newValue;
+	}
+
+
+	@Override
+	public void updateVar(double var) {
+		sd = Math.sqrt(var);
+		
+	}
+
+	@Override
+	public double getVar() {
+		return sd*sd;
+	}
+
+	public double getMean() {
+		return m;
+	}
+
+	public void setMdean(double m) {
+		this.m = m;
+	}
+
+	public double getSD() {
+		return sd;
+	}
+
+	public void setSD(double sd) {
+		this.sd = sd;
+	}
+
+	public double getLower() {
+		return lower;
+	}
+
+	public double getUpper() {
+		return upper;
+	}
+
+
 }

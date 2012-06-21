@@ -1,14 +1,18 @@
 package sw.math;
 
+
+//import static sw.math.RandomGenerator.r;
+
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 
-public class NormalDistribution extends RandomGenerator implements DistributionPrior, DistributionProposal {
+
+public class NormalDistribution extends AbstractDistributionProposal implements DistributionPrior {
 
 	static NormalDistributionImpl stdNorm = new NormalDistributionImpl(0,1);
 	
 	NormalDistributionImpl d = new NormalDistributionImpl();
-	double logq  = 1;
+	double logq  = 0;
 	double mu;
 	double sigma;
 
@@ -20,7 +24,7 @@ public class NormalDistribution extends RandomGenerator implements DistributionP
 	}
 
 	@Override
-	public double init() {
+	public double nextPrior() {
 		
 		return r.nextGaussian(mu, sigma);
 	}

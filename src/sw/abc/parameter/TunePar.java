@@ -131,35 +131,39 @@ public class TunePar {
 //		}
 	}
 
-	private double checkRate(double tp, double d, int type, double reset) {
+	private double checkRate(double tp, double accRate, int type, double reset) {
 
 		double newRate = tp;
 		if (type == 0) {
-			newRate = checkNormal2(tp, d, reset);
+			newRate = checkNormal2(tp, accRate, reset);
 		} else if (type == 1) {
-			newRate = checkNormal2(tp, d, reset);
+			newRate = checkNormal2(tp, accRate, reset);
 		} else if (type == 2) {
-			newRate = checkScale(tp, d);
+			newRate = checkScale(tp, accRate);
 		}
 		return newRate;
 	}
 
-	private double checkScale(double tp, double d) {
+	private double checkScale(double tp, double rate) {
 
 	
-		if (d >= accUpper) {
+		if (rate >= accUpper) {
 			tp -= rd.nextUniform(0, tuneStepSize);
-		} else if (d < accLower) {
+		} else if (rate < accLower) {
 			tp += rd.nextUniform(0, tuneStepSize);
 		}
 		
-		if (tp <= 0.25){
-			tp = 0.25;
+		if (tp <= 0.2){
+			tp = 0.2;
 		}
 		if ( tp >= 0.9) {
 			tp = 0.9;
 		}
-		
+
+		if(rate<0.01){
+			tp = 0.2;
+		}
+
 		return tp;
 
 	}

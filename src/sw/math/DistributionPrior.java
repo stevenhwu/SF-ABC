@@ -5,5 +5,5 @@ public interface DistributionPrior  {
 
 	public double getLogPrior(double x);
 	
-	public double init();
+	public double nextPrior();
 }

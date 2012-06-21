@@ -31,6 +31,7 @@ public class TraceUtil {
 		int noComb = Combination.calNoComb(this.noTime);
 		summaryStatCollection.put("mu", 1);
 		summaryStatCollection.put("popsize", 1);
+		summaryStatCollection.put("theta", 1);
 		summaryStatCollection.put("gap", this.noParam);
 		
 		summaryStatCollection.put("dist", -1);

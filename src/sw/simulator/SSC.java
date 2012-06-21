@@ -25,8 +25,8 @@ public class SSC {
 
 	final private int seqLength = 750;
 			
-	private int popSize = 3000;
-	private double substitutionRate = 1E-5;
+	private int popSize;
+	private double substitutionRate;
 	
 	private ConstantPopulation constPop = new ConstantPopulation(3000);
 	private CoalescentIntervalGeneratorMod intervals = new CoalescentIntervalGeneratorMod(constPop);
@@ -60,7 +60,7 @@ public class SSC {
 
 
 	public Tree simulateTree(int pSize){//, double sRate) {
-		this.popSize = pSize;
+		setPopSize(pSize);
 //		this.substitutionRate = sRate;
 
 		constPop.setN0(popSize);
@@ -73,21 +73,24 @@ public class SSC {
 	}
 	
 	public Alignment simulateAlignment(ParametersCollection allPar) {
-		this.popSize = (int) allPar.getValues("popsize");
-		this.substitutionRate = allPar.getValues("mu");
+		setPopSize( allPar.getNewValue("popsize") );
+		setSubstitutionRate(allPar.getNewValue("mu"));
 		return simulateAlignment();
 	}
 	
 	public Alignment simulateAlignment(int pSize, double sRate) {
-		this.popSize = pSize;
-		this.substitutionRate = sRate;
+		setPopSize(pSize);
+		setSubstitutionRate(sRate);
 		return simulateAlignment();
 	}
 	
 
 	private Alignment simulateAlignment(){
-		constPop.setN0(popSize);
-		intervals.setDemographicFunction(constPop);
+		constPop = new ConstantPopulation(popSize);
+		intervals = new CoalescentIntervalGeneratorMod(constPop);
+		
+//		constPop.setN0(popSize);
+//		intervals.setDemographicFunction(constPop);
 		seqGen.setSubstitutionRate(substitutionRate);
 
 		Tree sTree = simTree();
@@ -197,14 +200,16 @@ public class SSC {
 	/**
 	 * @param popSize the popSize to set
 	 */
-	public void setPopSize(int popSize) {
+	private void setPopSize(int popSize) {
 		this.popSize = popSize;
 	}
-
+	private void setPopSize(double popSize) {
+		setPopSize((int) popSize);
+	}
 	/**
 	 * @param substitutionRate the substitutionRate to set
 	 */
-	public void setSubstitutionRate(double substitutionRate) {
+	private void setSubstitutionRate(double substitutionRate) {
 		this.substitutionRate = substitutionRate;
 	}
 
@@ -239,13 +244,13 @@ public class SSC {
 		
 	}
 
-	public void setPopSize(ParametersCollection allParUniformPrior) {
-		setPopSize((int) allParUniformPrior.getValues("popSize"));
-		
-	}
-
-	public void setSubstitutionRate(ParametersCollection allParUniformPrior) {
-		setSubstitutionRate(allParUniformPrior.getValues("mu"));
-		
-	}
+//	public void setPopSize(ParametersCollection allParUniformPrior) {
+//		setPopSize((int) allParUniformPrior.getValue("popSize"));
+//		
+//	}
+//
+//	public void setSubstitutionRate(ParametersCollection allParUniformPrior) {
+//		setSubstitutionRate(allParUniformPrior.getValue("mu"));
+//		
+//	}
 }

@@ -53,7 +53,7 @@ public class SavePar {
 	public void add(ParametersCollection newPar) {
 
 		for (int i = 0; i < NOTUNE; i++) {
-			allPar[count][i] = newPar.getValues(i);
+			allPar[count][i] = newPar.getValue(i);
 		}
 
 		count++;

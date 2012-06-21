@@ -1,3 +1,8 @@
+/*
+//TODO: Fix proposal distribution, scale/truncated scale/truncated normal?
+ * prior? joined prior for both? theta prior? boundary?
+*/
+
 package sw.main;
 
 import java.io.BufferedReader;
@@ -15,9 +20,12 @@ import jebl.evolution.io.NexusImporter;
 
 import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.util.MathUtils;
 
+import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaPopsize;
+import sw.abc.parameter.Parameters;
 import sw.abc.parameter.ParametersCollection;
 import sw.abc.parameter.SavePar;
 import sw.abc.parameter.TunePar;
@@ -25,9 +33,11 @@ import sw.abc.stat.data.AlignmentStatFlex;
 import sw.abc.stat.summary.SStatFlexable;
 import sw.logger.ArrayLogFormatterD;
 import sw.math.Combination;
+import sw.math.NormalDistribution;
 import sw.math.OneOverDistribution;
 import sw.math.Scale;
 import sw.math.TruncatedNormalDistribution;
+import sw.math.TruncatedScale;
 import sw.math.UniformDistribution;
 import sw.simulator.SSC;
 import sw.util.TraceUtil;
@@ -48,12 +58,12 @@ public class Main {
 	private static final int NO_TIME_POINT = 3;
 	private static final int TIME_GAP = 400;
 	
-	private static final int TUNESIZE = 500 ; //500
-	private static final int TUNEGROUP = 8; //8
+	private static final int TUNESIZE = 400 ; //400
+	private static final int TUNEGROUP = 10; //10
 	private static final int NO_REPEAT_CAL_ERROR = 1000; //1000
 	private static final int NO_REPEAT_PER_PARAMETERS = 100; //100
 	
-	private static final double initScale = 0.75;
+	private static final double initScale = 0.5;
 //	private static String noSimPerPar = "1";
 	
 	
@@ -68,7 +78,15 @@ public class Main {
 		e.g.	0 simData.paup 500000 1000000 1000 0.01
 	*/
 	public static void main(String[] args) {
-		
+
+//		double ratio[] = new double[100];
+//		for (int i = 0; i < RegressionResult.result.length; i++) {
+//			double r = RegressionResult.result[i][0]*RegressionResult.result[i][1];
+//			ratio[i] = r/(1E-5*3000);
+//			System.out.println(r +"\t"+ ratio[i]);
+//		}
+//		System.out.println(StatUtils.mean(ratio));
+//		System.out.println(StatUtils.variance(ratio));
 		startSimulation(args);
        
 	}
@@ -85,13 +103,14 @@ public class Main {
 		setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
 		setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
 		
-		
-		generateStatFile(setting);
-		
-		
 		try {
+//			testStatFile(setting);			
+			generateStatFile(setting);
+			generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
+//		
 			System.out.println(setting.toString());
 			ABCUpdateMCMC(setting);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -131,24 +150,41 @@ public class Main {
 		
 		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
 // TODO plot proir against posterior
-//		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
+//		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(0.5, 0.5, 0, 0.4));
+//		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean, muLower, muUpper));
 //		ParaMu pMu = new ParaMu(new UniformDistribution(muLower, muUpper));
 		ParaMu pMu = new ParaMu(new UniformDistribution(0,1) );
-		pMu.setInitValue(muMean);
-		pMu.setProposal(new Scale(initScale ));
-//		pMu.setProposal(new NormalDistribution(muMean, muMean/5));
 		
-//		ParaPopsize pPop = new ParaPopsize(new TruncatedNormalDistribution(popSizeMean, popSizeMean/2, popSizeLower, popSizeUpper));
+		pMu.setInitValue(muMean);
+//		pMu.setInitValue(3.0E-5);
+//		pMu.setProposal(new Scale(initScale ));
+		pMu.setProposal(new TruncatedScale(initScale, muLower, muUpper ));
+//		pMu.setProposal(new TruncatedNormalDistribution(muMean, muMean/2, muLower, muUpper));
+		
+//		ParaPopsize pPop = new ParaPopsize(new TruncatedNormalDistribution(
+//				popSizeMean, popSizeMean, popSizeLower, popSizeUpper));
+//				ParaPopsize pPop = new ParaPopsize(new TruncatedNormalDistribution(1000000, 100000, 0, 1500000));
 //		ParaPopsize pPop = new ParaPopsize(new UniformDistribution(popSizeLower, popSizeUpper));
 		ParaPopsize pPop = new ParaPopsize(new OneOverDistribution(popSizeMean));		
 		pPop.setInitValue(popSizeMean);
-		pPop.setProposal(new Scale(initScale ));
+//		pPop.setInitValue(6E3);
+//		pPop.setProposal(new Scale(initScale ));
+		pPop.setProposal(new TruncatedScale(initScale, popSizeLower, popSizeUpper ));
+//		pPop.setProposal(new TruncatedNormalDistribution(popSizeMean, popSizeMean/2, popSizeLower, popSizeUpper));
 //		pPop.setProposal(new NormalDistribution(thetaMean, thetaMean/5));
 
-
+		
+		double theta = muMean * popSizeMean;
+		double thetaLower = theta/scaleFactor;
+		double thetaUpper = theta*scaleFactor;
+		ParaTheta pTheta = new ParaTheta(new UniformDistribution(thetaLower, thetaUpper));
+//		ParaTheta pTheta = new ParaTheta(new NormalDistribution(theta , theta*2));
+		pTheta.setInitValue(theta);
+		
 		ParametersCollection allPars = new ParametersCollection(paramListName, pMu, pPop); 
 		ParametersCollection allParsPrior = new ParametersCollection(paramListName, unifMu, unifPopsize);
 //		
+		
 		
 //		double muTune = muMean/10;
 //		double thetaTune = thetaMean/10;
@@ -159,6 +195,7 @@ public class Main {
 		setting.setTunePar(tPar);
 		setting.setAllPar(allPars);
 		setting.setAllParPrior(allParsPrior);
+		setting.setTheta(pTheta);
 
 		return setting;
 	}
@@ -190,7 +227,7 @@ public class Main {
 
 			final long startTime = System.currentTimeMillis();
 			for (int i = 0; i < nRun; i++) {
-				allParUniformPrior.getNextProir();
+				allParUniformPrior.nextProirs();
 									
 				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
 				newStat.updateAlignment(jeblAlignment);
@@ -207,8 +244,7 @@ public class Main {
 			String regressionSummary = sStat.toString();
 			System.out.println(regressionSummary);
 			System.out.println("Time:\t" + Math.round( (System.currentTimeMillis()-startTime)/60e3)+" mins" );	
-			
-			
+
 			try {	
 				
 				String regressionCoefFile =  setting.getRegressionCoefFile();
@@ -221,21 +257,67 @@ public class Main {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
 		}
 		else{
-			
 			sStat = readRegressionFile(setting);
-			
 		}
-		
 		setting.setSummaryStat(sStat);
 		setting.setObsStat( calObsStat(setting) );
 		
-		double error = generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
-		setting.setError(error);
 		
 		return setting;
+	
+	}
+
+
+//	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static void testStatFile(Setting setting) {
+
+		final int nRun = 100;
+		final int noTime = setting.getNoTime();
+		String[] paramList = setting.getParamList();
+		String[] statsList = setting.getStatList();
+
+		ParametersCollection allParUniformPrior = setting.getAllParPrior();
+
+		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
+
+		SSC simulator = new SSC(setting);
+
+		TraceUtil tu = new TraceUtil(noTime);
+		ArrayLogFormatterD traceLogParam = new ArrayLogFormatterD(6, tu.createTraceAll(paramList));
+		ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAll(statsList));
+		long start = System.currentTimeMillis();
+		try {
+			PrintWriter oResult = new PrintWriter(new BufferedWriter(
+					new FileWriter("zzz_testRegressionOutput2")));
+			String s = traceLogParam.getLabels() +"\t"+ traceLogStats.getLabels();
+			oResult.println(s);
+			for (int i = 0; i < nRun; i++) {
+				allParUniformPrior.nextProirs();
+				traceLogParam.logValues(allParUniformPrior.getValues());
+				
+				for (int j = 0; j < 100; j++) {
+					
+				
+				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
+				newStat.updateAlignment(jeblAlignment);
+
+				
+				traceLogStats.logValues(newStat.getCurStat(statsList));
+				s = traceLogParam.getLine(i) + "\t" + traceLogStats.getLine(i*100+j);
+				oResult.println(s);
+				oResult.flush();
+				
+				}
+				
+
+			}
+			oResult.close();
+			System.out.println("Time:\t"+(System.currentTimeMillis()-start));
+		} catch (Exception e) {
+			// TODO: handle exception
+		}	
 	
 	}
 
@@ -258,7 +340,7 @@ public class Main {
 		double[] meanOfMean = new double[nRun];
 		
 		for (int i = 0; i < nRun; i++) {
-			allParUniformPrior.getNextProir();
+			allParUniformPrior.nextProirs();
 			
 			for (int j = 0; j < nRepeat; j++) {
 				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
@@ -271,15 +353,15 @@ public class Main {
 				double s2 = repeatStat[listAllComb[j][1]];
 				expectedError[j] = AlignmentStatFlex.calAbsDiff(s1, s2);
 				expectedError[j + noOfComb] = AlignmentStatFlex.calAbsDiff(s2, s1);
-//				System.out.println(s1 +"\t"+ s2 +"\t"+ expectedError[j]
-//						+"\t"+ expectedError[j+noOfComb]);
-//				 	System.out.println(listAllComb[j][0] +"\t"+
-//				 			listAllComb[j][1]);
 
 			}
 			meanOfMean[i] = StatUtils.mean(expectedError);
 		}
-		return (StatUtils.mean(meanOfMean));
+		double error = StatUtils.mean(meanOfMean);
+		setting.setError(error);
+		
+		return error;
+		
 
 	}
 
@@ -294,6 +376,9 @@ public class Main {
 		double error = setting.getError();
 		ParametersCollection allPar = setting.getAllPar();
 		TunePar tPar = setting.getTunePar();
+
+		ParaTheta pTheta = setting.getTheta();
+		pTheta.setInitPriorRatio(allPar);
 		
 		SSC simulator = new SSC(setting);
 		SavePar sPar = new SavePar(TUNESIZE);
@@ -311,28 +396,52 @@ public class Main {
 		
 		
 		System.out.println("Start ABCMCMC\nTolerance:\t"+error);
+		double[] saveGaps = new double[10];
+		
+//		error = 1;
 		for (int i = 0; i < nRun; i++) {
+			
 			for (int p = 0; p < allPar.getSize(); p++) {
-				allPar.getNextProposal(p);
-
-				Alignment jeblAlignment = simulator.simulateAlignment(allPar);
-				newStat.updateAlignmentAndStat(jeblAlignment);
-				
-				double saveGap = newStat.calDelta();
-
-				if (saveGap < error) {
-					if (MH.accept(allPar.getParameter(p))) { //TODO: think about this
-						allPar.acceptNewValue(p);
-					}
-				}
+				allPar.nextProposal(p);
 			}
+				for (int j = 0; j < saveGaps.length; j++) {
+					
+//					simulator = new SSC(setting);
+					Alignment jeblAlignment = simulator.simulateAlignment(allPar);
+					newStat.updateAlignmentAndStat(jeblAlignment);
+					saveGaps[j] = newStat.calDelta(0);
+				}
+//				System.out.println(Arrays.toString(saveGaps));
+//				Alignment jeblAlignment = simulator.simulateAlignment(allPar);
+//				newStat.updateAlignmentAndStat(jeblAlignment);
+				
+//				double saveGap = newStat.calDelta();
+				double saveGap = StatUtils.mean(saveGaps);
+//				System.out.println(saveGap);
+				if (saveGap < error) {	
+//					System.out.println(saveGap);
+//					if (MH.accept(allPar.getParameter(p))) { //TODO: think about this
+//						allPar.acceptNewValue(p);
+//					}
+					double logP = pTheta.getPriorRatio(allPar);
+					double logQ = pTheta.getProposalRatio(allPar);
+					
+					if (MH.accept(logP, logQ)) { 
+						allPar.acceptNewValues();
+						pTheta.acceptNewValue();
+					}
+					//					if (MH.accept(allPar)) { 
+//						allPar.acceptNewValues();
+//					}
+				}
+//			}
 			sPar.add(allPar);
 			
 			if (i % TUNESIZE == 0 & i!=0) {
 				
 				tPar.update(sPar, i);
 				allPar.updateProposalDistVar(tPar);
-				error = updateTol(tPar.getAccRate(), error);
+//				error = updateTol(tPar.getAccRate(), error);
 
 //				for (int j = 0; j < allPar.getSize(); j++) {
 ////					TODO recode this
@@ -359,7 +468,11 @@ public class Main {
 				
 			}
 
-		}
+		}				
+		traceLog.logValues(allPar.getValues());
+		String s = nRun + "\t" + traceLog.getLine(nRun / thinning);
+		oResult.println(s);
+		oResult.flush();
 		oResult.close();
 		
 		System.out.println(Arrays.toString( tPar.getEachAccRate() ));
@@ -479,12 +592,13 @@ public class Main {
 			// lm(log(Mu*Theta)~ .)
 			double[] allMu = traceLogParam.toArray(0);
 			double[] allTheta = traceLogParam.toArray(1);
-			double[] logMuTheta = new double[allTheta.length];
+			double[] muTheta = new double[allTheta.length];
 			for (int i = 0; i < allTheta.length; i++) {
-				logMuTheta[i] = Math.log(allMu[i]*allTheta[i]);
+//				logMuTheta[i] = Math.log(allMu[i]*allTheta[i]);
+				muTheta[i] = allMu[i]*allTheta[i];
 			}
 
-			Regression lm = new Regression(xxData, logMuTheta );
+			Regression lm = new Regression(xxData, muTheta );
 			
 			lm.linear();	
 			double[] coef = lm.getBestEstimates();

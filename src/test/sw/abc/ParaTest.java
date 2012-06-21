@@ -29,7 +29,8 @@ public class ParaTest {
 		double value;
 		boolean isTrue;
 		for (int i = 0; i < 1000; i++) {
-			value = pMu.nextPrior();
+			pMu.nextPrior();
+			value = pMu.getNewValue();
 			isTrue = value>0.01 && value<0.05;
 		
 			assertTrue( isTrue);
@@ -51,14 +52,15 @@ public class ParaTest {
 
 		double value;
 		boolean isTrue = false;
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 1; i < 1000; i++) {
 			for (int j = 0; j < 2; j++) {
-				value = allPar.get(j).nextProposal();
+				allPar.get(j).nextProposal();
+				value = allPar.get(j).getNewValue();
 				if (allPar.get(j) instanceof ParaMu) {
-					isTrue = value == 1+i;
+					isTrue = value == 0+i*2;
 				}
 				else if(allPar.get(j) instanceof ParaPopsize){
-					isTrue = value == 1001+i;
+					isTrue = value == 1000+i*2;
 				}
 //				System.out.println(i+"\t"+value+"\t"+isTrue);
 				assertTrue( isTrue);
@@ -83,14 +85,15 @@ public class ParaTest {
 
 		double value;
 		boolean isTrue = false;
-		for (int i = 0; i < 3; i++) {
+		for (int i = 1; i < 10; i++) {
 			for (int j = 0; j < 2; j++) {
-				value = allPar.get(j).nextPrior();
+				allPar.get(j).nextPrior();
+				value = allPar.get(j).getNewValue();
 				if (allPar.get(j) instanceof ParaMu) {
-					isTrue = value == 1;
+					isTrue = value == 1+i;
 				}
 				else if(allPar.get(j) instanceof ParaPopsize){
-					isTrue = value == 1000;
+					isTrue = value == 1000+i;
 				}
 //				System.out.println(i+"\t"+value+"\t"+isTrue);
 				assertTrue( isTrue);
@@ -115,7 +118,8 @@ public class ParaTest {
 		boolean isTrue = false;
 		for (int i = 0; i < 1000; i++) {
 			for (int j = 0; j < 2; j++) {
-				value = allPar.get(j).nextPrior();
+				allPar.get(j).nextPrior();
+				value = allPar.get(j).getNewValue();
 				if (allPar.get(j) instanceof ParaMu) {
 					isTrue = value>0.01 && value<0.05;
 				}

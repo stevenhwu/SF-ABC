@@ -3,9 +3,10 @@ package test.sw;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import test.sw.abc.ParaTest;
-import test.sw.math.CombinationTest;
-import test.sw.math.RegressionTest;
+import test.sw.abc.AllTestsABC;
+import test.sw.main.SettingTest;
+import test.sw.math.AllTestsMath;
+import test.sw.sequence.AllTestsSequence;
 import test.sw.sequence.SiteAlignPerTimeTest;
 import test.sw.sequence.SiteAlignmentTest;
 import test.sw.sequence.SiteTest;
@@ -14,19 +15,15 @@ import test.sw.simulator.SSCTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ 
 	
-	ParaTest.class,
+	AllTestsABC.class,
 
-	  
+	SettingTest.class,
 //	CreateControlFileTest.class,
 	
-	CombinationTest.class, 
-	RegressionTest.class,
+	AllTestsMath.class, 
 
-//	RunExtTest.class,
-	
-	SiteAlignmentTest.class,
-	SiteAlignPerTimeTest.class,
-	SiteTest.class,
+
+	AllTestsSequence.class,
 	
 	SSCTest.class,
 }) 

@@ -1,9 +1,10 @@
 package sw.math;
 
+
 public class OneOverDistribution extends RandomGenerator implements DistributionPrior {
 
 	double x;
-	double logP;
+	
 	
 	public OneOverDistribution(double init) {
 		this.x = init;
@@ -11,7 +12,7 @@ public class OneOverDistribution extends RandomGenerator implements Distribution
 	}
 
 	@Override
-	public double init() {
+	public double nextPrior() {
 		return x;
 	}
 
