@@ -87,7 +87,8 @@ public class Main {
 //		}
 //		System.out.println(StatUtils.mean(ratio));
 //		System.out.println(StatUtils.variance(ratio));
-		startSimulation(args);
+//		startSimulation(args);
+
        
 	}
 	
