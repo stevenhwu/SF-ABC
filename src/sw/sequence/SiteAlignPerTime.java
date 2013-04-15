@@ -219,6 +219,9 @@ public class SiteAlignPerTime {
 	//		System.out.println(Arrays.toString(pattern));
 			//Sum up to one, so take out the last position
 			double[] table = FrequencyUtils.summaryTable(pattern, Site.PATTERN_COUNT);
+//			System.out.println(Site.PATTERN_COUNT +"\t"+  Arrays.toString(pattern));
+//			System.out.println(Arrays.toString(table));
+//			System.out.println();
 			return table;
 		}
 

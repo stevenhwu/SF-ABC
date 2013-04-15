@@ -1,6 +1,7 @@
 package sw.sequence;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math.stat.StatUtils;
@@ -130,7 +131,7 @@ public class Site {
 
 		}
 		else {
-			pattern = 4; //diff maj 
+			pattern = 4; //diff maj
 			// OLD: TEMP both "majority and zero", too few of them, merge with 3
 			// 4 false [0.625, 0.0, 0.0, 0.375] [0.0, 0.0, 0.55, 0.45]
 			// 4 false [0.4, 0.575, 0.0, 0.025] [0.4, 0.0, 0.6, 0.0]

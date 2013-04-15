@@ -87,7 +87,10 @@ public class Main {
 //		}
 //		System.out.println(StatUtils.mean(ratio));
 //		System.out.println(StatUtils.variance(ratio));
-//		startSimulation(args);
+		
+		String[] localTest = new String[]{"/home/sw167/workspace/SF-ABC/simData.paup", "100", "100"	,"10"};
+		startSimulation(localTest);
+		startSimulation(args);
 
        
 	}
@@ -243,6 +246,7 @@ public class Main {
 			
 			sStat = semiAutoRegression(nRun, traceLogStats, traceLogParam, 1);
 			String regressionSummary = sStat.toString();
+			System.out.println(Arrays.toString(statsList));
 			System.out.println(regressionSummary);
 			System.out.println("Time:\t" + Math.round( (System.currentTimeMillis()-startTime)/60e3)+" mins" );	
 

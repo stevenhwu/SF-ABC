@@ -46,6 +46,7 @@ public class SStatFlexable extends AbstractSummaryStat {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Regression Coefficient\n");
+		System.out.println(coef.keySet().toString() +"\n" );
 		coef.size();
 		for (String key : coef.keySet()) {
 			sb.append(key).append("\t").append(Arrays.toString( coef.get(key) )).append("\n");
