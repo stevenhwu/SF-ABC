@@ -1,4 +1,7 @@
-package sw.math;
+package sw.math.distribution;
+
+import sw.math.RandomUtils;
+
 
 
 
@@ -16,7 +19,7 @@ public class Scale extends AbstractDistributionProposal {
 	@Override
 	public double next(double mean) {
 	    
-	    final double scale = (scaleFactor + (RandomGenerator.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)) );
+	    final double scale = (scaleFactor + (RandomUtils.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)) );
 	    logQ = -Math.log(scale);
 	    final double newValue = scale * mean;
 

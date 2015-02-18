@@ -1,10 +1,12 @@
-package sw.math;
+package sw.math.distribution;
 
 
 //import static sw.math.RandomGenerator.r;
 
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
+
+import sw.math.RandomUtils;
 
 
 public class NormalDistribution extends AbstractDistributionProposal implements DistributionPrior {
@@ -26,7 +28,7 @@ public class NormalDistribution extends AbstractDistributionProposal implements 
 	@Override
 	public double nextPrior() {
 		
-		return r.nextGaussian(mu, sigma);
+		return RandomUtils.nextGaussian(mu, sigma);
 	}
 	
 
@@ -34,7 +36,7 @@ public class NormalDistribution extends AbstractDistributionProposal implements 
 	@Override
 	public double next(double mean) {
 		
-		double v = r.nextGaussian(mean, sigma);
+		double v = RandomUtils.nextGaussian(mean, sigma);
 //		logq = pdf(v);
 		return v;
 	}

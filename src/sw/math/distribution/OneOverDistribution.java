@@ -1,7 +1,10 @@
-package sw.math;
+package sw.math.distribution;
+
+import sw.math.RandomUtils;
 
 
-public class OneOverDistribution extends RandomGenerator implements DistributionPrior {
+
+public class OneOverDistribution extends RandomUtils implements DistributionPrior {
 
 	double x;
 	

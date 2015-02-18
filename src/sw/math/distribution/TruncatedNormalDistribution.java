@@ -1,4 +1,6 @@
-package sw.math;
+package sw.math.distribution;
+
+import sw.math.RandomUtils;
 
 
 public class TruncatedNormalDistribution extends AbstractDistributionProposal implements DistributionPrior {
@@ -166,7 +168,7 @@ public class TruncatedNormalDistribution extends AbstractDistributionProposal im
 		try {
 
 			do {
-				newValue = r.nextGaussian(current, sd);
+				newValue = RandomUtils.nextGaussian(current, sd);
 			} while (newValue > upper || newValue < lower);
 
 			double limit = Math.log(calcT(current, sd, lower, upper));

@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import sw.math.OneOverDistribution;
+import sw.math.distribution.OneOverDistribution;
 
 public class OneOverDistributionTest {
 

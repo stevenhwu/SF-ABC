@@ -1,6 +1,6 @@
 package sw.abc.parameter;
 
-import sw.math.DistributionPrior;
+import sw.math.distribution.DistributionPrior;
 
 
 public class ParaMu extends AbstractParameter   {

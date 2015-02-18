@@ -7,7 +7,7 @@ import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.commons.math.stat.StatUtils;
 import org.junit.Assert;
 
-import sw.math.NormalDistribution;
+import sw.math.distribution.NormalDistribution;
 
 // TUNESIZE = average of tuneSize iterations
 // TuneGroup = over tuenGroup

@@ -1,4 +1,4 @@
-package sw.math;
+package sw.math.distribution;
 
 public interface DistributionPrior  {
 

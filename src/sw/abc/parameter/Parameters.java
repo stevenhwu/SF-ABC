@@ -1,8 +1,8 @@
 package sw.abc.parameter;
 
 
-import sw.math.DistributionPrior;
-import sw.math.DistributionProposal;
+import sw.math.distribution.DistributionPrior;
+import sw.math.distribution.DistributionProposal;
 
 
 public interface Parameters {

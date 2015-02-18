@@ -15,12 +15,12 @@ import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaPopsize;
 import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.ParametersCollection;
-import sw.math.NormalDistribution;
-import sw.math.OneOverDistribution;
-import sw.math.Scale;
-import sw.math.TruncatedScale;
-import sw.math.UniformDistribution;
-import sw.math.ZTestDistribution;
+import sw.math.distribution.NormalDistribution;
+import sw.math.distribution.OneOverDistribution;
+import sw.math.distribution.Scale;
+import sw.math.distribution.TruncatedScale;
+import sw.math.distribution.UniformDistribution;
+import sw.math.distribution.ZTestDistribution;
 
 public class ParaThetaTest {
 

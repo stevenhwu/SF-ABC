@@ -1,4 +1,5 @@
-package sw.math;
+package sw.math.distribution;
+
 
 
 public class ZTestDistribution extends AbstractDistributionProposal implements DistributionPrior{

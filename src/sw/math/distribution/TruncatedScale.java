@@ -1,4 +1,7 @@
-package sw.math;
+package sw.math.distribution;
+
+import sw.math.RandomUtils;
+
 
 
 
@@ -23,7 +26,7 @@ public class TruncatedScale extends Scale {
 		double scale;
 		double newValue = mean;
 		do{
-		    scale = (scaleFactor + (RandomGenerator.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)) );
+		    scale = (scaleFactor + (RandomUtils.nextDouble() * ((1.0 / scaleFactor) - scaleFactor)) );
 		    logQ = -Math.log(scale);
 		    newValue = scale * mean;
 		} while  (newValue > upper || newValue < lower);

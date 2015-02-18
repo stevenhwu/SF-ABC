@@ -43,7 +43,7 @@
  * Boston, MA  02110-1301  USA
  */
 
-package sw.hpd;
+package sw.beast.hpd;
 
 import java.util.AbstractList;
 import java.util.Comparator;

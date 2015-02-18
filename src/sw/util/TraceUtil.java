@@ -7,10 +7,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import sw.beast.trace.Trace;
+import sw.beast.trace.TraceFactory.TraceType;
 import sw.logger.NumberColumn;
 import sw.math.Combination;
 import sw.sequence.Site;
-import sw.util.TraceFactory.TraceType;
 
 
 

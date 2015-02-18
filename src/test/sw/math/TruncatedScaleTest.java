@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import sw.math.TruncatedScale;
+import sw.math.distribution.TruncatedScale;
 
 public class TruncatedScaleTest {
 

@@ -10,8 +10,8 @@ import org.junit.Test;
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaPopsize;
 import sw.abc.parameter.Parameters;
-import sw.math.UniformDistribution;
-import sw.math.ZTestDistribution;
+import sw.math.distribution.UniformDistribution;
+import sw.math.distribution.ZTestDistribution;
 
 public class ParaTest {
 

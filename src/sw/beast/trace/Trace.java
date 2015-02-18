@@ -1,4 +1,4 @@
-package sw.util;
+package sw.beast.trace;
 /*
  * Trace.java
  *

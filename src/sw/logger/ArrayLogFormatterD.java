@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import sw.util.Trace;
-import sw.util.TraceFactory;
+import sw.beast.trace.Trace;
+import sw.beast.trace.TraceFactory;
 
 import com.google.common.primitives.Doubles;
 

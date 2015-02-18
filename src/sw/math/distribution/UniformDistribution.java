@@ -1,4 +1,6 @@
-package sw.math;
+package sw.math.distribution;
+
+import sw.math.RandomUtils;
 
 
 public class UniformDistribution extends AbstractDistributionProposal implements DistributionPrior{
@@ -18,7 +20,7 @@ public class UniformDistribution extends AbstractDistributionProposal implements
 	
 	public double nextPrior() {
 
-		return r.nextUniform(lower, upper);
+		return RandomUtils.nextUniform(lower, upper);
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package sw.main;
 
 import sw.abc.parameter.Parameters;
 import sw.abc.parameter.ParametersCollection;
-import sw.math.RandomGenerator;
+import sw.math.RandomUtils;
 
 public class MH {
 
@@ -19,7 +19,7 @@ public class MH {
 	public static boolean accept(double logP, double logQ) {
 		
 		final double ratio = logP+logQ;
-		final double alpha = RandomGenerator.nextLogDouble();
+		final double alpha = RandomUtils.nextLogDouble();
 		final boolean isAccept = (alpha < ratio);
 //		System.out.println("p:"+logP+"\tq: "+logQ+"\tratio" + ratio +"\talpha: "+alpha +"\t"+ isAccept);
 		return isAccept;

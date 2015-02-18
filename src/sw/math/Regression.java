@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math.stat.regression.OLSMultipleLinearRegression;
 
-import sw.util.Trace;
+import sw.beast.trace.Trace;
 import sw.util.TraceUtil;
 
 
