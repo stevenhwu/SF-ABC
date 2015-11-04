@@ -1,4 +1,6 @@
-## Estimation of evolutionary parameters using short, random and partial sequences from mixed samples of anonymous individuals
+### Estimation of evolutionary parameters using short, random and partial sequences from mixed samples of anonymous individuals
+Steven H. Wu and Allen G. Rodrigo
+
 
 http://www.biomedcentral.com/1471-2105/16/357
 
