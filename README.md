@@ -1,5 +1,7 @@
 ## Estimation of evolutionary parameters using short, random and partial sequences from mixed samples of anonymous individuals
 
+http://www.biomedcentral.com/1471-2105/16/357
+
 #### USAGE
 **TODO**
 
