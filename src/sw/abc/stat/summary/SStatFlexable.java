@@ -24,8 +24,8 @@ public class SStatFlexable extends AbstractSummaryStat {
 	}
 	
 	@Override
-	public double calStatTheta(double[] par) {
-		double stat = calStatParam(par, coef.get("Theta"));
+	public double calStatPop(double[] par) {
+		double stat = calStatParam(par, coef.get("Pop"));
 		return stat;
 	}
 

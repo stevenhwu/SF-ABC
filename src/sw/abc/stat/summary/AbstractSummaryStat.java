@@ -12,7 +12,7 @@ public abstract class AbstractSummaryStat implements SummaryStat{
 			break;
 
 		case 1:
-			stat = calStatTheta(par);
+			stat = calStatPop(par);
 			break;
 		}
 		
@@ -21,7 +21,7 @@ public abstract class AbstractSummaryStat implements SummaryStat{
 	
 	@Override
 	public double[] calStat(double[] par) {
-		double[] stat = new double[] { calStatMu(par), calStatTheta(par) };
+		double[] stat = new double[] { calStatMu(par), calStatPop(par) };
 		return stat;
 	}
 	@Override
@@ -30,13 +30,13 @@ public abstract class AbstractSummaryStat implements SummaryStat{
 	}
 
 	@Override
-	public double calStatTheta(double[] par) {
+	public double calStatPop(double[] par) {
 		return Double.MAX_VALUE;
 	}
 
 	@Override
 	public double[] calStat(double[]... par) {
-		double[] stat = new double[] { calStatMu(par), calStatTheta(par) };
+		double[] stat = new double[] { calStatMu(par), calStatPop(par) };
 		return stat;
 	}	
 
@@ -46,7 +46,7 @@ public abstract class AbstractSummaryStat implements SummaryStat{
 	}
 
 	@Override
-	public double calStatTheta(double[]... par) {
+	public double calStatPop(double[]... par) {
 		return Double.MAX_VALUE;
 	}
 }

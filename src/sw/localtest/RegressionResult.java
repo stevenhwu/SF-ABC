@@ -1,9 +1,9 @@
-package sw.main;
+package sw.localtest;
 
 public class RegressionResult {
 
 	
-	static double[][] result = {
+	public static double[][] result = {
 		{0.000004705,9064}, 	//0
 		{0.00001319,2946}, 	//1
 		{0.00001081,4249}, 	//2

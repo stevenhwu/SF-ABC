@@ -38,7 +38,7 @@ public class SemiAutoRegression {
 			
 			lm.linear();	
 			double[] coef = lm.getBestEstimates();
-			sStat.addCoef("Mu", coef);
+//			sStat.addCoef("Mu", coef);
 			sStat.addCoef("Theta", coef);
 			System.out.println(lm.getAdjustedCoefficientOfDetermination());
 		}
@@ -54,7 +54,7 @@ public class SemiAutoRegression {
 			lm.linear();
 			System.out.println(lm.getAdjustedCoefficientOfDetermination());
 			coef = lm.getBestEstimates();
-			sStat.addCoef("Theta", coef);
+			sStat.addCoef("Pop", coef);
 		}
 		return sStat;
 	}

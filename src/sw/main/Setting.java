@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.ParametersCollection;
@@ -52,14 +53,15 @@ public class Setting {
 	private int noIteMCMC;
 	private int noItePreprocess;
 	private ParaTheta pTheta;
+	private HashMap<String, Double> initValues;
 	
 	private void init(String workingDir, String outputDir, String dataFileName) {
 
 		this.workingDir = checkDir(workingDir);
 		Path p = Paths.get(dataFileName);
 		dataFileName = p.getFileName().toString();
-		System.out.println(p.getFileName());
-		System.out.println(this.workingDir +"\t"+ workingDir +"\t"+ outputDir +"\t"+ dataFileName);
+//		System.out.println(p.getFileName());
+//		System.out.println(this.workingDir +"\t"+ workingDir +"\t"+ outputDir +"\t"+ dataFileName);
 		setupOutputFiles(outputDir, dataFileName);
 
 		try {
@@ -85,18 +87,19 @@ public class Setting {
 		File f = new File(dataFileName);
 //		File f2 = new File(obsDataName, "Template/");
 //		System.out.println(f2.getAbsolutePath());
-		System.out.println(f.getName() +"\t"+ f.getPath());
+//		System.out.println(f.getName() +"\t"+ f.getPath());
 		
-		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
+//		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
 //		System.out.println(f.getAbsolutePath() +"\t"+ f.getPath() +"\t"+ f.getParent());
 		
 		String workingDir = f.getParent();//+File.separatorChar+"TemplateFiles"+File.separatorChar;
 		String outputDir = workingDir;//obsDataNamePrefix+File.separatorChar;
 		System.out.println("output Dir:\t"+outputDir +"\t"+ workingDir);
-		System.out.println(f.getParent());
-		System.out.println(obsDataNamePrefix);
-		
-		
+//		System.out.println(f.getParent());
+//		System.out.println(obsDataNamePrefix);
+		initValues = new HashMap<String, Double>();
+		initValues.put("mu", 0.00001);
+		initValues.put("popsize", 5000.0);
 		init(workingDir, outputDir, dataFileName);
 	}
 
@@ -294,7 +297,7 @@ public class Setting {
 		this.resultOutFile = outputDir + dataFileName + "_summary.log";
 		this.obsFileName = workingDir + dataFileName;
 		this.regressionCoefFile = obsFileName + "_regressionCoef.coef";
-		System.out.println(resultOutFile +"\t"+ regressionCoefFile);
+//		System.out.println(resultOutFile +"\t"+ regressionCoefFile);
 		File tFile = new File(regressionCoefFile);
 		if (tFile.exists()) {
 			System.out.println("Regression file exist\t" + tFile.toString());
@@ -328,6 +331,10 @@ public class Setting {
 		this.timeGap = intervalBetweenTime;
 		this.noSeqPerTime = noTotalSeq / noTime;
 		//TODO: What happen if there not even?
+	}
+	public HashMap<String, Double> GetInitValues() {
+		// TODO Auto-generated method stub
+		return initValues;
 	}
 
 

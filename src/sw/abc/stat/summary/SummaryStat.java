@@ -8,7 +8,7 @@ public interface SummaryStat {
 
 	double calStatMu(double[] par);
 	
-	double calStatTheta(double[] par);
+	double calStatPop(double[] par);
 	
 	
 	
@@ -16,7 +16,7 @@ public interface SummaryStat {
 
 	double calStatMu(double[]... par);
 
-	double calStatTheta(double[]... par);
+	double calStatPop(double[]... par);
 
 	
 }

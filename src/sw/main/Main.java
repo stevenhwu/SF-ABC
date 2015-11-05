@@ -25,6 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import jebl.evolution.alignments.Alignment;
@@ -67,46 +68,17 @@ public class Main {
 	 * @version $Id$
 	 */
 
-	
-	private static final int NO_SEQ_PER_TIME = 50;
-	private static final int SEQ_LENGTH = 750;
-	private static final int NO_TIME_POINT = 3;
-	private static final int TIME_GAP = 400;
-	
-	private static final int TUNESIZE = 400 ; //400
-	private static final int TUNEGROUP = 10; //10
-	private static final int NO_REPEAT_CAL_ERROR = 1000; //1000
-	private static final int NO_REPEAT_PER_PARAMETERS = 100; //100
+	private static final int TUNESIZE = TunePar.TUNESIZE;//400 ; 
+	private static final int TUNEGROUP = TunePar.TUNEGROUP;//10; 
 	
 	private static final double initScale = 0.5;
-
-	private static final boolean DYNAMIC_ERROR_RATE = false;//Alter the error rate in MCMC. Testing methods only with unknown behaviour. Turn on with caution!!
 	private static final String VERSION = "1.0";
 	
+	private static final boolean DYNAMIC_ERROR_RATE = false;//Alter the error rate in MCMC. Testing methods only with unknown behaviour. Turn on with caution!!
 	
-	/*
-		param:
-		args[0]: String 	data file
-		args[1]: int		noItePreprocess
-		args[2]: int		noIteMCMC
-		args[3]: int		thinning
-		args[4]: double 	error
-		
-		int 	no_time_points
-		e.g.	0 simData.paup 50 100 10 0.1 
-		e.g.	0 simData.paup 500000 1000000 1000 0.01
-	*/
 	public static void main(String[] args) {
 
-//		Init with default values
-//		int numItePreprocess = 1000;
-//		int numIteMCMC = 1000;
-//		int numIteSample = 100;
-//		double error = 0.01;
-		
-//		int numTimePoints;
-//		int timeGap;
-//		String obsDataName ="";
+
 		args = new String[]{
 //				"-h",
 				"-i", "/home/steven/workspace/SF-ABC/Simulations/test/test.nex",
@@ -124,8 +96,8 @@ public class Main {
 		options.addOption(help);
 		options.addOption(version);
 		
-		options.addOption(Option.builder("i").longOpt("input").hasArg()
-				.argName("INPUT").desc("Infile (nexus format)")
+		options.addOption(Option.builder("i").longOpt("infile").hasArg()
+				.argName("infile").desc("REQUIRED: Infile (nexus format)")
 				.build());
 //		options.addOption(Option.builder("t").longOpt("time").hasArg()
 //				.argName("TIME").desc("Number of time points")
@@ -137,7 +109,7 @@ public class Main {
 					
 		Builder C = Option.builder("m").longOpt("mcmc")
 				.numberOfArgs(3).argName("preprocess mcmc sampling")
-				.desc("Three Parameters in the following orders: "
+				.desc("REQUIRED: Three Parameters in the following orders: "
 						+ "(1) Length of preprocessing, "
 						+ "(2) Length of MCMC chain, "
 						+ "(3) Sample every n iterations. ");
@@ -145,13 +117,23 @@ public class Main {
 
 		C = Option.builder("t").longOpt("time")
 				.numberOfArgs(2).argName("numTime interval")
-				.desc("Two Parameters in the following orders: "
+				.desc("REQUIRED: Two Parameters in the following orders: "
 						+ "(1) Number of time points, "
 						+ "(2) Interval between two time points");
 		options.addOption(C.build());
+
+		options.addOption(Option.builder("Xe").longOpt("error").hasArg()
+				.argName("").desc("Error threshold for ABC. [default: 0.01]")
+				.build());
+		options.addOption(Option.builder("Xm").longOpt("initMutation").hasArg()
+				.argName("").desc("Initial mutation rate. [default: 0.00001]")
+				.build());
+		options.addOption(Option.builder("Xp").longOpt("initPopulation").hasArg()
+				.argName("").desc("Initial Population size. [default: 5000]")
+				.build());
 		
 		HelpFormatter formatter = new HelpFormatter();
-		String syntax = "sfabc";
+		String syntax = "sfabc -i <infile> -m <preprocess mcmc sampling> -t <numTime interval>";
 		String header = 
 				"\nEstimation of evolutionary parameters using short, random and partial sequences from mixed samples of anonymous individuals. "
 				+ "\n\nArguments:\n";
@@ -193,7 +175,7 @@ public class Main {
 			String[] pct_config = cmd.getArgs();
 
 			if (cmd.hasOption("h") || args.length == 0) {
-				formatter.printHelp(syntax, header, options, footer, true);
+				formatter.printHelp(syntax, header, options, footer, false);
 				System.exit(0);
 			}
 			if(cmd.hasOption("v")){
@@ -224,20 +206,17 @@ public class Main {
 //						}
 				
 			}
-			if (cmd.hasOption("input")){
+			if (cmd.hasOption("infile")){
 //				numberOfObservation= Integer.parseInt(cmd.getOptionValue("obs"));
-				String obsDataName = cmd.getOptionValue("input");
+				String obsDataName = cmd.getOptionValue("infile");
 				setting = new Setting(obsDataName);
 				
 				NexusImporter imp = new NexusImporter(new FileReader(setting.getDataFile()));
 				Alignment jeblAlignment = imp.importAlignments().get(0);
 				int seqLength = jeblAlignment.getPatternCount();
 				int totalSeqCount = jeblAlignment.getPatternLength(); 
-				System.out.println(seqLength);
-//				System.out.println(jeblAlignment.getSiteCount());
-				System.out.println(totalSeqCount);
 				setting.setSeqInfo(seqLength, totalSeqCount);
-				System.out.println("Infile: "+obsDataName);
+//				System.out.println("Infile: "+obsDataName);
 			}
 			else{
 				System.out.println("Error: Input file required\n");
@@ -292,7 +271,8 @@ public class Main {
 			System.out.println(setting.toString());
 			//TODO: Check NO_SEQ_PER_TIME, num seq used for simulation, actual number seq per time in the real data
 			
-			MCMCFeatures.testStatFile(setting);			
+//			MCMCFeatures.testStatFile(setting);
+			
 			generateStatFile(setting);
 
 			// double error = MCMCFeatures.generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
@@ -309,31 +289,10 @@ public class Main {
 	}
 
 	public static Setting ABCSetup(Setting setting) throws IOException {
-
-//		File f = new File(obsDataName);
-//		File f2 = new File(obsDataName, "Template/");
-////		System.out.println(f2.getAbsolutePath());
-//		System.out.println(f.getName() +"\t"+ f.getPath());
-//		
-//		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
-////		System.out.println(f.getAbsolutePath() +"\t"+ f.getPath() +"\t"+ f.getParent());
-//		
-//		String workingDir = f.getParent();//+File.separatorChar+"TemplateFiles"+File.separatorChar;
-//		String outputDir = workingDir;//obsDataNamePrefix+File.separatorChar;
-//		System.out.println("output Dir:\t"+outputDir +"\t"+ workingDir);
-//		System.out.println(f.getParent());
-//		System.out.println(obsDataNamePrefix);
-//				
-//		Setting setting = new Setting(workingDir, outputDir, obsDataName);
 		
-//		Setting setting = new Setting(obsDataName);
-		String obsDataName = setting.getDataFile();
-		File f = new File(obsDataName);
-		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
-		double[] initValue = getRegressionResult(obsDataNamePrefix);
-//		System.out.println(obsDataName);
-//		System.out.println(setting.getDataFile());
+//		double[] initValue = new double[]{0.00001, 3000};
 				
+		HashMap<String, Double> initValues = setting.GetInitValues();
 		String[] paramListName = new String[]{"mu", "popsize"};
 		String[] statList = new String[]{"dist", "chisq", "var", "covar", "sitePattern"};
 		
@@ -341,11 +300,11 @@ public class Main {
 		setting.setStatList(statList);				
 
 		double scaleFactor = 5.0;
-		double muMean = initValue[0];
+		double muMean = initValues.get("mu");
 		double muLower = muMean / scaleFactor;
 		double muUpper = muMean * scaleFactor;
 		
-		double popSizeMean = initValue[1];
+		double popSizeMean = initValues.get("popsize");
 		double popSizeLower = popSizeMean / scaleFactor;
 		double popSizeUpper = popSizeMean * scaleFactor;
 		
@@ -636,21 +595,6 @@ public class Main {
 		
 		return aliStat.getSummaryStatAll();
 	
-	}
-
-
-	private static double[] getRegressionResult(String obsDataNamePrefix) {
-		int fileIndex = obsDataNamePrefix.indexOf("_");
-		double[] initValue = new double[2];
-		if(fileIndex== -1){
-			initValue = new double[]{0.00001, 3000};
-		}
-		else {
-			int i = Integer.parseInt(obsDataNamePrefix.substring(fileIndex+1));
-			initValue = RegressionResult.result[i];
-		}
-		System.out.println("Init values:\t"+Arrays.toString(initValue));
-		return initValue;
 	}
 
 
