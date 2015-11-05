@@ -18,27 +18,28 @@
 
 package sw.main;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 import jebl.evolution.alignments.Alignment;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.NexusImporter;
 
-import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.util.MathUtils;
 
-import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaPopsize;
-import sw.abc.parameter.Parameters;
+import sw.abc.parameter.ParaTheta;
 import sw.abc.parameter.ParametersCollection;
 import sw.abc.parameter.SavePar;
 import sw.abc.parameter.TunePar;
@@ -46,15 +47,12 @@ import sw.abc.stat.data.AlignmentStatFlex;
 import sw.abc.stat.summary.SStatFlexable;
 import sw.logger.ArrayLogFormatterD;
 import sw.math.Combination;
-import sw.math.distribution.NormalDistribution;
+import sw.math.RandomUtils;
 import sw.math.distribution.OneOverDistribution;
-import sw.math.distribution.Scale;
-import sw.math.distribution.TruncatedNormalDistribution;
 import sw.math.distribution.TruncatedScale;
 import sw.math.distribution.UniformDistribution;
 import sw.simulator.SSC;
 import sw.util.TraceUtil;
-import flanagan.analysis.Regression;
 
 
 public class Main {
@@ -64,7 +62,7 @@ public class Main {
 	 * @author Steven Wu
 	 * @version $Id$
 	 */
-	private static RandomDataImpl rd = new RandomDataImpl();
+
 	
 	private static final int NO_SEQ_PER_TIME = 50;
 	private static final int SEQ_LENGTH = 750;
@@ -77,7 +75,8 @@ public class Main {
 	private static final int NO_REPEAT_PER_PARAMETERS = 100; //100
 	
 	private static final double initScale = 0.5;
-//	private static String noSimPerPar = "1";
+
+	private static final boolean DYNAMIC_ERROR_RATE = false;//Alter the error rate in MCMC. Testing methods only with unknown behaviour. Turn on with caution!!
 	
 	
 	/*
@@ -100,12 +99,18 @@ public class Main {
 //		}
 //		System.out.println(StatUtils.mean(ratio));
 //		System.out.println(StatUtils.variance(ratio));
+		for (int i = 50; i < 0; i++) {
+			
 		
-		String[] localTest = new String[]{"/home/sw167/workspace/SF-ABC/simData.paup", "100", "100"	,"10"};
-		startSimulation(localTest);
-		startSimulation(args);
+			String[] localTest = new String[] {
+					"/home/steven/workspace/SF-ABC/Simulations/ABCA/CPo3Ti40S400_"+i+".pau",
+					"200000", "100", "1000" };
 
-       
+			startSimulation(localTest);
+		}
+//		startSimulation(args);
+
+
 	}
 	
 	public static void startSimulation(String[] args) {
@@ -116,17 +121,18 @@ public class Main {
 		final int thinning = Integer.parseInt(args[3]);
 //		double error = Double.parseDouble(args[4]);
  		
-		Setting setting = ABCSetup(obsDataName);
-		setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
-		setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
 		
 		try {
+			Setting setting = ABCSetup(obsDataName);
+			setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
+			setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
+			
 //			testStatFile(setting);			
 			generateStatFile(setting);
-			generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
+//			generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
 //		
 			System.out.println(setting.toString());
-			ABCUpdateMCMC(setting);
+//			ABCUpdateMCMC(setting);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -135,14 +141,22 @@ public class Main {
 
 	}
 
-	public static Setting ABCSetup(String obsDataName) {
+	public static Setting ABCSetup(String obsDataName) throws IOException {
 
-			
-		String obsDataNamePrefix = obsDataName.split("\\.")[0];
-		String workingDir = System.getProperty("user.dir")+File.separatorChar+"TemplateFiles"+File.separatorChar;
-		String outputDir = workingDir+obsDataNamePrefix+File.separatorChar;
-		System.out.println("output Dir:\t"+outputDir);
+		File f = new File(obsDataName);
+		File f2 = new File(obsDataName, "Template/");
+//		System.out.println(f2.getAbsolutePath());
+		System.out.println(f.getName() +"\t"+ f.getPath());
 		
+		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
+//		System.out.println(f.getAbsolutePath() +"\t"+ f.getPath() +"\t"+ f.getParent());
+		
+		String workingDir = f.getParent();//+File.separatorChar+"TemplateFiles"+File.separatorChar;
+		String outputDir = workingDir;//obsDataNamePrefix+File.separatorChar;
+		System.out.println("output Dir:\t"+outputDir +"\t"+ workingDir);
+		System.out.println(f.getParent());
+//		System.exit(-1);
+		System.out.println(obsDataNamePrefix);
 		double[] initValue = getRegressionResult(obsDataNamePrefix);
 				
 		Setting setting = new Setting(workingDir, outputDir, obsDataName);
@@ -257,12 +271,12 @@ public class Main {
 				}
 			}
 			
-			sStat = semiAutoRegression(nRun, traceLogStats, traceLogParam, 1);
+			sStat = SemiAutoRegression.semiAutoRegression(nRun, traceLogStats, traceLogParam, 2);
 			String regressionSummary = sStat.toString();
 			System.out.println(Arrays.toString(statsList));
 			System.out.println(regressionSummary);
 			System.out.println("Time:\t" + Math.round( (System.currentTimeMillis()-startTime)/60e3)+" mins" );	
-
+			System.out.println("Time:\t" + TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis()-startTime) +" mins" );
 			try {	
 				
 				String regressionCoefFile =  setting.getRegressionCoefFile();
@@ -277,7 +291,7 @@ public class Main {
 			}
 		}
 		else{
-			sStat = readRegressionFile(setting);
+			sStat = SemiAutoRegression.readRegressionFile(setting);
 		}
 		setting.setSummaryStat(sStat);
 		setting.setObsStat( calObsStat(setting) );
@@ -288,62 +302,11 @@ public class Main {
 	}
 
 
-//	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static void testStatFile(Setting setting) {
-
-		final int nRun = 100;
-		final int noTime = setting.getNoTime();
-		String[] paramList = setting.getParamList();
-		String[] statsList = setting.getStatList();
-
-		ParametersCollection allParUniformPrior = setting.getAllParPrior();
-
-		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
-
-		SSC simulator = new SSC(setting);
-
-		TraceUtil tu = new TraceUtil(noTime);
-		ArrayLogFormatterD traceLogParam = new ArrayLogFormatterD(6, tu.createTraceAll(paramList));
-		ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAll(statsList));
-		long start = System.currentTimeMillis();
-		try {
-			PrintWriter oResult = new PrintWriter(new BufferedWriter(
-					new FileWriter("zzz_testRegressionOutput2")));
-			String s = traceLogParam.getLabels() +"\t"+ traceLogStats.getLabels();
-			oResult.println(s);
-			for (int i = 0; i < nRun; i++) {
-				allParUniformPrior.nextProirs();
-				traceLogParam.logValues(allParUniformPrior.getValues());
-				
-				for (int j = 0; j < 100; j++) {
-					
-				
-				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
-				newStat.updateAlignment(jeblAlignment);
-
-				
-				traceLogStats.logValues(newStat.getCurStat(statsList));
-				s = traceLogParam.getLine(i) + "\t" + traceLogStats.getLine(i*100+j);
-				oResult.println(s);
-				oResult.flush();
-				
-				}
-				
-
-			}
-			oResult.close();
-			System.out.println("Time:\t"+(System.currentTimeMillis()-start));
-		} catch (Exception e) {
-			// TODO: handle exception
-		}	
-	
-	}
-
-	public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
+public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
 
 		// nRun = 10;
 		// nRepeat = 10;
-
+		System.out.println("Estimating Error Rate");
 		ParametersCollection allParUniformPrior = setting.getAllParPrior();
 		SSC simulator = new SSC(setting);
 		AlignmentStatFlex[] newStat = new AlignmentStatFlex[nRepeat];
@@ -459,7 +422,9 @@ public class Main {
 				
 				tPar.update(sPar, i);
 				allPar.updateProposalDistVar(tPar);
-//				error = updateTol(tPar.getAccRate(), error);
+				if(DYNAMIC_ERROR_RATE){
+					error = updateTol(tPar.getAccRate(), error);
+				}
 
 //				for (int j = 0; j < allPar.getSize(); j++) {
 ////					TODO recode this
@@ -507,50 +472,13 @@ public class Main {
 		
 		double newError = error;
 		if (aveAccRate > 0.5) {
-			newError -= rd.nextUniform(0, 0.02);
+			newError -= RandomUtils.nextUniform(0, 0.02);
 		} 
 		if (aveAccRate < 0.1) {
-			newError += rd.nextUniform(0, 0.02);
+			newError += RandomUtils.nextUniform(0, 0.02);
 		}
 		return newError;
 	}
-
-	private static SStatFlexable readRegressionFile(Setting setting) {
-		
-		String regressionCoefFile =  setting.getRegressionCoefFile();
-		System.out.println("Skip preprocessing - parse existing coef file: "+regressionCoefFile);
-		SStatFlexable sStat = new SStatFlexable();
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(regressionCoefFile));
-			String line;
-			while((line = br.readLine())!= null ){
-				if(line.startsWith("Mu")) {
-					sStat.addCoef("Mu", parseCoef(line));
-				} else if(line.startsWith("Theta")){
-					sStat.addCoef("Theta", parseCoef(line));
-				}
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-
-	
-		return sStat;
-	}
-
-
-	private static double[] parseCoef(String line) {
-		
-		String[] tokens = line.split("\\[|,|\\]");
-		double[] coef = new double[tokens.length-1];
-		for (int i = 0; i < coef.length; i++) {
-			coef[i] = Double.parseDouble(tokens[i+1].trim());
-		}
-		return coef;
-	}
-
 
 	private static double[] calObsStat(Setting setting) {
 	
@@ -595,50 +523,55 @@ public class Main {
 		return initValue;
 	}
 
-
-	private static SStatFlexable semiAutoRegression(int nRun, ArrayLogFormatterD traceLogStats, ArrayLogFormatterD traceLogParam, int sParam) {
-		
-		if(nRun != traceLogParam.getLength()){
-			System.err.println("Error! incomplete preprocessing:\t"+nRun+"\t"+traceLogParam.getLength()+"\tEXIT");
-			System.exit(-1);
-		}
-		
-		double[][] xxData = traceLogStats.to2DArray();
-		SStatFlexable sStat = new SStatFlexable();
-		
-		if(sParam==1){
-			// lm(log(Mu*Theta)~ .)
-			double[] allMu = traceLogParam.toArray(0);
-			double[] allTheta = traceLogParam.toArray(1);
-			double[] muTheta = new double[allTheta.length];
-			for (int i = 0; i < allTheta.length; i++) {
-//				logMuTheta[i] = Math.log(allMu[i]*allTheta[i]);
-				muTheta[i] = allMu[i]*allTheta[i];
-			}
-
-			Regression lm = new Regression(xxData, muTheta );
-			
-			lm.linear();	
-			double[] coef = lm.getBestEstimates();
-			sStat.addCoef("Mu", coef);
-			sStat.addCoef("Theta", coef);
-System.out.println(lm.getAdjustedCoefficientOfDetermination());
-		}
-		else{
-			
-			Regression lm = new Regression(xxData, traceLogParam.toArray(0) );
-			lm.linear();	
-			System.out.println(lm.getAdjustedCoefficientOfDetermination());
-			double[] coef = lm.getBestEstimates();
-			sStat.addCoef("Mu", coef);
+	//	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static void testStatFile(Setting setting) {
 	
-			lm.enterData(xxData, traceLogParam.toArray(1));
-			lm.linear();
-			System.out.println(lm.getAdjustedCoefficientOfDetermination());
-			coef = lm.getBestEstimates();
-			sStat.addCoef("Theta", coef);
-		}
-		return sStat;
+		final int nRun = 100;
+		final int noTime = setting.getNoTime();
+		String[] paramList = setting.getParamList();
+		String[] statsList = setting.getStatList();
+	
+		ParametersCollection allParUniformPrior = setting.getAllParPrior();
+	
+		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
+	
+		SSC simulator = new SSC(setting);
+	
+		TraceUtil tu = new TraceUtil(noTime);
+		ArrayLogFormatterD traceLogParam = new ArrayLogFormatterD(6, tu.createTraceAll(paramList));
+		ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAll(statsList));
+		long start = System.currentTimeMillis();
+		try {
+			PrintWriter oResult = new PrintWriter(new BufferedWriter(
+					new FileWriter("zzz_testRegressionOutput2")));
+			String s = traceLogParam.getLabels() +"\t"+ traceLogStats.getLabels();
+			oResult.println(s);
+			for (int i = 0; i < nRun; i++) {
+				allParUniformPrior.nextProirs();
+				traceLogParam.logValues(allParUniformPrior.getValues());
+				
+				for (int j = 0; j < 100; j++) {
+					
+				
+				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
+				newStat.updateAlignment(jeblAlignment);
+	
+				
+				traceLogStats.logValues(newStat.getCurStat(statsList));
+				s = traceLogParam.getLine(i) + "\t" + traceLogStats.getLine(i*100+j);
+				oResult.println(s);
+				oResult.flush();
+				
+				}
+				
+	
+			}
+			oResult.close();
+			System.out.println("Time:\t"+(System.currentTimeMillis()-start));
+		} catch (Exception e) {
+			// TODO: handle exception
+		}	
+	
 	}
 
 

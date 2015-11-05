@@ -18,7 +18,7 @@ public class SiteTest {
 	public void setUp() throws Exception {
 		double[] f1 = {0.1,0.2,0.3,0.4};
 		
-		s1 = new Site(f1);
+		s1 = Site.createSiteWithFreqs(f1);
 		
 	}
 

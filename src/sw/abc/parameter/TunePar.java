@@ -7,6 +7,7 @@ import org.apache.commons.math.random.RandomDataImpl;
 import org.apache.commons.math.stat.StatUtils;
 import org.junit.Assert;
 
+import sw.math.RandomUtils;
 import sw.math.distribution.NormalDistribution;
 
 // TUNESIZE = average of tuneSize iterations
@@ -47,7 +48,6 @@ public class TunePar {
 	private double accUpper = 0.4;//OPTIMRATE + ACCTOL;
 	private double[] initValue;
 
-	private static RandomDataImpl rd = new RandomDataImpl();
 
 	public TunePar(int tuneSize, int tuneGroup, double[] initValue, String[] type) {
 
@@ -148,9 +148,9 @@ public class TunePar {
 
 	
 		if (rate >= accUpper) {
-			tp -= rd.nextUniform(0, tuneStepSize);
+			tp -= RandomUtils.nextUniform(0, tuneStepSize);
 		} else if (rate < accLower) {
-			tp += rd.nextUniform(0, tuneStepSize);
+			tp += RandomUtils.nextUniform(0, tuneStepSize);
 		}
 		
 		if (tp <= 0.2){

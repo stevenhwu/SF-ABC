@@ -23,7 +23,7 @@ import dr.evomodel.substmodel.HKY;
 
 public class SSC {
 
-	final private int seqLength = 750;
+	private int seqLength;
 			
 	private int popSize;
 	private double substitutionRate;
@@ -34,27 +34,24 @@ public class SSC {
 	private SeqGenMod seqGen;
 	private String prefix;
 	
-	public SSC(int noTime, int noSeq, int timeGap) {
-		this(noTime, noSeq, timeGap, "Tip_");
+	public SSC(int seqLength, int noSeqPerTime, int noTime, int timeGap) {
+		this(seqLength, noSeqPerTime, noTime, timeGap, "Tip_");
 	}
 	public SSC(Setting setting) {
-		this(setting.getNoTime(), setting.getNoSeqPerTime(), setting.getTimeGap());
+		this(setting.getSeqLength(), setting.getNoSeqPerTime(), setting.getNoTime(), setting.getTimeGap());
 	}	
-	public SSC(int noTime, int noSeq, int timeGap, String prefix) {
+	public SSC(int seqLength, int noSeqPerTime, int noTime, int timeGap, String prefix) {
 
-//		double[] samplingTimes = genTimeSetting(noTime, noSeq, timeGap);
-//		jeblGenTree(samplingTimes, popSize);
 		this.prefix = prefix;
+		this.seqLength = seqLength;
 		
 		setupDefaultModel();
 		
 		int[] samplingCounts = new int[noTime];
-		Arrays.fill(samplingCounts, noSeq);
+		Arrays.fill(samplingCounts, noSeqPerTime);
 		double[] samplingTimes = genTimeSetting(noTime, timeGap);
 		treeSim = new TreeSimulator(this.prefix, samplingCounts, samplingTimes);
 		
-		
-//		simulateAlignment(popSize, substitutionRate);
 	}
 
 
@@ -147,7 +144,7 @@ public class SSC {
 		return alignments;
 
 	}
-	private void setupDefaultModel(){
+	private void setupDefaultModel(){// JC
 
 		double[] frequencies = new double[] { 0.25, 0.25, 0.25, 0.25 };
 		double kappa = 1;

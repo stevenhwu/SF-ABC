@@ -20,6 +20,7 @@ public abstract class AbstractParameter implements Parameters {
 	
 	
 	public AbstractParameter(){}
+	
 @Override
 	public void acceptNewValue(){
 		value = newValue;

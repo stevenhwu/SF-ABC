@@ -13,7 +13,7 @@ public class Site {
 	private double[] freqs;
 	private double maxFreq;
 
-	public static ArrayList<Site> init(int n) {
+	public static ArrayList<Site> createSiteArrayList(int n) {
 		ArrayList<Site> allSites = new ArrayList<Site>(n);
 		for (int i = 0; i < n; i++) {
 			allSites.add(new Site(i));
@@ -22,13 +22,10 @@ public class Site {
 
 	}
 
-//	public Site(int index, double[] freqs) {
-//		this.index = index;
-//		this.freqs = freqs;
-//	}
-
-	public Site(double[] freqs) {
-		this.freqs = freqs;
+	public static Site createSiteWithFreqs(double[] freqs){
+		Site s = new Site(0);
+		s.updateSite(freqs);
+		return s;
 	}
 
 

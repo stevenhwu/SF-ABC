@@ -64,7 +64,7 @@ public class SSCTest {
 
 	@Test
 	public void testSSC() {
-		SSC sim = new SSC(5, 2, 100);
+		SSC sim = new SSC(750, 2, 5, 100);
 		Alignment ali = sim.simulateAlignment(3300, 1.75E-5);
 //		System.out.println("Pattern Count:\t"+ali.getPatternCount());
 //		System.out.println("Site    Count:\t"+ali.getSiteCount() );
@@ -81,10 +81,11 @@ public class SSCTest {
 	@Test
 	public void testCorrectName() {
 		
+		int seqLength = 750;
 		int noTime = 5;
 		int noSeq = 2;
 		int timeGap = 100;
-		SSC sim = new SSC(noTime, noSeq, timeGap);
+		SSC sim = new SSC(seqLength, noSeq, noTime, timeGap);
 		Alignment ali = sim.simulateAlignment(3300, 1.75E-5);
 		
 		List<Taxon> expectedList = new ArrayList<Taxon>();

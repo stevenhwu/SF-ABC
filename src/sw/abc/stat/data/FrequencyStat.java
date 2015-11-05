@@ -2,8 +2,9 @@ package sw.abc.stat.data;
 
 import org.apache.commons.math.util.MathUtils;
 
-public class FrequencyStat {
 
+public class FrequencyStat {
+@Deprecated
 	public FrequencyStat() {
 
 	}

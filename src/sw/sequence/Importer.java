@@ -14,7 +14,7 @@ import dr.evolution.sequence.Sequence;
 
 public class Importer {
 
-	File aliFile;
+	private File aliFile;
 	private int noSeq;
 
 
@@ -33,15 +33,17 @@ public class Importer {
 		aliFile = new File(f);
 	}
 
-	public Alignment importAlignment() throws IOException   {
 
+	public Alignment importAlignment() throws IOException   {
+	
 		BufferedReader br = new BufferedReader(new FileReader(aliFile));
 		SimpleAlignment sa = readSeq(br);
 		br.close();
 		
 		return sa;
 	}
-	
+
+
 	private SimpleAlignment readSeq(BufferedReader br) throws IOException {
 		
 		SimpleAlignment sa = new SimpleAlignment();

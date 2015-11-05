@@ -17,22 +17,15 @@ import dr.evolution.alignment.SimpleAlignment;
 
 public class SiteAlignment {
 
-	private final static int DNASTATCOUNT = 4; 
-
-//	private int noSeq;
-//	private int noState;
 	
 	private Alignment ali;
 	private int noSite; 
 	private int noTime;
-//	private ArrayList<int[]> timeGroup;
+
 	private ArrayList<SiteAlignPerTime> st = new ArrayList<SiteAlignPerTime>();
 
 	private double timeGap;
 	private double[] timeGroups;
-	// private
-
-	
 
 	private int[][] combs;
 
@@ -53,43 +46,6 @@ public class SiteAlignment {
 			time += this.timeGap;
 		}
 	}
-	public SimpleAlignment convertJEBLAlignmentToDrAlignment(Alignment jeblAlignment) {
-		
-		SimpleAlignment drAlignment = new SimpleAlignment();
-		List<Sequence> allSeq = jeblAlignment.getSequenceList();
-		for (Sequence seq : allSeq) {
-			String actualSeq = seq.getString();
-			dr.evolution.sequence.Sequence drSeq = new dr.evolution.sequence.Sequence(actualSeq);
-			drAlignment.addSequence(drSeq);
-		}
-		return drAlignment;
-	}
-	
-	public BasicAlignment convertDrAlignmentToJEBLAlignment(dr.evolution.alignment.Alignment drAlignment) {
-		
-		BasicAlignment jAlignment = new BasicAlignment();
-		int noSeq = drAlignment.getSequenceCount();
-//		List<dr.evolution.util.Taxon> drTaxon = drAlignment.asList();
-		Taxon t;
-		for (int i = 0; i < noSeq; i++) {
-			dr.evolution.sequence.Sequence drSeq = drAlignment.getSequence(i);
-			String actualSeq = drSeq.getSequenceString();
-			
-			if(drSeq.getTaxon()==null){
-				int timeIndex = i<(noSeq/noTime)? 0:1; 
-				t = Taxon.getTaxon(i+"."+timeGroups[timeIndex] );
-			}
-			else {
-				t = Taxon.getTaxon(drSeq.getTaxon().toString() );	
-			}
-			
-			BasicSequence jSeq = new BasicSequence(SequenceType.NUCLEOTIDE, t, actualSeq);
-			jAlignment.addSequence(jSeq);
-		}
-
-		return jAlignment;
-	}
-	
 	private void parseAlignment() {
 		
 		List<Sequence> allSeq = ali.getSequenceList();
@@ -134,8 +90,12 @@ public class SiteAlignment {
 	}
 
 
-	public ArrayList<Site> calcFreqTime(int t, ArrayList<Site> allSite) {
-		return calcFreq(getTimeGroup(t), allSite);
+	public void updateJEBLAlignment(Alignment jeblAlignment){
+		this.ali = jeblAlignment;
+		parseAlignment();
+		calAllFreq();
+		calAllSpectrum();
+	
 	}
 
 	public double[][] calSitePattern() {
@@ -168,13 +128,7 @@ public class SiteAlignment {
 
 	}
 	
-//	public int[][] getAllSpectrum() {
-//		int[][] allSpec = new int[noTime][];
-//		for (int i = 0; i < noTime; i++) {
-//			allSpec[i] = st.get(i).getSiteSpecturm();
-//		}
-//		return allSpec;
-//	}
+
 	public double[][] getFreqSpectrumAll() {
 		double[][] allSpec = new double[noTime][];
 		for (int i = 0; i < noTime; i++) {
@@ -190,13 +144,8 @@ public class SiteAlignment {
 		}
 		return allSpec;
 	}
-//	public double[] getFreqSpectrumTime(int time) {
-//		double[] allSpec = st.get(time).getSiteSpecturm();
-//		
-//		return allSpec;
-//	}
 
-	
+
 	public double[] calDists() {
 		
 
@@ -212,9 +161,7 @@ public class SiteAlignment {
 		return dist;
 	}
 
-	public void setNoTime(int noTime) {
-		this.noTime = noTime;
-	}
+
 
 	public double[] getVar() {
 		double[] var = new double[noTime];
@@ -234,7 +181,7 @@ public class SiteAlignment {
 		return covar;
 	}
 
-	
+	@Deprecated
 	public double[] getKurtosis() {
 		double[] kurt = new double[noTime];
 		for (int i = 0; i < noTime; i++) {
@@ -243,7 +190,7 @@ public class SiteAlignment {
 
 		return kurt;
 	}
-	
+	@Deprecated
 	public double[] getSecondM() {
 		double[] secondM = new double[noTime];
 		for (int i = 0; i < noTime; i++) {
@@ -252,6 +199,7 @@ public class SiteAlignment {
 
 		return secondM;
 	}
+	@Deprecated
 	public double[] getSkewness() {
 		double[] kurt = new double[noTime];
 		for (int i = 0; i < noTime; i++) {
@@ -261,14 +209,51 @@ public class SiteAlignment {
 		return kurt;
 	}
 	
-	public void updateJEBLAlignment(Alignment jeblAlignment){
-		this.ali = jeblAlignment;
-		parseAlignment();
-		calAllFreq();
-		calAllSpectrum();
-
+	@Deprecated
+	public SimpleAlignment convertJEBLAlignmentToDrAlignment(Alignment jeblAlignment) {
+		
+		SimpleAlignment drAlignment = new SimpleAlignment();
+		List<Sequence> allSeq = jeblAlignment.getSequenceList();
+		for (Sequence seq : allSeq) {
+			String actualSeq = seq.getString();
+			dr.evolution.sequence.Sequence drSeq = new dr.evolution.sequence.Sequence(actualSeq);
+			drAlignment.addSequence(drSeq);
+		}
+		return drAlignment;
 	}
 
+	@Deprecated
+		public BasicAlignment convertDrAlignmentToJEBLAlignment(dr.evolution.alignment.Alignment drAlignment) {
+			
+			BasicAlignment jAlignment = new BasicAlignment();
+			int noSeq = drAlignment.getSequenceCount();
+	//		List<dr.evolution.util.Taxon> drTaxon = drAlignment.asList();
+			Taxon t;
+			for (int i = 0; i < noSeq; i++) {
+				dr.evolution.sequence.Sequence drSeq = drAlignment.getSequence(i);
+				String actualSeq = drSeq.getSequenceString();
+				
+				if(drSeq.getTaxon()==null){
+					int timeIndex = i<(noSeq/noTime)? 0:1; 
+					t = Taxon.getTaxon(i+"."+timeGroups[timeIndex] );
+				}
+				else {
+					t = Taxon.getTaxon(drSeq.getTaxon().toString() );	
+				}
+				
+				BasicSequence jSeq = new BasicSequence(SequenceType.NUCLEOTIDE, t, actualSeq);
+				jAlignment.addSequence(jSeq);
+			}
+	
+			return jAlignment;
+		}
+
+	@Deprecated
+	public ArrayList<Site> calcFreqTime(int t, ArrayList<Site> allSite) {
+		return calcFreq(getTimeGroup(t), allSite);
+	}
+
+	@Deprecated
 	public void updateAlignment(List<Alignment> importAlignments) {
 		
 		if( importAlignments.size() == 1){

@@ -19,9 +19,10 @@ import sw.math.FrequencyUtils;
 public class SiteAlignPerTime {
 
 //	private static final int SITE_PATTERN_COUNT = Site.PATTERN;
-	static final double SITE_SPEC_BIN_SIZE = 0.05;
-	static final int SITE_SPEC_NO_BIN = (int) (1/SITE_SPEC_BIN_SIZE);
-	static final int NO_STATE = 4;
+	public static final double SITE_SPEC_BIN_SIZE = 0.05;
+	public static final int SITE_SPEC_NO_BIN = (int) (1/SITE_SPEC_BIN_SIZE);
+	public static final int MAX_SMALL_FREQ_BIN_LENGTH = 9;
+
 
 	private ArrayList<Site> allSites;
 	//TODO change to Stie[] ? faster?
@@ -34,14 +35,14 @@ public class SiteAlignPerTime {
 	public SiteAlignPerTime(int n) {
 		allSites = init(n);
 		siteSpecturm = new double[SITE_SPEC_NO_BIN+1];
-		siteSpecturmEach = new double[9];
+		siteSpecturmEach = new double[MAX_SMALL_FREQ_BIN_LENGTH];//Used in putSmallFreqBin()
 		saAlignment = new BasicAlignment();
 	}
 
 	public SiteAlignPerTime(int n, List<Sequence> allSeqArray) {
 		allSites = init(n);
 		siteSpecturm = new double[SITE_SPEC_NO_BIN+1];
-		siteSpecturmEach = new double[9];
+		siteSpecturmEach = new double[MAX_SMALL_FREQ_BIN_LENGTH];
 		saAlignment = new BasicAlignment(allSeqArray);
 	}
 
@@ -124,8 +125,8 @@ public class SiteAlignPerTime {
 			double max = s.getMaxFreq();
 			int ind = (int) (max / SITE_SPEC_BIN_SIZE);
 			siteSpecturm[ind]++;
-			ind = putSmallFreqBin(max);
-			siteSpecturmEach[ind]++;
+			int smallBinIndex = putSmallFreqBin(max);
+			siteSpecturmEach[smallBinIndex]++;
 		} 
 		for (int i = 0; i < siteSpecturm.length; i++) {
 			siteSpecturm[i] = siteSpecturm[i] / n;
@@ -134,7 +135,7 @@ public class SiteAlignPerTime {
 
 	}
 
-	private int putSmallFreqBin(double max) {
+	private static int putSmallFreqBin(double max) {
 		int ind = 8;
 		if(max>=0.99){
 			ind = 0;
@@ -212,20 +213,20 @@ public class SiteAlignPerTime {
 
 	public double[] calSitePattern(SiteAlignPerTime st2) {
 	
-			int[] pattern = new int[allSites.size()];
-			for (int i = 0; i < allSites.size(); i++) {
-				pattern[i] = allSites.get(i).calPattern(st2.getSite(i));
-			}		
-	//		System.out.println(Arrays.toString(pattern));
-			//Sum up to one, so take out the last position
-			double[] table = FrequencyUtils.summaryTable(pattern, Site.PATTERN_COUNT);
+		int[] pattern = new int[allSites.size()];
+		for (int i = 0; i < allSites.size(); i++) {
+			pattern[i] = allSites.get(i).calPattern(st2.getSite(i));
+		}		
+//		System.out.println(Arrays.toString(pattern));
+		//Sum up to one, so take out the last position
+		double[] table = FrequencyUtils.summaryTable(pattern, Site.PATTERN_COUNT);
 //			System.out.println(Site.PATTERN_COUNT +"\t"+  Arrays.toString(pattern));
 //			System.out.println(Arrays.toString(table));
 //			System.out.println();
-			return table;
-		}
+		return table;
+	}
 
-public Site getSite(int i) {
+	public Site getSite(int i) {
 		return allSites.get(i);
 	}
 

@@ -25,7 +25,7 @@ public class SiteAlignPerTimeTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		SSC simulator = new SSC(2, 10, 500);
+		SSC simulator = new SSC(750, 10, 2, 500);
 		jeblAlignment = simulator.simulateAlignment(3000, 1e-2);
 //		jeblAlignment = 
 	}

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import jebl.evolution.alignments.Alignment;
-
 import sw.abc.stat.summary.SummaryStat;
 import sw.main.Setting;
 import sw.sequence.SiteAlignment;
@@ -16,25 +15,21 @@ public class AlignmentStatFlex {
 	private SummaryStat sumStat;
 
 	// Alignment properties
-//	private double[][] siteFreqSpec;
+	// private double[][] siteFreqSpec;
 	private double[][] siteFreqSpecEach;
-	
+
 	private StatArray siteDists = new StatArray("dist");
 	private StatArray siteVarinace = new StatArray("var");
 	private StatArray siteCovarinace = new StatArray("covar");
 	private StatArray siteChiDist = new StatArray("chisq");
 	private StatArray sitePattern = new StatArray("sitePattern");
 
-	private String[] statsList;
-	private double[] summaryStatAll;
-	
-	private HashMap<String, StatArray> siteStats = new HashMap<String, StatArray>();
-
-	private SiteAlignment siteAlig;
-
 	private double[] obsStat;
+	private double[] summaryStatAll;
+	private String[] statsList;
 
-	
+	private HashMap<String, StatArray> siteStats = new HashMap<String, StatArray>();
+	private SiteAlignment siteAlig;
 
 
 
@@ -96,21 +91,20 @@ public class AlignmentStatFlex {
 
 	}
 
-	private void addSiteVar() {
-
-		this.siteVarinace.setStats( siteAlig.getVar() );
-	}
-
-	private void addSiteCovar() {
-
-		this.siteCovarinace.setStats( siteAlig.getCovar() );
-	}
 	private void addSiteFreqSpec() {
-
 		double[][] siteFreqSpec = siteAlig.getFreqSpectrumAll();
 		this.siteFreqSpecEach = siteAlig.getFreqSpectrumEach();
 		this.siteChiDist.setStats( FrequencyStat.calChiDiff(siteFreqSpec) );
 		
+	}
+
+
+	private void addSiteVar() {
+		this.siteVarinace.setStats( siteAlig.getVar() );
+	}
+
+	private void addSiteCovar() {
+		this.siteCovarinace.setStats( siteAlig.getCovar() );
 	}
 	
 	private void addSitePattern() {

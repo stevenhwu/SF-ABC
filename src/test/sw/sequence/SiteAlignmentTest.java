@@ -94,8 +94,8 @@ public class SiteAlignmentTest {
 		SimpleAlignment simpleA0 = saOld.getTimeGroup(0);
 		SimpleAlignment simpleA1 = saOld.getTimeGroup(1);
 		
-		ArrayList<Site> allSite0 = Site.init(750);
-		ArrayList<Site> allSite1 = Site.init(750);
+		ArrayList<Site> allSite0 = Site.createSiteArrayList(750);
+		ArrayList<Site> allSite1 = Site.createSiteArrayList(750);
 
 		allSite0 = SiteAlignment.calcFreq(simpleA0, allSite0);
 		allSite1 = SiteAlignment.calcFreq(simpleA1, allSite1);
@@ -108,8 +108,8 @@ public class SiteAlignmentTest {
 	@Test
 	public void testCalcFreqTime() {
 		
-		ArrayList<Site> allSite0 = Site.init(750);
-		ArrayList<Site> allSite1 = Site.init(750);
+		ArrayList<Site> allSite0 = Site.createSiteArrayList(750);
+		ArrayList<Site> allSite1 = Site.createSiteArrayList(750);
 		
 		allSite0 = saOld.calcFreqTime(0, allSite0);
 		allSite1 = saOld.calcFreqTime(1, allSite1);
@@ -191,7 +191,7 @@ public class SiteAlignmentTest {
 		
 		int noSeq = 5;
 		
-		SSC sim = new SSC(noTime, noSeq, timeGap);
+		SSC sim = new SSC(750, noSeq, noTime, timeGap);
 		Alignment ali = sim.simulateAlignment(3300, 1.75E-5);
 		List<Sequence> allSSSC = ali.getSequenceList();
 		

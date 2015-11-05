@@ -1,6 +1,8 @@
 package sw.main;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import sw.abc.parameter.ParaTheta;
@@ -52,6 +54,10 @@ public class Setting {
 	public Setting(String workingDir, String outputDir, String dataFileName) {
 
 		this.workingDir = checkDir(workingDir);
+		Path p = Paths.get(dataFileName);
+		dataFileName = p.getFileName().toString();
+		System.out.println(p.getFileName());
+		System.out.println(this.workingDir +"\t"+ workingDir +"\t"+ outputDir +"\t"+ dataFileName);
 		setupOutputFiles(outputDir, dataFileName);
 
 		try {
@@ -265,7 +271,7 @@ public class Setting {
 		this.resultOutFile = outputDir + dataFileName + "_summary.log";
 		this.obsFileName = workingDir + dataFileName;
 		this.regressionCoefFile = obsFileName + "_regressionCoef.coef";
-		;
+		System.out.println(resultOutFile +"\t"+ regressionCoefFile);
 		File tFile = new File(regressionCoefFile);
 		if (tFile.exists()) {
 			System.out.println("Regression file exist\t" + tFile.toString());
@@ -287,5 +293,7 @@ public class Setting {
 	public ParaTheta getTheta() {
 		return pTheta;
 	}
+
+	
 
 }

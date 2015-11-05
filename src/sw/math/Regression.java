@@ -2,12 +2,17 @@ package sw.math;
 
 import java.util.Arrays;
 
-import org.apache.commons.math.stat.regression.OLSMultipleLinearRegression;
+import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
 import sw.beast.trace.Trace;
 import sw.util.TraceUtil;
 
-
+/**
+ * Linear regression 
+ * Wrapper for org.apache.commons.math3 package
+ * @author Steven Wu
+ *
+ */
 public class Regression {
 
 	private OLSMultipleLinearRegression lm;

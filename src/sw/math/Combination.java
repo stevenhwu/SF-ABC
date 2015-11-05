@@ -12,7 +12,6 @@ public class Combination {
 				try {
 					throw new Exception("n too big" +"\t"+ longList +" > "+ Integer.MAX_VALUE);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

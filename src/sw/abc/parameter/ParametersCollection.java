@@ -2,8 +2,6 @@ package sw.abc.parameter;
 
 import java.util.HashMap;
 
-import org.apache.commons.math.random.RandomDataImpl;
-
 
 public class ParametersCollection {
 	
@@ -11,7 +9,7 @@ public class ParametersCollection {
 	final static String POPSIZE = "popsize";
 	final static String THETA = "theta";
 //	ArrayList<Parameters> allPar = new ArrayList<Parameters>();
-	private static RandomDataImpl r = new RandomDataImpl();
+
 	
 	private String[] keys;
 //	private String[] keys = new String[]{MU, POPSIZE, THETA};
