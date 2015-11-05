@@ -10,6 +10,12 @@ public class ParaMu extends AbstractParameter   {
 
 	}
 
+	@Override
+	public String getName() {
+		return MU;
+	}
+	
+
 
 	
 

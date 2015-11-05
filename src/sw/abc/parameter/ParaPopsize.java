@@ -9,6 +9,11 @@ public class ParaPopsize extends AbstractParameter  {
 		setPrior(d);
 		
 	}
+
+	@Override
+	public String getName() {
+		return POP;
+	}
 	
 
 

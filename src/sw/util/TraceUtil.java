@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import sw.abc.parameter.Parameters;
 import sw.beast.trace.Trace;
 import sw.beast.trace.TraceFactory.TraceType;
 import sw.logger.NumberColumn;
@@ -30,8 +31,8 @@ public class TraceUtil {
 		this.noTime = noTime;
 		this.noParam = noParam;
 		int noComb = Combination.calNoComb(this.noTime);
-		summaryStatCollection.put("mu", 1);
-		summaryStatCollection.put("popsize", 1);
+		summaryStatCollection.put(Parameters.MU, 1);
+		summaryStatCollection.put(Parameters.POP, 1);
 		summaryStatCollection.put("theta", 1);
 		summaryStatCollection.put("gap", this.noParam);
 		
@@ -52,6 +53,7 @@ public class TraceUtil {
 		
 		ArrayList<Trace> allAL = new ArrayList<Trace>();
 		for (String key : paramList) {
+
 			int noTrace = summaryStatCollection.get(key);	
 			if(noTrace == 0){
 	            System.err.println("Check noParam OR parameter name: "+ key);

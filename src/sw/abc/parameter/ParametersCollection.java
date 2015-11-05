@@ -5,9 +5,7 @@ import java.util.HashMap;
 
 public class ParametersCollection {
 	
-	final static String MU = "mu";
-	final static String POPSIZE = "popsize";
-	final static String THETA = "theta";
+	
 //	ArrayList<Parameters> allPar = new ArrayList<Parameters>();
 
 	
@@ -28,7 +26,7 @@ public class ParametersCollection {
 		keys = new String[size];
 		currentValue = new double[size];
 		for (int i = 0; i < size; i++) {
-			keys[i] = k[i].toLowerCase().trim();
+			keys[i] = k[i].trim();
 			allParams.put(keys[i], p[i]);
 		}
 		
@@ -113,7 +111,6 @@ public class ParametersCollection {
 	//	}
 	
 	public double getNewValue(String s){
-		
 		return allParams.get(s).getNewValue();
 		
 	}

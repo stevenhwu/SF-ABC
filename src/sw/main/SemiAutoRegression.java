@@ -4,11 +4,15 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import sw.abc.parameter.Parameters;
 import sw.abc.stat.summary.SStatFlexable;
 import sw.logger.ArrayLogFormatterD;
 import flanagan.analysis.Regression;
 
 public class SemiAutoRegression {
+
+	private static final String MU = Parameters.MU;
+	private static final String POP = Parameters.POP;
 
 //	public SemiAutoRegression() {
 //		// TODO Auto-generated constructor stub
@@ -48,13 +52,13 @@ public class SemiAutoRegression {
 			lm.linear();	
 			System.out.println(lm.getAdjustedCoefficientOfDetermination());
 			double[] coef = lm.getBestEstimates();
-			sStat.addCoef("Mu", coef);
+			sStat.addCoef(MU, coef);
 	
 			lm.enterData(xxData, traceLogParam.toArray(1));
 			lm.linear();
 			System.out.println(lm.getAdjustedCoefficientOfDetermination());
 			coef = lm.getBestEstimates();
-			sStat.addCoef("Pop", coef);
+			sStat.addCoef(POP, coef);
 		}
 		return sStat;
 	}
@@ -68,10 +72,10 @@ public class SemiAutoRegression {
 			BufferedReader br = new BufferedReader(new FileReader(regressionCoefFile));
 			String line;
 			while((line = br.readLine())!= null ){
-				if(line.startsWith("Mu")) {
-					sStat.addCoef("Mu", parseCoef(line));
-				} else if(line.startsWith("Theta")){
-					sStat.addCoef("Theta", parseCoef(line));
+				if(line.startsWith(MU)) {
+					sStat.addCoef(MU, parseCoef(line));
+				} else if(line.startsWith(POP)){
+					sStat.addCoef(POP, parseCoef(line));
 				}
 			}
 	

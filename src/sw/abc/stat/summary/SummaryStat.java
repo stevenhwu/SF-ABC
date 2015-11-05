@@ -6,17 +6,17 @@ public interface SummaryStat {
 
 	double[] calStat(double[] par);
 
-	double calStatMu(double[] par);
-	
-	double calStatPop(double[] par);
-	
+//	double calStatMu(double[] par);
+//	
+//	double calStatPop(double[] par);
+//	
 	
 	
 	double[] calStat(double[]... par);
-
-	double calStatMu(double[]... par);
-
-	double calStatPop(double[]... par);
+//
+//	double calStatMu(double[]... par);
+//
+//	double calStatPop(double[]... par);
 
 	
 }

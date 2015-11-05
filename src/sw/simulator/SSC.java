@@ -2,11 +2,13 @@ package sw.simulator;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import jebl.evolution.alignments.Alignment;
 import jebl.evolution.coalescent.ConstantPopulation;
 import jebl.evolution.trees.RootedTree;
 import jebl.evolution.treesimulation.TreeSimulator;
+import sw.abc.parameter.Parameters;
 import sw.abc.parameter.ParametersCollection;
 import sw.main.Setting;
 
@@ -22,6 +24,8 @@ import dr.evomodel.substmodel.HKY;
 
 
 public class SSC {
+	private static final String MU = Parameters.MU;
+	private static final String POP = Parameters.POP;
 
 	private int seqLength;
 			
@@ -70,8 +74,8 @@ public class SSC {
 	}
 	
 	public Alignment simulateAlignment(ParametersCollection allPar) {
-		setPopSize( allPar.getNewValue("popsize") );
-		setSubstitutionRate(allPar.getNewValue("mu"));
+		setPopSize( allPar.getNewValue(POP) );
+		setSubstitutionRate(allPar.getNewValue(MU));
 		return simulateAlignment();
 	}
 	

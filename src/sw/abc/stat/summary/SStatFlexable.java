@@ -17,15 +17,15 @@ public class SStatFlexable extends AbstractSummaryStat {
 	
 	
 	@Override
-	public double calStatMu(double[] par) {
+	protected double calStatMu(double[] par) {
 
-		double stat = calStatParam(par, coef.get("Mu"));
+		double stat = calStatParam(par, coef.get(MU));
 		return stat;
 	}
 	
 	@Override
-	public double calStatPop(double[] par) {
-		double stat = calStatParam(par, coef.get("Pop"));
+	protected double calStatPop(double[] par) {
+		double stat = calStatParam(par, coef.get(POP));
 		return stat;
 	}
 

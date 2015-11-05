@@ -1,6 +1,11 @@
 package sw.abc.stat.summary;
 
+import sw.abc.parameter.Parameters;
+
 public abstract class AbstractSummaryStat implements SummaryStat{
+
+	protected static final String MU = Parameters.MU;
+	protected static final String POP = Parameters.POP;
 
 	
 	@Override
@@ -24,13 +29,13 @@ public abstract class AbstractSummaryStat implements SummaryStat{
 		double[] stat = new double[] { calStatMu(par), calStatPop(par) };
 		return stat;
 	}
-	@Override
-	public double calStatMu(double[] par) {
+	
+	protected double calStatMu(double[] par) {
 		return Double.MAX_VALUE;
 	}
 
-	@Override
-	public double calStatPop(double[] par) {
+	
+	protected double calStatPop(double[] par) {
 		return Double.MAX_VALUE;
 	}
 
@@ -40,13 +45,13 @@ public abstract class AbstractSummaryStat implements SummaryStat{
 		return stat;
 	}	
 
-	@Override
-	public double calStatMu(double[]... par) {
+	
+	protected double calStatMu(double[]... par) {
 		return Double.MAX_VALUE;
 	}
 
-	@Override
-	public double calStatPop(double[]... par) {
+	
+	protected double calStatPop(double[]... par) {
 		return Double.MAX_VALUE;
 	}
 }

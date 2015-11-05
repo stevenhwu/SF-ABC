@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import sw.abc.parameter.ParaTheta;
+import sw.abc.parameter.Parameters;
 import sw.abc.parameter.ParametersCollection;
 import sw.abc.parameter.TunePar;
 import sw.abc.stat.summary.SummaryStat;
@@ -22,6 +23,10 @@ public class Setting {
 
 	}
 
+	private static final double DEFAULT_ERROR = 0.01;
+	private static final double DEFAULT_INIT_MU = 0.00001;
+	private static final double DEFAULT_INIT_POP = 5000;
+	
 	private String workingDir;
 	private String obsFileName;
 	private String resultOutFile;
@@ -42,22 +47,23 @@ public class Setting {
 
 	private double[] obsStat;
 
-	private double error;
+	private double[] errors;
 	
 	private int seqLength;
-	private int noSeqPerTime;
-	private int noTime;
-	private int noTotalSeq;
+	private int numSeqPerTime;
+	private int numTime;
+	private int numTotalSeq;
 	private int timeGap;
 	private int thinning;
 	private int noIteMCMC;
-	private int noItePreprocess;
+	private int numItePreprocess;
 	private ParaTheta pTheta;
 	private HashMap<String, Double> initValues;
 	
 	private void init(String workingDir, String outputDir, String dataFileName) {
 
 		this.workingDir = checkDir(workingDir);
+		outputDir = checkDir(outputDir);
 		Path p = Paths.get(dataFileName);
 		dataFileName = p.getFileName().toString();
 //		System.out.println(p.getFileName());
@@ -76,6 +82,7 @@ public class Setting {
 			e.printStackTrace();
 		}
 	}
+	
 	public Setting(String workingDir, String outputDir, String dataFileName) {
 		init(workingDir, outputDir, dataFileName);
 	}
@@ -85,22 +92,17 @@ public class Setting {
 	public Setting(String dataFileName) {
 
 		File f = new File(dataFileName);
-//		File f2 = new File(obsDataName, "Template/");
-//		System.out.println(f2.getAbsolutePath());
-//		System.out.println(f.getName() +"\t"+ f.getPath());
-		
-//		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
-//		System.out.println(f.getAbsolutePath() +"\t"+ f.getPath() +"\t"+ f.getParent());
-		
-		String workingDir = f.getParent();//+File.separatorChar+"TemplateFiles"+File.separatorChar;
+		this.workingDir = checkDir(f.getParent());
+//		String workingDir = f.getParent();//+File.separatorChar+"TemplateFiles"+File.separatorChar;
 		String outputDir = workingDir;//obsDataNamePrefix+File.separatorChar;
-		System.out.println("output Dir:\t"+outputDir +"\t"+ workingDir);
-//		System.out.println(f.getParent());
-//		System.out.println(obsDataNamePrefix);
-		initValues = new HashMap<String, Double>();
-		initValues.put("mu", 0.00001);
-		initValues.put("popsize", 5000.0);
+
 		init(workingDir, outputDir, dataFileName);
+
+		initValues = new HashMap<String, Double>();
+		initValues.put(Parameters.MU, DEFAULT_INIT_MU);
+		initValues.put(Parameters.POP, DEFAULT_INIT_POP);
+		errors = new double[initValues.size()];
+
 	}
 
 	/**
@@ -131,8 +133,8 @@ public class Setting {
 	/**
 	 * @return the error
 	 */
-	public double getError() {
-		return error;
+	public double[] getErrors() {
+		return errors;
 	}
 
 	/**
@@ -146,19 +148,19 @@ public class Setting {
 	 * @return the noItePreprocess
 	 */
 	public int getNoItePreprocess() {
-		return noItePreprocess;
+		return numItePreprocess;
 	}
 
 	public int getNoSeqPerTime() {
-		return noSeqPerTime;
+		return numSeqPerTime;
 	}
 
 	public int getNoTime() {
-		return noTime;
+		return numTime;
 	}
 
 	public int getNoTotalSeq() {
-		return noTotalSeq;
+		return numTotalSeq;
 	}
 
 	public double[] getObsStat() {
@@ -201,13 +203,16 @@ public class Setting {
 				.append(", regressionCoefFile=").append(regressionCoefFile)
 				.append(", doRegression=").append(doRegression)
 				.append(", obsStat=").append(Arrays.toString(obsStat))
-				.append(", error=").append(error).append(", seqLength=")
-				.append(seqLength).append(", noSeqPerTime=")
-				.append(noSeqPerTime).append(", noTime=").append(noTime)
-				.append(", noTotalSeq=").append(noTotalSeq)
-				.append(", timeGap=").append(timeGap).append(", thinning=")
-				.append(thinning).append(", noIteMCMC=").append(noIteMCMC)
-				.append(", noItePreprocess=").append(noItePreprocess)
+				.append(", error=").append(errors)
+				.append(", seqLength=").append(seqLength)
+				.append(", numSeqPerTime=").append(numSeqPerTime)
+				.append(", numTime=").append(numTime)
+				.append(", numTotalSeq=").append(numTotalSeq)
+				.append(", timeGap=").append(timeGap)
+				.append(", thinning=").append(thinning)
+				.append(", numIteMCMC=").append(noIteMCMC)
+				.append(", numItePreprocess=").append(numItePreprocess)
+				.append(", InitValues=").append(initValues.values().toString())
 				.append("]");
 		return builder.toString();
 	}
@@ -246,19 +251,19 @@ public class Setting {
 	public void setMCMCSetting(int noItePreprocess, int noIteMCMC,
 			int thinning, double error) {
 
-		this.noItePreprocess = noItePreprocess;
+		this.numItePreprocess = noItePreprocess;
 		this.noIteMCMC = noIteMCMC;
 		this.thinning = thinning;
-		this.error = error;
+		this.errors[0] = error;
 
 	}
 	public void setMCMCSetting(int noItePreprocess, int noIteMCMC,
 			int thinning) {
-		setMCMCSetting(noItePreprocess, noIteMCMC, thinning, 0.05);
+		setMCMCSetting(noItePreprocess, noIteMCMC, thinning, DEFAULT_ERROR);
 	}
 	
-	public void setError(double error) {
-		this.error = error;
+	public void setErrors(double... errors) {
+		this.errors = errors;
 	}
 
 	public void setObsStat(double[] stat) {
@@ -272,10 +277,10 @@ public class Setting {
 	public void setSeqInfo(int seqLength, int noSeqPerTime, int noTime,
 			int timeGap) {
 		this.seqLength = seqLength;
-		this.noSeqPerTime = noSeqPerTime;
-		this.noTime = noTime;
+		this.numSeqPerTime = noSeqPerTime;
+		this.numTime = noTime;
 		this.timeGap = timeGap;
-		noTotalSeq = this.noSeqPerTime * this.noTime;
+		numTotalSeq = this.numSeqPerTime * this.numTime;
 	}
 
 	public void setStatList(String[] statList) {
@@ -322,19 +327,29 @@ public class Setting {
 
 	public void setSeqInfo(int seqLength, int totalSeqCount) {
 		this.seqLength = seqLength;
-		this.noTotalSeq = totalSeqCount;//this.noSeqPerTime * this.noTime;
+		this.numTotalSeq = totalSeqCount;//this.noSeqPerTime * this.noTime;
 		
 	}
 
 	public void setTime(int numTimePoint, int intervalBetweenTime) {
-		this.noTime = numTimePoint;
+		this.numTime = numTimePoint;
 		this.timeGap = intervalBetweenTime;
-		this.noSeqPerTime = noTotalSeq / noTime;
-		//TODO: What happen if there not even?
+		this.numSeqPerTime = numTotalSeq / numTime;
+		if(numTotalSeq != (numSeqPerTime*numTime)){
+			System.out.println("Warning! Total number of sequences is not divible by the number of time points.\n"
+					+ "Total number of sequence: "+ numTotalSeq
+					+ "\tNumber of time points:" + numTime);
+		}
+
 	}
 	public HashMap<String, Double> GetInitValues() {
-		// TODO Auto-generated method stub
+
 		return initValues;
+	}
+
+	public void setInitValue(String key, double value) {
+		initValues.put(key, value);
+		
 	}
 
 

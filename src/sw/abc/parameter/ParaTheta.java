@@ -27,14 +27,19 @@ public class ParaTheta extends AbstractParameter {
 	}
 
 	public double getProposalRatio(ParametersCollection allPar) {
-		double logQ = allPar.getParameter("mu").getLogQ()
-				+ allPar.getParameter("popsize").getLogQ();
+		double logQ = allPar.getParameter(MU).getLogQ()
+				+ allPar.getParameter(POP).getLogQ();
 		return logQ;
 	}
 	
 	private static double calculateTheta(ParametersCollection allPar) {
-		double newTheta = allPar.getParameter("mu").getNewValue()
-				* allPar.getParameter("popsize").getNewValue();
+		double newTheta = allPar.getParameter(MU).getNewValue()
+				* allPar.getParameter(POP).getNewValue();
 		return newTheta;
+	}
+
+	@Override
+	public String getName() {
+		return null;
 	}
 }

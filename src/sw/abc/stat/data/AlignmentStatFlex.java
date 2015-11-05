@@ -129,33 +129,34 @@ public class AlignmentStatFlex {
 
 	}
 //	
-//	public double calDelta() {
-////		calSumStat();
-////		double[] obsStatAll = obsStat.getSummaryStatAll();
-////		System.out.println(Arrays.toString(summaryStatAll));
-//		double delta = 0;
-//		for (int i = 0; i < summaryStatAll.length; i++) {
-//			//
-//			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
-//
-//			double s = calAbsDiff(obsStat[i], summaryStatAll[i]);
-////			System.out.println(s+"\t"+summaryStatAll[i] +"\t"+ obsStat[i]+"\t"); 
-//			delta += s;
-//			 
-//			// System.out.print(
-//			// Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i] + "\t");
-//			// System.out.print( (dif*dif)/obsStatAll[i] + "\t");
-//		}
-//		// System.out.println();
-//		delta /= summaryStatAll.length;
-//		return delta;
-//
-//	}
+	public double calDelta() {
+//		calSumStat();
+//		double[] obsStatAll = obsStat.getSummaryStatAll();
+//		System.out.println(Arrays.toString(summaryStatAll));
+		double delta = 0;
+		for (int i = 0; i < summaryStatAll.length; i++) {
+			//
+			// delta += Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i];
+
+			double s = calAbsDiff(obsStat[i], summaryStatAll[i]);
+//			System.out.println(s+"\t"+summaryStatAll[i] +"\t"+ obsStat[i]+"\t"); 
+			delta += s;
+			 
+			// System.out.print(
+			// Math.abs(statAll[i]-obsStatAll[i])/obsStatAll[i] + "\t");
+			// System.out.print( (dif*dif)/obsStatAll[i] + "\t");
+		}
+		// System.out.println();
+		delta /= summaryStatAll.length;
+		return delta;
+
+	}
 
 
 	public double calDelta(int i) {
 
 		double delta = calAbsDiff(obsStat[i], summaryStatAll[i]);
+		
 		return delta;
 
 	}
@@ -191,11 +192,11 @@ public class AlignmentStatFlex {
 
 
 	public static double calAbsDiff(double expectStat, double obsStat){
+
 		double diff = (obsStat - expectStat);
 		diff *= diff;
-		double stat = Math.abs ( (diff) /expectStat ); 
-//		double stat = ( (diff*diff) /expectStat);
-				
+		double stat = Math.abs ( (diff) / expectStat ); 
+
 		return stat;
 	}
 

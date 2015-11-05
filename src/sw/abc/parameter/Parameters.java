@@ -7,6 +7,9 @@ import sw.math.distribution.DistributionProposal;
 
 public interface Parameters {
 
+	public static final String MU = "MutationRate";
+	public static final String POP = "PopulationSize";
+	public static final String THETA = "theta";
 	
 	
 	// add prior distribution
@@ -41,5 +44,7 @@ public interface Parameters {
 	public double getProposalDistVar();
 
 	double getNewValue();
+
+	public String getName();
 
 }

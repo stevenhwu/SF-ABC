@@ -19,7 +19,6 @@
 package sw.main;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -45,13 +44,13 @@ import org.apache.commons.math3.stat.StatUtils;
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaPopsize;
 import sw.abc.parameter.ParaTheta;
+import sw.abc.parameter.Parameters;
 import sw.abc.parameter.ParametersCollection;
 import sw.abc.parameter.SavePar;
 import sw.abc.parameter.TunePar;
 import sw.abc.stat.data.AlignmentStatFlex;
 import sw.abc.stat.summary.SStatFlexable;
 import sw.logger.ArrayLogFormatterD;
-import sw.math.Combination;
 import sw.math.RandomUtils;
 import sw.math.distribution.OneOverDistribution;
 import sw.math.distribution.TruncatedScale;
@@ -67,27 +66,34 @@ public class Main {
 	 * @author Steven Wu
 	 * @version $Id$
 	 */
+	private static final String MU = Parameters.MU;
+	private static final String POP = Parameters.POP;
 
-	private static final int TUNESIZE = TunePar.TUNESIZE;//400 ; 
+	private static final int TUNESIZE = 100;//TunePar.TUNESIZE;//400 ; 
 	private static final int TUNEGROUP = TunePar.TUNEGROUP;//10; 
 	
 	private static final double initScale = 0.5;
 	private static final String VERSION = "1.0";
 	
-	private static final boolean DYNAMIC_ERROR_RATE = false;//Alter the error rate in MCMC. Testing methods only with unknown behaviour. Turn on with caution!!
+	private static final boolean DYNAMIC_ERROR_RATE = true;//Alter the error rate in MCMC. Testing methods only with unknown behaviour. Turn on with caution!!
+	private static int SAVE_COUNT = 10;
+	
 	
 	public static void main(String[] args) {
 
 
-		args = new String[]{
-//				"-h",
-				"-i", "/home/steven/workspace/SF-ABC/Simulations/test/test.nex",
-				"-t", "3", "400",
-				"-m", "1000", "1000", "100",
-//				"-g 400"
-				
-		};
-		
+//		args = new String[]{
+////				"-h",
+//				"-i", "/home/steven/workspace/SF-ABC/Simulations/test/test.nex",
+//				"-t", "3", "400",
+//				"-m", "100000", "10000", "100",
+////				"-Xe", "0.5",
+////				"-Xm", "1e-5",
+////				"-Xp", "5000",
+////				"-Xm", "5e-6",
+////				"-Xp", "20000",
+//		};
+//		
 		
 		Options options = new Options();
 		Option help = new Option("h", "help", false, "print this message");
@@ -112,24 +118,24 @@ public class Main {
 				.desc("REQUIRED: Three Parameters in the following orders: "
 						+ "(1) Length of preprocessing, "
 						+ "(2) Length of MCMC chain, "
-						+ "(3) Sample every n iterations. ");
+						+ "(3) Sample every n iterations.");
 		options.addOption(C.build());
 
 		C = Option.builder("t").longOpt("time")
 				.numberOfArgs(2).argName("numTime interval")
 				.desc("REQUIRED: Two Parameters in the following orders: "
 						+ "(1) Number of time points, "
-						+ "(2) Interval between two time points");
+						+ "(2) Interval between two time points. ");
 		options.addOption(C.build());
 
-		options.addOption(Option.builder("Xe").longOpt("error").hasArg()
-				.argName("").desc("Error threshold for ABC. [default: 0.01]")
+//		options.addOption(Option.builder("Xe").longOpt("error").hasArg()
+//				.argName("error").desc("Error threshold for ABC.")
+//				.build());
+		options.addOption(Option.builder("Xm").longOpt("mutation").hasArg()
+				.argName("mu").desc("Initial mutation rate. [default: 0.00001]")
 				.build());
-		options.addOption(Option.builder("Xm").longOpt("initMutation").hasArg()
-				.argName("").desc("Initial mutation rate. [default: 0.00001]")
-				.build());
-		options.addOption(Option.builder("Xp").longOpt("initPopulation").hasArg()
-				.argName("").desc("Initial Population size. [default: 5000]")
+		options.addOption(Option.builder("Xp").longOpt("population").hasArg()
+				.argName("pop").desc("Initial population size. [default: 5000]")
 				.build());
 		
 		HelpFormatter formatter = new HelpFormatter();
@@ -142,33 +148,8 @@ public class Main {
 		formatter.setWidth(80);
 		
 		
-
-//		final int noItePreprocess = Integer.parseInt(args[1]);
-//		final int noIteMCMC = Integer.parseInt(args[2]); 
-//		final int thinning = Integer.parseInt(args[3]);
-////		double error = Double.parseDouble(args[4]);
-// 		final int time_gap = 3;
-		
-//		try {
 		Setting setting = null;
 		
-//			
-//			try {
-//
-//				NexusImporter imp = new NexusImporter(new FileReader(setting.getDataFile()));
-//				Alignment jeblAlignment = imp.importAlignments().get(0);
-//				System.out.println(jeblAlignment.getPatternCount());
-//				System.out.println(jeblAlignment.getSiteCount());
-//				System.out.println(jeblAlignment.getPatternLength());
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			} catch (ImportException e) {
-//				e.printStackTrace();
-//			} 
-//			
-//			setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
-//			setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
-//			
 		try {
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
@@ -182,32 +163,13 @@ public class Main {
 				System.out.println("SF_ABC "+VERSION);
 				System.exit(0);
 			}
-//					if (pct_config.length != 2){
-//						System.out
-//								.println("ERROR! Required exactly two argumennts for pct_env and pct_pool. It got "
-//										+ pct_config.length + ": " + Arrays.toString(pct_config));
-//						formatter.printHelp(syntax, header, options, footer, true);
-//						System.exit(3);
-//					}
-			else{
-//						pctEnv = Double.parseDouble(pct_config[0]);
-//						pctPool = Double.parseDouble(pct_config[1]);
-//						if(pctEnv<0 || pctEnv >1){
-//							System.out.println(
-//								"ERROR: pctEnv (Percentage of environmental acquisition) must be between 0 and 1 (pctEnv="
-//								+ pctEnv + ")! EXIT");
-//							System.exit(3);
-//						}
-//						if(pctPool<0 || pctPool >1){
-//							System.out.println(
-//								"ERROR: pctPool (Percentage of pooled environmental component must) must be between 0 and 1 (pctPool="
-//								+ pctPool + ")! EXIT");
-//							System.exit(3);
-//						}
-				
-			}
+			if (pct_config.length != 0) {
+				System.out.println("Warning! " + pct_config.length
+						+ " unused parameters: " + Arrays.toString(pct_config));
+			}	
+
 			if (cmd.hasOption("infile")){
-//				numberOfObservation= Integer.parseInt(cmd.getOptionValue("obs"));
+
 				String obsDataName = cmd.getOptionValue("infile");
 				setting = new Setting(obsDataName);
 				
@@ -219,7 +181,7 @@ public class Main {
 //				System.out.println("Infile: "+obsDataName);
 			}
 			else{
-				System.out.println("Error: Input file required\n");
+				System.out.println("Error! Input file (-i, --infile) required\n");
 				System.exit(6);
 			}
 					
@@ -230,10 +192,10 @@ public class Main {
 				int numIteMCMC = Integer.parseInt(configs[1]);
 				int numIteSample = Integer.parseInt(configs[2]);
 				setting.setMCMCSetting(numItePreprocess, numIteMCMC, numIteSample);
-				System.out.println("MCMC: "+ numItePreprocess +"\t"+ numIteMCMC +"\t"+ numIteSample);
+//				System.out.println("MCMC: "+ numItePreprocess +"\t"+ numIteMCMC +"\t"+ numIteSample);
 			}
 			else{
-				System.out.println("Error: MCMC options required\n");
+				System.out.println("Error! MCMC (-m, --mcmc) options required\n");
 				System.exit(6);
 			}
 			
@@ -243,12 +205,30 @@ public class Main {
 				int intervalBetweenTime = Integer.parseInt(configs[1]);
 				
 				setting.setTime(numTimePoints, intervalBetweenTime);
-				System.out.println("Number of time points: "+numTimePoints);
+//				System.out.println("Number of time points: "+numTimePoints);
 			}			
 			else{
-				System.out.println("Error: Number of time point (-t,--time) required\n");
+				System.out.println("Error! time (-t, --time) options required\n");
 				System.exit(6);
 			}
+			
+//			if(cmd.hasOption("-Xe")){
+//				String s = cmd.getOptionValue("Xe");
+//				double error = Double.parseDouble(s);
+//				setting.setErrors(error);
+//			}
+			
+			if(cmd.hasOption("-Xm") ){
+				String s = cmd.getOptionValue("Xm");
+				double value = Double.parseDouble(s);
+				setting.setInitValue(MU, value);
+			}
+			if(cmd.hasOption("-Xp")){
+				String s = cmd.getOptionValue("Xp");
+				double value = Double.parseDouble(s);
+				setting.setInitValue(POP, value);
+			}		
+				
 			
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -275,8 +255,8 @@ public class Main {
 			
 			generateStatFile(setting);
 
-			// double error = MCMCFeatures.generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
-			// setting.setError(error);
+			double[] errors = MCMCFeatures.generateErrorRate(setting);
+			setting.setErrors(errors);
 		
 			ABCUpdateMCMC(setting);
 		} catch (IOException e) {
@@ -293,18 +273,18 @@ public class Main {
 //		double[] initValue = new double[]{0.00001, 3000};
 				
 		HashMap<String, Double> initValues = setting.GetInitValues();
-		String[] paramListName = new String[]{"mu", "popsize"};
+		String[] paramListName = new String[]{MU, POP};
 		String[] statList = new String[]{"dist", "chisq", "var", "covar", "sitePattern"};
 		
 		setting.setParamList(paramListName);
 		setting.setStatList(statList);				
 
 		double scaleFactor = 5.0;
-		double muMean = initValues.get("mu");
+		double muMean = initValues.get(MU);
 		double muLower = muMean / scaleFactor;
 		double muUpper = muMean * scaleFactor;
 		
-		double popSizeMean = initValues.get("popsize");
+		double popSizeMean = initValues.get(POP);
 		double popSizeLower = popSizeMean / scaleFactor;
 		double popSizeUpper = popSizeMean * scaleFactor;
 		
@@ -443,7 +423,7 @@ public class Main {
 		final int thinning = setting.getThinning();
 		final int noTime = setting.getNoTime();
 
-		double error = setting.getError();
+		double[] errors = setting.getErrors();
 		ParametersCollection allPar = setting.getAllPar();
 		TunePar tPar = setting.getTunePar();
 
@@ -465,45 +445,57 @@ public class Main {
 		oResult.flush();
 		
 		
-		System.out.println("Start ABCMCMC\nTolerance:\t"+error);
-		double[] saveGaps = new double[10];
-		
+		System.out.println("Start ABCMCMC\nTolerance:\t"+ Arrays.toString(errors) );
+		double[][] saveGaps = new double[allPar.getSize()][SAVE_COUNT];
+		double[] saveGap = new double[allPar.getSize()];
 //		error = 1;
 		for (int i = 0; i < nRun; i++) {
 			
 			for (int p = 0; p < allPar.getSize(); p++) {
 				allPar.nextProposal(p);
 			}
-				for (int j = 0; j < saveGaps.length; j++) {
-					
+			
+			for (int j = 0; j < SAVE_COUNT ; j++) {
+				
 //					simulator = new SSC(setting);
-					Alignment jeblAlignment = simulator.simulateAlignment(allPar);
-					newStat.updateAlignmentAndStat(jeblAlignment);
-					saveGaps[j] = newStat.calDelta(0);
+				Alignment jeblAlignment = simulator.simulateAlignment(allPar);
+				newStat.updateAlignmentAndStat(jeblAlignment);
+//				System.out.println("Mu  error: "+newStat.calDelta(0));
+//				System.out.println("Pop error: "+newStat.calDelta(1));
+				for (int k = 0; k < allPar.getSize(); k++) {
+					saveGaps[k][j] = newStat.calDelta(k);
 				}
+
+			}
+			
 //				System.out.println(Arrays.toString(saveGaps));
 //				Alignment jeblAlignment = simulator.simulateAlignment(allPar);
 //				newStat.updateAlignmentAndStat(jeblAlignment);
-				
+			
 //				double saveGap = newStat.calDelta();
-				double saveGap = StatUtils.mean(saveGaps);
-//				System.out.println(saveGap);
-				if (saveGap < error) {	
-//					System.out.println(saveGap);
+			boolean isClose = true;
+			for (int k = 0; k < allPar.getSize() ; k++) {
+				saveGap[k] = StatUtils.mean(saveGaps[k]);
+				isClose &= (saveGap[k] < errors[k]);
+			}
+
+			
+			if (isClose ) {	
+//				System.out.println(Arrays.toString(saveGap));
 //					if (MH.accept(allPar.getParameter(p))) { //TODO: think about this
 //						allPar.acceptNewValue(p);
 //					}
-					double logP = pTheta.getPriorRatio(allPar);
-					double logQ = pTheta.getProposalRatio(allPar);
-					
-					if (MH.accept(logP, logQ)) { 
-						allPar.acceptNewValues();
-						pTheta.acceptNewValue();
-					}
-					//					if (MH.accept(allPar)) { 
+				double logP = pTheta.getPriorRatio(allPar);
+				double logQ = pTheta.getProposalRatio(allPar);
+				
+				if (MH.accept(logP, logQ)) { 
+					allPar.acceptNewValues();
+					pTheta.acceptNewValue();
+				}
+				//					if (MH.accept(allPar)) { 
 //						allPar.acceptNewValues();
 //					}
-				}
+			}
 //			}
 			sPar.add(allPar);
 			
@@ -512,7 +504,7 @@ public class Main {
 				tPar.update(sPar, i);
 				allPar.updateProposalDistVar(tPar);
 				if(DYNAMIC_ERROR_RATE){
-					error = updateTol(tPar.getAccRate(), error);
+//					errors = updateTol(tPar.getAccRate(), errors);
 				}
 
 //				for (int j = 0; j < allPar.getSize(); j++) {
@@ -527,11 +519,15 @@ public class Main {
 			}
 			
 			if ((i % thinning) == 0) {
-				System.out.println("Ite:\t"+i + "\t"+ Arrays.toString(allPar.getAcceptCounts()) + "\t" + 
-						error +"\t"+ 
-						allPar.getParameter(0).getProposalDistVar() +"\t"+ allPar.getParameter(1).getProposalDistVar() +"\t"+ 
-						Arrays.toString(tPar.getEachAccRate()) + "\t" +
-						Arrays.toString(allPar.getValues()) );
+				System.out.println("Ite:\t" + i + "\t"
+						+ Arrays.toString(allPar.getValues())
+						+ "\t" + Arrays.toString(errors) + "\t"
+//						+ Arrays.toString(tPar.getEachAccRate()) + "\t"
+//						+ Arrays.toString(allPar.getAcceptCounts()) + "\t"
+//						+ allPar.getParameter(0).getProposalDistVar() + "\t"
+//						+ allPar.getParameter(1).getProposalDistVar() + "\t"
+						
+						);
 
 				traceLog.logValues(allPar.getValues());
 				String s = i + "\t" + traceLog.getLine(i / thinning);
@@ -569,6 +565,24 @@ public class Main {
 		return newError;
 	}
 
+	private static double[] updateTol(double[] accRate, double errors[]) {
+		
+		double aveAccRate = StatUtils.mean(accRate);
+		
+		double[] newError = new double[errors.length];
+		if (aveAccRate > 0.5) {
+			for (int i = 0; i < newError.length; i++) {
+				newError[i] = errors[i] / RandomUtils.nextUniform(1, 1.05);
+			}
+			
+		} 
+		if (aveAccRate < 0.1) {
+			for (int i = 0; i < newError.length; i++) {
+				newError[i] = errors[i] * RandomUtils.nextUniform(1, 1.05);
+			}
+		}
+		return newError;
+	}
 	private static double[] calObsStat(Setting setting) {
 	
 //		System.out.println("Calculate observed stat");

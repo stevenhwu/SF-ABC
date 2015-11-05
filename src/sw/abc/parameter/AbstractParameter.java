@@ -111,4 +111,6 @@ public abstract class AbstractParameter implements Parameters {
 		
 		return proposalDist.getVar();
 	}
+
+	
 }
