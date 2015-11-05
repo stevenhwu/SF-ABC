@@ -24,18 +24,22 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import java.util.prefs.Preferences;
 
 import jebl.evolution.alignments.Alignment;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.NexusImporter;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Option.Builder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.math3.stat.StatUtils;
-import org.apache.commons.math3.util.MathUtils;
 
 import sw.abc.parameter.ParaMu;
 import sw.abc.parameter.ParaPopsize;
@@ -77,19 +81,211 @@ public class Main {
 	private static final double initScale = 0.5;
 
 	private static final boolean DYNAMIC_ERROR_RATE = false;//Alter the error rate in MCMC. Testing methods only with unknown behaviour. Turn on with caution!!
+	private static final String VERSION = "1.0";
 	
 	
 	/*
 		param:
-		args[0]: data file 
-		args[1]: noItePreprocess
-		args[2]: noIteMCMC
-		args[3]: thinning
-		args[4]: error
+		args[0]: String 	data file
+		args[1]: int		noItePreprocess
+		args[2]: int		noIteMCMC
+		args[3]: int		thinning
+		args[4]: double 	error
+		
+		int 	no_time_points
 		e.g.	0 simData.paup 50 100 10 0.1 
 		e.g.	0 simData.paup 500000 1000000 1000 0.01
 	*/
 	public static void main(String[] args) {
+
+//		Init with default values
+//		int numItePreprocess = 1000;
+//		int numIteMCMC = 1000;
+//		int numIteSample = 100;
+		double error = 0.01;
+		
+//		int numTimePoints;
+//		int timeGap;
+		String obsDataName ="";
+		args = new String[]{
+//				"-h",
+				"-i", "/home/steven/workspace/SF-ABC/Simulations/test/test.nex",
+				"-t", "3", "400",
+				"-m", "1000", "1000", "100",
+//				"-g 400"
+				
+		};
+		
+		
+		Options options = new Options();
+		Option help = new Option("h", "help", false, "print this message");
+		Option version = new Option("v", "version", false,
+				"print the version information and exit");
+		options.addOption(help);
+		options.addOption(version);
+		
+		options.addOption(Option.builder("i").longOpt("input").hasArg()
+				.argName("INPUT").desc("Infile (nexus format)")
+				.build());
+//		options.addOption(Option.builder("t").longOpt("time").hasArg()
+//				.argName("TIME").desc("Number of time points")
+//				.build());
+//		
+//		options.addOption(Option.builder("g").longOpt("gap").hasArg()
+//				.argName("GAP").desc("Time between gaps")
+//				.build());
+					
+		Builder C = Option.builder("m").longOpt("mcmc")
+				.numberOfArgs(3).argName("preprocess mcmc sampling")
+				.desc("Three Parameters in the following orders: "
+						+ "(1) Length of preprocessing, "
+						+ "(2) Length of MCMC chain, "
+						+ "(3) Sample every n iterations. ");
+		options.addOption(C.build());
+
+		C = Option.builder("t").longOpt("time")
+				.numberOfArgs(2).argName("numTime interval")
+				.desc("Two Parameters in the following orders: "
+						+ "(1) Number of time points, "
+						+ "(2) Interval between two time points");
+		options.addOption(C.build());
+		
+		HelpFormatter formatter = new HelpFormatter();
+		String syntax = "sfabc";
+		String header = 
+				"\nEstimation of evolutionary parameters using short, random and partial sequences from mixed samples of anonymous individuals. "
+				+ "\n\nArguments:\n";
+		String footer = "\n";
+		
+		formatter.setWidth(80);
+		
+		
+
+//		final int noItePreprocess = Integer.parseInt(args[1]);
+//		final int noIteMCMC = Integer.parseInt(args[2]); 
+//		final int thinning = Integer.parseInt(args[3]);
+////		double error = Double.parseDouble(args[4]);
+// 		final int time_gap = 3;
+		
+//		try {
+		Setting setting = null;
+		
+//			
+//			try {
+//
+//				NexusImporter imp = new NexusImporter(new FileReader(setting.getDataFile()));
+//				Alignment jeblAlignment = imp.importAlignments().get(0);
+//				System.out.println(jeblAlignment.getPatternCount());
+//				System.out.println(jeblAlignment.getSiteCount());
+//				System.out.println(jeblAlignment.getPatternLength());
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} catch (ImportException e) {
+//				e.printStackTrace();
+//			} 
+//			
+//			setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
+//			setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
+//			
+		try {
+			CommandLineParser parser = new DefaultParser();
+			CommandLine cmd = parser.parse(options, args);
+			String[] pct_config = cmd.getArgs();
+
+			if (cmd.hasOption("h") || args.length == 0) {
+				formatter.printHelp(syntax, header, options, footer, true);
+				System.exit(0);
+			}
+			if(cmd.hasOption("v")){
+				System.out.println("SF_ABC "+VERSION);
+				System.exit(0);
+			}
+//					if (pct_config.length != 2){
+//						System.out
+//								.println("ERROR! Required exactly two argumennts for pct_env and pct_pool. It got "
+//										+ pct_config.length + ": " + Arrays.toString(pct_config));
+//						formatter.printHelp(syntax, header, options, footer, true);
+//						System.exit(3);
+//					}
+			else{
+//						pctEnv = Double.parseDouble(pct_config[0]);
+//						pctPool = Double.parseDouble(pct_config[1]);
+//						if(pctEnv<0 || pctEnv >1){
+//							System.out.println(
+//								"ERROR: pctEnv (Percentage of environmental acquisition) must be between 0 and 1 (pctEnv="
+//								+ pctEnv + ")! EXIT");
+//							System.exit(3);
+//						}
+//						if(pctPool<0 || pctPool >1){
+//							System.out.println(
+//								"ERROR: pctPool (Percentage of pooled environmental component must) must be between 0 and 1 (pctPool="
+//								+ pctPool + ")! EXIT");
+//							System.exit(3);
+//						}
+				
+			}
+			if (cmd.hasOption("input")){
+//				numberOfObservation= Integer.parseInt(cmd.getOptionValue("obs"));
+				obsDataName = cmd.getOptionValue("input");
+				setting = ABCSetup(obsDataName);
+				
+				NexusImporter imp = new NexusImporter(new FileReader(setting.getDataFile()));
+				Alignment jeblAlignment = imp.importAlignments().get(0);
+				int seqLength = jeblAlignment.getPatternCount();
+				int totalSeqCount = jeblAlignment.getPatternLength(); 
+				System.out.println(seqLength);
+//				System.out.println(jeblAlignment.getSiteCount());
+				System.out.println(totalSeqCount);
+				setting.setSeqInfo(seqLength, totalSeqCount);
+				System.out.println("Infile: "+obsDataName);
+			}
+			else{
+				System.out.println("Error: Input file required\n");
+				System.exit(6);
+			}
+					
+			if (cmd.hasOption("mcmc")){
+				String[] configs = cmd.getOptionValues("mcmc");
+				
+				int numItePreprocess = Integer.parseInt(configs[0]);
+				int numIteMCMC = Integer.parseInt(configs[1]);
+				int numIteSample = Integer.parseInt(configs[2]);
+				setting.setMCMCSetting(numItePreprocess, numIteMCMC, numIteSample);
+				System.out.println("MCMC: "+ numItePreprocess +"\t"+ numIteMCMC +"\t"+ numIteSample);
+			}
+			else{
+				System.out.println("Error: MCMC options required\n");
+				System.exit(6);
+			}
+			
+			if (cmd.hasOption("time")){
+				String[] configs = cmd.getOptionValues("time");
+				int numTimePoints = Integer.parseInt(configs[0]);
+				int intervalBetweenTime = Integer.parseInt(configs[1]);
+				
+//				numTimePoints = Integer.parseInt(cmd.getOptionValue("time").trim());
+				setting.setTime(numTimePoints, intervalBetweenTime);
+				System.out.println("Number of time points: "+numTimePoints);
+			}			
+			else{
+				System.out.println("Error: Number of time point (-t,--time) required\n");
+				System.exit(6);
+			}
+			
+//					numTimePoints = Integer.parseInt(cmd.getOptionValue("time"));
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			System.exit(3);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ImportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(setting.toString());
+//		System.exit(3);
 
 //		double ratio[] = new double[100];
 //		for (int i = 0; i < RegressionResult.result.length; i++) {
@@ -99,46 +295,62 @@ public class Main {
 //		}
 //		System.out.println(StatUtils.mean(ratio));
 //		System.out.println(StatUtils.variance(ratio));
-		for (int i = 50; i < 0; i++) {
-			
-		
+		int i = 0;
 			String[] localTest = new String[] {
-					"/home/steven/workspace/SF-ABC/Simulations/ABCA/CPo3Ti40S400_"+i+".pau",
-					"200000", "100", "1000" };
-
-			startSimulation(localTest);
-		}
+					obsDataName,
+//					"200000", "100", "1000" };
+					"2000", "10", "100" };
+			System.out.println(Arrays.toString(localTest));
+			startSimulation(setting);
+			
 //		startSimulation(args);
 
 
 	}
 	
-	public static void startSimulation(String[] args) {
+//	public static void startSimulation(String[] args) {
+	public static void startSimulation(Setting setting) {
 		
-		final String obsDataName = args[0];
-		final int noItePreprocess = Integer.parseInt(args[1]);
-		final int noIteMCMC = Integer.parseInt(args[2]); 
-		final int thinning = Integer.parseInt(args[3]);
-//		double error = Double.parseDouble(args[4]);
- 		
-		
+//		final String obsDataName = args[0];
+//		final int noItePreprocess = Integer.parseInt(args[1]);
+//		final int noIteMCMC = Integer.parseInt(args[2]); 
+//		final int thinning = Integer.parseInt(args[3]);
+////		double error = Double.parseDouble(args[4]);
+// 		final int time_gap = 3;
+//		
 		try {
-			Setting setting = ABCSetup(obsDataName);
-			setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
-			setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
+//			Setting setting = ABCSetup(obsDataName);
+//			
+//			try {
+//
+//				NexusImporter imp = new NexusImporter(new FileReader(setting.getDataFile()));
+//				Alignment jeblAlignment = imp.importAlignments().get(0);
+//				System.out.println(jeblAlignment.getPatternCount());
+//				System.out.println(jeblAlignment.getSiteCount());
+//				System.out.println(jeblAlignment.getPatternLength());
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} catch (ImportException e) {
+//				e.printStackTrace();
+//			} 
+//			
+//			setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
+//			setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
+			
+			//TODO: Check NO_SEQ_PER_TIME, num seq used for simulation, actual number seq per time in the real data
 			
 //			testStatFile(setting);			
 			generateStatFile(setting);
 //			generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
 //		
 			System.out.println(setting.toString());
-//			ABCUpdateMCMC(setting);
+			ABCUpdateMCMC(setting);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-
+		
 	}
 
 	public static Setting ABCSetup(String obsDataName) throws IOException {
@@ -155,11 +367,16 @@ public class Main {
 		String outputDir = workingDir;//obsDataNamePrefix+File.separatorChar;
 		System.out.println("output Dir:\t"+outputDir +"\t"+ workingDir);
 		System.out.println(f.getParent());
-//		System.exit(-1);
+
 		System.out.println(obsDataNamePrefix);
+		
 		double[] initValue = getRegressionResult(obsDataNamePrefix);
 				
 		Setting setting = new Setting(workingDir, outputDir, obsDataName);
+//		System.out.println(obsDataName);
+//		System.out.println(setting.getDataFile());
+
+				
 		String[] paramListName = new String[]{"mu", "popsize"};
 		String[] statList = new String[]{"dist", "chisq", "var", "covar", "sitePattern"};
 		

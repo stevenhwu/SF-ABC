@@ -26,15 +26,17 @@ public class Setting {
 	private String resultOutFile;
 
 	private String regressionCoefFile;
+
 	private String[] paramList;
-
 	private String[] statList;
-	private ParametersCollection allPar = null;
 
+	private ParametersCollection allPar = null;
 	private ParametersCollection allParPrior = null;
+
 	private SummaryStat summaryStat;
 
 	private TunePar tPar;
+	
 	private boolean doRegression;
 
 	private double[] obsStat;
@@ -293,6 +295,20 @@ public class Setting {
 	public ParaTheta getTheta() {
 		return pTheta;
 	}
+
+	public void setSeqInfo(int seqLength, int totalSeqCount) {
+		this.seqLength = seqLength;
+		this.noTotalSeq = totalSeqCount;//this.noSeqPerTime * this.noTime;
+		
+	}
+
+	public void setTime(int numTimePoint, int intervalBetweenTime) {
+		this.noTime = numTimePoint;
+		this.timeGap = intervalBetweenTime;
+		this.noSeqPerTime = noTotalSeq / noTime;
+		//TODO: What happen if there not even?
+	}
+
 
 	
 
