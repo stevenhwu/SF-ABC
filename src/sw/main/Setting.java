@@ -52,8 +52,8 @@ public class Setting {
 	private int noIteMCMC;
 	private int noItePreprocess;
 	private ParaTheta pTheta;
-
-	public Setting(String workingDir, String outputDir, String dataFileName) {
+	
+	private void init(String workingDir, String outputDir, String dataFileName) {
 
 		this.workingDir = checkDir(workingDir);
 		Path p = Paths.get(dataFileName);
@@ -73,7 +73,31 @@ public class Setting {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	public Setting(String workingDir, String outputDir, String dataFileName) {
+		init(workingDir, outputDir, dataFileName);
+	}
+	
+	
 
+	public Setting(String dataFileName) {
+
+		File f = new File(dataFileName);
+//		File f2 = new File(obsDataName, "Template/");
+//		System.out.println(f2.getAbsolutePath());
+		System.out.println(f.getName() +"\t"+ f.getPath());
+		
+		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
+//		System.out.println(f.getAbsolutePath() +"\t"+ f.getPath() +"\t"+ f.getParent());
+		
+		String workingDir = f.getParent();//+File.separatorChar+"TemplateFiles"+File.separatorChar;
+		String outputDir = workingDir;//obsDataNamePrefix+File.separatorChar;
+		System.out.println("output Dir:\t"+outputDir +"\t"+ workingDir);
+		System.out.println(f.getParent());
+		System.out.println(obsDataNamePrefix);
+		
+		
+		init(workingDir, outputDir, dataFileName);
 	}
 
 	/**
@@ -227,12 +251,9 @@ public class Setting {
 	}
 	public void setMCMCSetting(int noItePreprocess, int noIteMCMC,
 			int thinning) {
-
-		this.noItePreprocess = noItePreprocess;
-		this.noIteMCMC = noIteMCMC;
-		this.thinning = thinning;
-
+		setMCMCSetting(noItePreprocess, noIteMCMC, thinning, 0.05);
 	}
+	
 	public void setError(double error) {
 		this.error = error;
 	}

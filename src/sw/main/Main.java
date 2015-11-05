@@ -102,11 +102,11 @@ public class Main {
 //		int numItePreprocess = 1000;
 //		int numIteMCMC = 1000;
 //		int numIteSample = 100;
-		double error = 0.01;
+//		double error = 0.01;
 		
 //		int numTimePoints;
 //		int timeGap;
-		String obsDataName ="";
+//		String obsDataName ="";
 		args = new String[]{
 //				"-h",
 				"-i", "/home/steven/workspace/SF-ABC/Simulations/test/test.nex",
@@ -226,8 +226,8 @@ public class Main {
 			}
 			if (cmd.hasOption("input")){
 //				numberOfObservation= Integer.parseInt(cmd.getOptionValue("obs"));
-				obsDataName = cmd.getOptionValue("input");
-				setting = ABCSetup(obsDataName);
+				String obsDataName = cmd.getOptionValue("input");
+				setting = new Setting(obsDataName);
 				
 				NexusImporter imp = new NexusImporter(new FileReader(setting.getDataFile()));
 				Alignment jeblAlignment = imp.importAlignments().get(0);
@@ -263,7 +263,6 @@ public class Main {
 				int numTimePoints = Integer.parseInt(configs[0]);
 				int intervalBetweenTime = Integer.parseInt(configs[1]);
 				
-//				numTimePoints = Integer.parseInt(cmd.getOptionValue("time").trim());
 				setting.setTime(numTimePoints, intervalBetweenTime);
 				System.out.println("Number of time points: "+numTimePoints);
 			}			
@@ -272,80 +271,36 @@ public class Main {
 				System.exit(6);
 			}
 			
-//					numTimePoints = Integer.parseInt(cmd.getOptionValue("time"));
-			
 		} catch (ParseException e) {
 			e.printStackTrace();
-			System.exit(3);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ImportException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(setting.toString());
-//		System.exit(3);
-
-//		double ratio[] = new double[100];
-//		for (int i = 0; i < RegressionResult.result.length; i++) {
-//			double r = RegressionResult.result[i][0]*RegressionResult.result[i][1];
-//			ratio[i] = r/(1E-5*3000);
-//			System.out.println(r +"\t"+ ratio[i]);
-//		}
-//		System.out.println(StatUtils.mean(ratio));
-//		System.out.println(StatUtils.variance(ratio));
-		int i = 0;
-			String[] localTest = new String[] {
-					obsDataName,
-//					"200000", "100", "1000" };
-					"2000", "10", "100" };
-			System.out.println(Arrays.toString(localTest));
-			startSimulation(setting);
-			
-//		startSimulation(args);
-
+		
+		startSimulation(setting);
 
 	}
 	
 //	public static void startSimulation(String[] args) {
 	public static void startSimulation(Setting setting) {
 		
-//		final String obsDataName = args[0];
-//		final int noItePreprocess = Integer.parseInt(args[1]);
-//		final int noIteMCMC = Integer.parseInt(args[2]); 
-//		final int thinning = Integer.parseInt(args[3]);
-////		double error = Double.parseDouble(args[4]);
-// 		final int time_gap = 3;
-//		
 		try {
-//			Setting setting = ABCSetup(obsDataName);
-//			
-//			try {
-//
-//				NexusImporter imp = new NexusImporter(new FileReader(setting.getDataFile()));
-//				Alignment jeblAlignment = imp.importAlignments().get(0);
-//				System.out.println(jeblAlignment.getPatternCount());
-//				System.out.println(jeblAlignment.getSiteCount());
-//				System.out.println(jeblAlignment.getPatternLength());
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			} catch (ImportException e) {
-//				e.printStackTrace();
-//			} 
-//			
-//			setting.setSeqInfo(SEQ_LENGTH, NO_SEQ_PER_TIME, NO_TIME_POINT , TIME_GAP);
-//			setting.setMCMCSetting(noItePreprocess, noIteMCMC, thinning);
+			ABCSetup(setting);
 			
+			System.out.println(setting.toString());
 			//TODO: Check NO_SEQ_PER_TIME, num seq used for simulation, actual number seq per time in the real data
 			
-//			testStatFile(setting);			
+			MCMCFeatures.testStatFile(setting);			
 			generateStatFile(setting);
-//			generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
-//		
-			System.out.println(setting.toString());
-			ABCUpdateMCMC(setting);
 
+			// double error = MCMCFeatures.generateErrorRate(setting, NO_REPEAT_CAL_ERROR, NO_REPEAT_PER_PARAMETERS);
+			// setting.setError(error);
+		
+			ABCUpdateMCMC(setting);
+		} catch (IOException e) {
+			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -353,29 +308,31 @@ public class Main {
 		
 	}
 
-	public static Setting ABCSetup(String obsDataName) throws IOException {
+	public static Setting ABCSetup(Setting setting) throws IOException {
 
+//		File f = new File(obsDataName);
+//		File f2 = new File(obsDataName, "Template/");
+////		System.out.println(f2.getAbsolutePath());
+//		System.out.println(f.getName() +"\t"+ f.getPath());
+//		
+//		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
+////		System.out.println(f.getAbsolutePath() +"\t"+ f.getPath() +"\t"+ f.getParent());
+//		
+//		String workingDir = f.getParent();//+File.separatorChar+"TemplateFiles"+File.separatorChar;
+//		String outputDir = workingDir;//obsDataNamePrefix+File.separatorChar;
+//		System.out.println("output Dir:\t"+outputDir +"\t"+ workingDir);
+//		System.out.println(f.getParent());
+//		System.out.println(obsDataNamePrefix);
+//				
+//		Setting setting = new Setting(workingDir, outputDir, obsDataName);
+		
+//		Setting setting = new Setting(obsDataName);
+		String obsDataName = setting.getDataFile();
 		File f = new File(obsDataName);
-		File f2 = new File(obsDataName, "Template/");
-//		System.out.println(f2.getAbsolutePath());
-		System.out.println(f.getName() +"\t"+ f.getPath());
-		
 		String obsDataNamePrefix = f.getAbsolutePath().split("\\.")[0];
-//		System.out.println(f.getAbsolutePath() +"\t"+ f.getPath() +"\t"+ f.getParent());
-		
-		String workingDir = f.getParent();//+File.separatorChar+"TemplateFiles"+File.separatorChar;
-		String outputDir = workingDir;//obsDataNamePrefix+File.separatorChar;
-		System.out.println("output Dir:\t"+outputDir +"\t"+ workingDir);
-		System.out.println(f.getParent());
-
-		System.out.println(obsDataNamePrefix);
-		
 		double[] initValue = getRegressionResult(obsDataNamePrefix);
-				
-		Setting setting = new Setting(workingDir, outputDir, obsDataName);
 //		System.out.println(obsDataName);
 //		System.out.println(setting.getDataFile());
-
 				
 		String[] paramListName = new String[]{"mu", "popsize"};
 		String[] statList = new String[]{"dist", "chisq", "var", "covar", "sitePattern"};
@@ -397,7 +354,7 @@ public class Main {
 	
 		
 		TunePar tPar = new TunePar(TUNESIZE, TUNEGROUP, new double[]{initScale , initScale}, new String[] { "Scale", "Scale" });
-// TODO plot proir against posterior
+
 //		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(0.5, 0.5, 0, 0.4));
 //		ParaMu pMu = new ParaMu(new TruncatedNormalDistribution(muMean, muMean, muLower, muUpper));
 //		ParaMu pMu = new ParaMu(new UniformDistribution(muLower, muUpper));
@@ -518,50 +475,6 @@ public class Main {
 	
 	}
 
-
-public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
-
-		// nRun = 10;
-		// nRepeat = 10;
-		System.out.println("Estimating Error Rate");
-		ParametersCollection allParUniformPrior = setting.getAllParPrior();
-		SSC simulator = new SSC(setting);
-		AlignmentStatFlex[] newStat = new AlignmentStatFlex[nRepeat];
-		for (int i = 0; i < newStat.length; i++) {
-			newStat[i] = new AlignmentStatFlex(setting);
-		}
-
-		double[] repeatStat = new double[nRepeat];
-		int[][] listAllComb = Combination.ListCombination(nRepeat);
-		int noOfComb = listAllComb.length;
-		double[] expectedError = new double[noOfComb * 2];
-		double[] meanOfMean = new double[nRun];
-		
-		for (int i = 0; i < nRun; i++) {
-			allParUniformPrior.nextProirs();
-			
-			for (int j = 0; j < nRepeat; j++) {
-				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
-				newStat[j].updateAlignmentAndStat(jeblAlignment);
-				repeatStat[j] = newStat[j].getSummaryStatAll()[0];
-			}
-
-			for (int j = 0; j < noOfComb; j++) {
-				double s1 = repeatStat[listAllComb[j][0]];
-				double s2 = repeatStat[listAllComb[j][1]];
-				expectedError[j] = AlignmentStatFlex.calAbsDiff(s1, s2);
-				expectedError[j + noOfComb] = AlignmentStatFlex.calAbsDiff(s2, s1);
-
-			}
-			meanOfMean[i] = StatUtils.mean(expectedError);
-		}
-		double error = StatUtils.mean(meanOfMean);
-		setting.setError(error);
-		
-		return error;
-		
-
-	}
 
 	//	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void ABCUpdateMCMC(Setting setting) throws Exception {
@@ -738,57 +651,6 @@ public static double generateErrorRate(Setting setting, int nRun, int nRepeat) {
 		}
 		System.out.println("Init values:\t"+Arrays.toString(initValue));
 		return initValue;
-	}
-
-	//	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static void testStatFile(Setting setting) {
-	
-		final int nRun = 100;
-		final int noTime = setting.getNoTime();
-		String[] paramList = setting.getParamList();
-		String[] statsList = setting.getStatList();
-	
-		ParametersCollection allParUniformPrior = setting.getAllParPrior();
-	
-		AlignmentStatFlex newStat = new AlignmentStatFlex(setting);
-	
-		SSC simulator = new SSC(setting);
-	
-		TraceUtil tu = new TraceUtil(noTime);
-		ArrayLogFormatterD traceLogParam = new ArrayLogFormatterD(6, tu.createTraceAll(paramList));
-		ArrayLogFormatterD traceLogStats = new ArrayLogFormatterD(6, tu.createTraceAll(statsList));
-		long start = System.currentTimeMillis();
-		try {
-			PrintWriter oResult = new PrintWriter(new BufferedWriter(
-					new FileWriter("zzz_testRegressionOutput2")));
-			String s = traceLogParam.getLabels() +"\t"+ traceLogStats.getLabels();
-			oResult.println(s);
-			for (int i = 0; i < nRun; i++) {
-				allParUniformPrior.nextProirs();
-				traceLogParam.logValues(allParUniformPrior.getValues());
-				
-				for (int j = 0; j < 100; j++) {
-					
-				
-				Alignment jeblAlignment = simulator.simulateAlignment(allParUniformPrior);
-				newStat.updateAlignment(jeblAlignment);
-	
-				
-				traceLogStats.logValues(newStat.getCurStat(statsList));
-				s = traceLogParam.getLine(i) + "\t" + traceLogStats.getLine(i*100+j);
-				oResult.println(s);
-				oResult.flush();
-				
-				}
-				
-	
-			}
-			oResult.close();
-			System.out.println("Time:\t"+(System.currentTimeMillis()-start));
-		} catch (Exception e) {
-			// TODO: handle exception
-		}	
-	
 	}
 
 
